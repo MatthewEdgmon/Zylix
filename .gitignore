@@ -1,0 +1,10 @@
+*.a
+*.o
+*.out
+*.mod
+*.sublime-project
+*.sublime-workspace
+.build-errors
+.toolchain-built
+zykernel
+zylix.img
