@@ -1,6 +1,6 @@
 #include <devices/ps2.h>
 
-#include <arch/io.h>
+#include <arch/IO.h>
 
 #include <common.h>
 #include <types.h>

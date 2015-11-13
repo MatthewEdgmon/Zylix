@@ -1,7 +1,7 @@
 #include <devices/pci.h>
 
 #include <common.h>
-#include <arch/io.h>
+#include <arch/IO.h>
 
 void PCIWriteField() {
 

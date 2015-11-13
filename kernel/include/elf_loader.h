@@ -1,6 +1,8 @@
 #ifndef __ELF_LOADER_H__
 #define __ELF_LOADER_H__
 
+#include <types.h>
+
 /**
  * The definitions here are source from the
  * ELF specification version 1.2.
@@ -11,8 +13,8 @@
  */
 #define ELF_MAGIC1  0x7F
 #define ELF_MAGIC2  'E'
-#define ELF_MAGIC2  'L'
-#define ELF_MAGIC2  'F'
+#define ELF_MAGIC3  'L'
+#define ELF_MAGIC4  'F'
 #define EI_NIDENT   16
 
 /**

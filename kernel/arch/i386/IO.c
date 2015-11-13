@@ -1,4 +1,4 @@
-#include <arch/io.h>
+#include <arch/IO.h>
 
 /**
  * Sends a byte (8 bits) value to specified port.

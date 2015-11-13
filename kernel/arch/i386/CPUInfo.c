@@ -10,29 +10,29 @@
 /**
  * Vendor-strings returned by CPUID_REQUEST_VENDOR_STRING stored in EBX, EDX, ECX (in that order).
  */
-#define CPUID_VENDOR_OLDAMD					"AMDisbetter!"	/* Early engineering samples of AMD K5 processor */
-#define CPUID_VENDOR_AMD					"AuthenticAMD"
-#define CPUID_VENDOR_INTEL					"GenuineIntel"
-#define CPUID_VENDOR_OLDVIA					"CentaurHauls"
-#define CPUID_VENDOR_VIA					"VIA VIA VIA "
-#define CPUID_VENDOR_OLDTRANSMETA			"TransmetaCPU"
-#define CPUID_VENDOR_TRANSMETA				"GenuineTMx86"
-#define CPUID_VENDOR_CYRIX					"CyrixInstead"
-#define CPUID_VENDOR_CENTAUR				"CentaurHauls"
-#define CPUID_VENDOR_NEXGEN					"NexGenDriven"
-#define CPUID_VENDOR_UMC					"UMC UMC UMC "
-#define CPUID_VENDOR_SIS					"SiS SiS SiS "
-#define CPUID_VENDOR_NSC					"Geode by NSC"
-#define CPUID_VENDOR_RISE					"RiseRiseRise"
-#define CPUID_VENDOR_VORTEX					"Vortex86 SoC"
-#define CPUID_VENDOR_KVM					"KVMKVMKVMKVM"
-#define CPUID_VENDOR_MICROSOFT_HYPERV		"Microsoft Hv"
-#define CPUID_VENDOR_VMWARE					"VMwareVMware"
-#define CPUID_VENDOR_XEN					"XenVMMXenVMM"
+#define CPUID_VENDOR_OLDAMD                 "AMDisbetter!"	/* Early engineering samples of AMD K5 processor */
+#define CPUID_VENDOR_AMD                    "AuthenticAMD"
+#define CPUID_VENDOR_INTEL                  "GenuineIntel"
+#define CPUID_VENDOR_OLDVIA                 "CentaurHauls"
+#define CPUID_VENDOR_VIA                    "VIA VIA VIA "
+#define CPUID_VENDOR_OLDTRANSMETA           "TransmetaCPU"
+#define CPUID_VENDOR_TRANSMETA              "GenuineTMx86"
+#define CPUID_VENDOR_CYRIX                  "CyrixInstead"
+#define CPUID_VENDOR_CENTAUR                "CentaurHauls"
+#define CPUID_VENDOR_NEXGEN                 "NexGenDriven"
+#define CPUID_VENDOR_UMC                    "UMC UMC UMC "
+#define CPUID_VENDOR_SIS                    "SiS SiS SiS "
+#define CPUID_VENDOR_NSC                    "Geode by NSC"
+#define CPUID_VENDOR_RISE                   "RiseRiseRise"
+#define CPUID_VENDOR_VORTEX                 "Vortex86 SoC"
+#define CPUID_VENDOR_KVM                    "KVMKVMKVMKVM"
+#define CPUID_VENDOR_MICROSOFT_HYPERV       "Microsoft Hv"
+#define CPUID_VENDOR_VMWARE                 "VMwareVMware"
+#define CPUID_VENDOR_XEN                    "XenVMMXenVMM"
 
 /* CPUID reported CPU features, EAX = 0x1 returned in EDX. */
-#define CPUID_FEAT_EDX_FPU					0x1             /* Floating Point Unit. */
-#define CPUID_FEAT_EDX_VME					0x2             /* Virtual 8086 Mode Extensions. */
+#define CPUID_FEAT_EDX_FPU                  0x1                 /* Floating Point Unit. */
+#define CPUID_FEAT_EDX_VME                  0x2                 /* Virtual 8086 Mode Extensions. */
 #define CPUID_FEAT_EDX_DE					0x4             /* Debugging Extensions. */
 #define CPUID_FEAT_EDX_PSE					0x8             /* Page Size Extensions. */
 #define CPUID_FEAT_EDX_TSC					0x10            /* Time Stamp Counter. */

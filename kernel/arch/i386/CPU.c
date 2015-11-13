@@ -1,4 +1,4 @@
-#include <types.h>
+#include <stdint.h>
 
 /**
  * Read the current value of the CPU's time-stamp counter and store into EDX:EAX.

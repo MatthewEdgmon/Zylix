@@ -41,7 +41,7 @@ TARGET_ARCH  = i386
 ARCH_DIR     = kernel/arch/$(TARGET_ARCH)
 
 # Kernel architecture specific files
-include		   $(ARCH_DIR)/make.config
+include        $(ARCH_DIR)/make.config
 CRTI_OBJ     = $(ARCH_DIR)/crti.o
 CRTN_OBJ     = $(ARCH_DIR)/crtn.o
 CRTBEGIN_OBJ = $(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
@@ -53,11 +53,11 @@ KERNEL_LDFLAGS += $(KERNEL_ARCH_LDFLAGS)
 
 # Order in which objects are linked.
 KERNEL_OBJ_LINK_LIST = ${CRTI_OBJ} \
-					   ${CRTBEGIN_OBJ} \
-					   ${KERNEL_ARCH_OBJS} \
-					   ${KERNEL_OBJS} \
-					   ${CRTEND_OBJ} \
-					   ${CRTN_OBJ}
+                       ${CRTBEGIN_OBJ} \
+                       ${KERNEL_ARCH_OBJS} \
+                       ${KERNEL_OBJS} \
+                       ${CRTEND_OBJ} \
+                       ${CRTN_OBJ}
 
 # C flags used to build libc
 LIBC_CFLAGS   =
@@ -65,7 +65,7 @@ LIBC_CXXFLAGS =
 
 # libc source files
 LIBC_OBJS    += $(patsubst %.c,%.o,$(wildcard libc/*/*.c))
-LIBC_OBJS	 += $(patsubst %.c,%.o,$(wildcard libc/*.c))
+LIBC_OBJS    += $(patsubst %.c,%.o,$(wildcard libc/*.c))
 
 # C flags used to build userspace programs.
 USER_CFLAGS   =

@@ -1,7 +1,7 @@
 /**
  * ELF Loader.
  */
-#include <elf32_loader.h>
+#include <elf_loader.h>
 
 #include <common.h>
 #include <types.h>
