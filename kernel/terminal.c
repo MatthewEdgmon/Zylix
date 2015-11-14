@@ -2,6 +2,8 @@
 
 #include <vga.h>
 
+#include <va_list.h>
+
 bool        terminal_caught_escape;
 size_t      terminal_row;
 size_t      terminal_column;
@@ -92,7 +94,7 @@ void TerminalPrintCharacter(char character) {
 
 void TerminalPrintString(char* string) {
     size_t stringlen = strlen(string);
-    for ( size_t i = 0; i < stringlen; i++ )
+    for(size_t i = 0; i < stringlen; i++)
         TerminalPrintCharacter(string[i]);
 }
 

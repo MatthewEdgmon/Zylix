@@ -245,7 +245,7 @@ bool CheckCPUExtendedFeature(int feature_code) {
 	return false;
 }
 
-void ClearRegisters(unsigned long eax, unsigned long ebx , unsigned long ecx, unsigned long edx) {
+void ClearRegisters(unsigned long* eax, unsigned long* ebx , unsigned long* ecx, unsigned long* edx) {
     eax = 0;
     ebx = 0;
     ecx = 0;

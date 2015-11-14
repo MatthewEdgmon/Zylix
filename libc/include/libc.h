@@ -1,7 +1,9 @@
-#ifndef __LIBC_H__
-#define __LIBC_H__
+#ifndef __STRING_H__
+#define __STRING_H__
 
 #include <stddef.h>
+
+typedef unsigned long size_t;
 
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
@@ -31,4 +33,7 @@ extern size_t strlen(const char * s);
 
 extern int atoi(const char * s);
 
-#endif /* __LIBC_H__ */
+/* Non-standard broken strtok_r */
+extern char * strtok_r(char * str, const char * delim, char ** saveptr);
+
+#endif /* __STRING_H__ */

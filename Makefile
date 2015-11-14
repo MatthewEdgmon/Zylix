@@ -153,7 +153,7 @@ libc/%.o: libc/%.c ${HEADERS}
 	@${CC} ${LIBC_CFLAGS} -g -I./libc/include -c -o $@ $< ${ERRORS}
 	@${END} "CC" "$<"
 
-libc/%.o: kernel/%.s
+libc/%.o: libc/%.s
 	@${BEG} "CC" "$<"
 	@${AS} -c $< -o $@ ${ERRORS}
 	@${END} "CC" "$<"
@@ -221,12 +221,27 @@ install: install-kernel install-kernel-headers install-libc install-libc-headers
 #                                   Clean-Up                                  #
 ###############################################################################
 
-clean: clean-kernel clean-libc clean-tags clean-image clean-objects clean-arch-objects clean-build-errors
+clean: clean-arch-objects clean-objects clean-kernel clean-libc-objects clean-libc clean-tags clean-image clean-build-errors
+
+clean-arch-objects:
+	@${BEGRM} "RM" "Cleaning kernel arch-specific objects..."
+	@rm -f ${KERNEL_ARCH_OBJS} ${CRTI_OBJ} ${CRTN_OBJ}
+	@${ENDRM} "RM" "Cleaned kernel arch-specific objects."
+
+clean-objects:
+	@${BEGRM} "RM" "Cleaning kernel objects..."
+	@rm -f ${KERNEL_OBJS}
+	@${ENDRM} "RM" "Cleaned kernel objects."
 
 clean-kernel:
 	@${BEGRM} "RM" "Cleaning kernel binary..."
 	@rm -f zykernel
 	@${ENDRM} "RM" "Cleaned kernel binary."
+
+clean-libc-objects:
+	@${BEGRM} "RM" "Cleaning libc objects..."
+	@rm -f ${LIBC_OBJS}
+	@${ENDRM} "RM" "Cleaned libc objects."
 
 clean-libc:
 	@${BEGRM} "RM" "Cleaning libc library..."
@@ -242,16 +257,6 @@ clean-image:
 	@${BEGRM} "RM" "Cleaning emulation hard disk image..."
 	@rm -f zylix.img
 	@${ENDRM} "RM" "Cleaned emulation hard disk image."
-
-clean-objects:
-	@${BEGRM} "RM" "Cleaning kernel objects..."
-	@rm -f ${KERNEL_OBJS}
-	@${ENDRM} "RM" "Cleaned kernel objects."
-
-clean-arch-objects:
-	@${BEGRM} "RM" "Cleaning kernel arch-specific objects..."
-	@rm -f ${KERNEL_ARCH_OBJS} ${CRTI_OBJ} ${CRTN_OBJ}
-	@${ENDRM} "RM" "Cleaned kernel arch-specific objects."
 
 clean-build-errors:
 	@${BEGRM} "RM" "Cleaning build error log..."

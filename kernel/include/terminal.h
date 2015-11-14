@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <types.h>
+#include <va_list.h>
 #include <vga.h>
 
 uint8_t TerminalMakeColor(enum vga_color foreground, enum vga_color background);

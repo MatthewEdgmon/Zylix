@@ -9,6 +9,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <libc.h>
 
 #include <arch/IO.h>
 #include <arch/CPUInfo.h>
@@ -20,8 +21,9 @@
 #include <devices/ps2mouse.h>
 #include <devices/pci.h>
 #include <devices/speaker.h>
-#include <elf_loader.h>
 #include <error.h>
+#include <execute.h>
+#include <shell.h>
 #include <vga.h>
 #include <terminal.h>
 
@@ -56,12 +58,16 @@ int KernelMain() {
     TerminalPrintString("Setting up PS/2 controller and devices.\n");
     SetupPS2();
 
-    TerminalPrintString(">\n");
+    TerminalPrintString("Setting up kernel debug shell.\n");
+    SetupShell();
 
-    uint8_t loop = 0x01;
+    // TODO: libc
+    // TODO: x86 arch code
 
-    while(loop) {
+    int exit_status = 0;
 
+    while(!exit_status) {
+        Shell();
     }
 
     return 0;

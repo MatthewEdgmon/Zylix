@@ -1,7 +1,5 @@
-#include <limits.h>
+#include <libc.h>
 
-#include <stdint.h>
-#include <types.h>
 #include <limits.h>
 
 #define ALIGN (sizeof(size_t))
