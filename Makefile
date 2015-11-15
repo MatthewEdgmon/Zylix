@@ -3,8 +3,7 @@
 #
 
 ## This makefile is pretty ugly. It currently holds up compilation of both
-## the kernel, bootloader and userspace utilities. It will be remade when
-## we port GCC to Zylix.
+## the kernel and userspace utilities. It will be remade when we port GCC to Zylix.
 
 # Point to your local i686 elf cross compiler.
 CROSS_DIR = /home/matthew/cross/bin
@@ -25,6 +24,7 @@ KERNEL_CFLAGS  = -O2 -std=c99
 KERNEL_CFLAGS += -finline-functions -ffreestanding
 KERNEL_CFLAGS += -Wall -Wextra -Wno-unused-function -Wno-unused-parameter
 KERNEL_CFLAGS += -pedantic -fno-omit-frame-pointer
+KERNEL_CFLAGS += -DKERNEL_LIBC_USE_ASSEMBLY
 KERNEL_LDFLAGS = -shared -Bsymbolic -z defs
 KERNEL_LIBS    = -nostdlib -lgcc
 
@@ -34,6 +34,9 @@ KERNEL_HEADERS = $(shell find kernel/include/ -type f -name '*.h')
 
 # Kernel object files.
 KERNEL_OBJS  = $(patsubst %.c,%.o,$(wildcard kernel/devices/*.c))
+KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/filesystem/*.c))
+KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/libc/*/*.c))
+KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/memory/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/*.c))
 
 # Change TARGET_ARCH to match the platform you're targeting.
@@ -58,24 +61,6 @@ KERNEL_OBJ_LINK_LIST = ${CRTI_OBJ} \
                        ${KERNEL_OBJS} \
                        ${CRTEND_OBJ} \
                        ${CRTN_OBJ}
-
-# C flags used to build libc
-LIBC_CFLAGS   =
-LIBC_CXXFLAGS =
-
-# libc source files
-LIBC_OBJS    += $(patsubst %.c,%.o,$(wildcard libc/*/*.c))
-LIBC_OBJS    += $(patsubst %.c,%.o,$(wildcard libc/*.c))
-
-# C flags used to build userspace programs.
-USER_CFLAGS   =
-USER_CXXFLAGS =
-
-# Userspace source files.
-USER_OBJS    = $(patsubst %.c,%.o,$(wildcard userspace/*/*/*/*.c))
-USER_OBJS   += $(patsubst %.c,%.o,$(wildcard userspace/*/*/*.c))
-USER_OBJS   += $(patsubst %.c,%.o,$(wildcard userspace/*/*.c))
-USER_OBJS   += $(patsubst %.c,%.o,$(wildcard userspace/*.c))
 
 # Emulator and arguments to pass to it.
 EMU = qemu-system-i386
@@ -112,7 +97,7 @@ ERRORS = 2>>./.build-errors
 .SUFFIXES: 
 
 all: system ctags install
-system: zykernel libc.a userspace
+system: zykernel userspace
 
 ###############################################################################
 #                                   Kernel                                    #
@@ -137,30 +122,6 @@ kernel/%.o: kernel/%.s
 install-kernel:
 
 install-kernel-headers:
-
-###############################################################################
-#                                   libc                                      #
-###############################################################################
-
-libc.a: ${LIBC_OBJS}
-	@${BEG} "AR" "libc"
-	@${AR} rcs $@ ${LIBC_OBJS}
-	@${END} "AR" "libc"
-	@${INFO} "--" "Finished building libc."
-
-libc/%.o: libc/%.c ${HEADERS}
-	@${BEG} "CC" "$<"
-	@${CC} ${LIBC_CFLAGS} -g -I./libc/include -c -o $@ $< ${ERRORS}
-	@${END} "CC" "$<"
-
-libc/%.o: libc/%.s
-	@${BEG} "CC" "$<"
-	@${AS} -c $< -o $@ ${ERRORS}
-	@${END} "CC" "$<"
-
-install-libc:
-
-install-libc-headers:
 
 ###############################################################################
 #                                  Userspace                                  #
@@ -206,7 +167,7 @@ zylix.img:
 #                                    CTags                                    #
 ###############################################################################
 
-ctags:
+ctags: zykernel
 	@${BEG} "CTAG" "Generating CTags..."
 	@ctags -R zykernel
 	@${END} "CTAG" "Done generating CTags."
@@ -215,13 +176,13 @@ ctags:
 #                                    Install                                  #
 ###############################################################################
 
-install: install-kernel install-kernel-headers install-libc install-libc-headers
+install: install-kernel install-kernel-headers
 
 ###############################################################################
 #                                   Clean-Up                                  #
 ###############################################################################
 
-clean: clean-arch-objects clean-objects clean-kernel clean-libc-objects clean-libc clean-tags clean-image clean-build-errors
+clean: clean-arch-objects clean-objects clean-kernel clean-tags clean-image clean-build-errors
 
 clean-arch-objects:
 	@${BEGRM} "RM" "Cleaning kernel arch-specific objects..."
@@ -237,16 +198,6 @@ clean-kernel:
 	@${BEGRM} "RM" "Cleaning kernel binary..."
 	@rm -f zykernel
 	@${ENDRM} "RM" "Cleaned kernel binary."
-
-clean-libc-objects:
-	@${BEGRM} "RM" "Cleaning libc objects..."
-	@rm -f ${LIBC_OBJS}
-	@${ENDRM} "RM" "Cleaned libc objects."
-
-clean-libc:
-	@${BEGRM} "RM" "Cleaning libc library..."
-	@rm -f libc.a
-	@${ENDRM} "RM" "Cleaned libc library."
 
 clean-tags:
 	@${BEGRM} "RM" "Cleaning CTags..."

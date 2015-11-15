@@ -1,7 +1,9 @@
 #include <devices/speaker.h>
 
+#include <arch/IO.h>
 #include <common.h>
-#include <types.h>
+
+#include <libc/stdint.h>
 
 void SpeakerPlaySound(uint32_t frequency) {
     uint32_t divisor;

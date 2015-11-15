@@ -1,6 +1,6 @@
 #include <error.h>
 
-#include <types.h>
+#include <libc/stdint.h>
 #include <common.h>
 #include <terminal.h>
 #include <vga.h>

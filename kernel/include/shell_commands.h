@@ -1,6 +1,9 @@
 #ifndef __SHELL_COMMANDS_H__
 #define __SHELL_COMMANDS_H__
 
-void CommandHelp();
+void CommandEcho();
+void CommandClear();
+void CommandPing();
+void CommandLogo();
 
 #endif /* __SHELL_COMMANDS_H__ */

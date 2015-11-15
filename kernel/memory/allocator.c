@@ -2,9 +2,7 @@
  * WARNING: Incoming terrible test memory allocator.
  */
 
-#include <stdint.h>
-
-#include <types.h>
+#include <libc/stdint.h>
 
 #define MALLOC_MAGIC	0xDEADD00D
 

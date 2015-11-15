@@ -2,8 +2,9 @@
 #include <devices/ps2.h>
 #include <devices/ps2mouse.h>
 
+#include <libc/stdint.h>
+
 #include <common.h>
-#include <types.h>
 #include <terminal.h>
 
 void PS2MouseReset() {

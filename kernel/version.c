@@ -1,5 +1,5 @@
-#include <types.h>
+#include <libc/stdint.h>
 
 char* GetKernelVersion() {
-    return "HydrOS kernel 0.0.0";
+    return "Zylix 0.0.1";
 }

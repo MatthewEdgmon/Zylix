@@ -1,7 +1,7 @@
 #ifndef __SPEAKER_H__
 #define __SPEAKER_H__
 
-#include <types.h>
+#include <libc/stdint.h>
 
 void SpeakerPlaySound(uint32_t frequency);
 void SpeakerNoSound();

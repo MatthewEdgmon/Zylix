@@ -1,8 +1,5 @@
 #include <limits.h>
-
-#include <stdint.h>
-#include <types.h>
-#include <limits.h>
+#include <libc/stdint.h>
 
 #define ALIGN (sizeof(size_t))
 #define ONES ((size_t)-1/UCHAR_MAX)
@@ -20,14 +17,6 @@ void * memcpy(void * restrict dest, const void * restrict src, size_t n) {
                 : "=c"((int){0})
                 : "D"(dest), "S"(src), "c"(n)
                 : "flags", "memory");
-    return dest;
-}
-
-void * memset(void * dest, int c, size_t n) {
-    asm volatile("rep stosb"
-                 : "=c"((int){0})
-                 : "D"(dest), "a"(c), "c"(n)
-                 : "flags", "memory");
     return dest;
 }
 
@@ -109,4 +98,54 @@ void * memmove(void * dest, const void * src, size_t n) {
     }
 
     return dest;
+}
+
+int strcmp(const char * l, const char * r) {
+    for (; *l == *r && *l; l++, r++);
+    return *(unsigned char *)l - *(unsigned char *)r;
+}
+
+char * stpcpy(char * restrict d, const char * restrict s) {
+    size_t * wd;
+    const size_t * ws;
+
+    if ((uintptr_t)s % ALIGN == (uintptr_t)d % ALIGN) {
+        for (; (uintptr_t)s % ALIGN; s++, d++) {
+            if (!(*d = *s)) {
+                return d;
+            }
+        }
+        wd = (void *)d;
+        ws = (const void *)s;
+        for (; !HASZERO(*ws); *wd++ = *ws++);
+        d = (void *)wd;
+        s = (const void *)ws;
+    }
+
+    for (; (*d=*s); s++, d++);
+
+    return d;
+}
+
+char * strcpy(char * restrict dest, const char * restrict src) {
+    stpcpy(dest, src);
+    return dest;
+}
+
+size_t strspn(const char * s, const char * c) {
+    const char * a = s;
+    size_t byteset[32/sizeof(size_t)] = { 0 };
+
+    if (!c[0]) {
+        return 0;
+    }
+    if (!c[1]) {
+        for (; *s == *c; s++);
+        return s-a;
+    }
+
+    for (; *c && BITOP(byteset, *(unsigned char *)c, |=); c++);
+    for (; *s && BITOP(byteset, *(unsigned char *)s, &); s++);
+
+    return s-a;
 }

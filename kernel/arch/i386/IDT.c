@@ -1,8 +1,7 @@
 #include "i386.h"
 
-#include <types.h>
-
-#include <libc.h>
+#include <libc/stdint.h>
+#include <libc/string.h>
 
 typedef struct {
 	uint16_t	base_low;

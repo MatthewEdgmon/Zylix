@@ -1,7 +1,10 @@
+/**
+ * Information for decoding and processing ELF header files.
+ */
 #ifndef __ELF_LOADER_H__
 #define __ELF_LOADER_H__
 
-#include <types.h>
+#include <libc/stdint.h>
 
 /**
  * The definitions here are source from the
@@ -97,6 +100,17 @@ typedef struct {
 #define EV_CURRENT  1                  /* Curent version. */
 
 /**
+ * Special Section Indexes
+ */
+#define SHN_UNDEF     0                /* Marks an undefined, missing or meaningless section reference. */
+#define SHN_LORESERVE 0xff00           /* This value specifies the lower bound of the range of reserved indexes. */
+#define SHN_LOPROC    0xff00           /* Values between this and SHN_HIPROC are reserved for processor-specific semantics. */
+#define SHN_HIPROC    0xff1f           /* Values between this and SHN_LOPROC are reserved for processor-specific semantics. */
+#define SHN_ABS       0xfff1           /* This value specifies absolute values for the corresponding reference. */
+#define SHN_COMMON    0xfff2           /* Sections defined relative to this section are common symbols. I.e. FORTRAN COMMON or C external. */
+#define SHN_HIRESERVE 0xffff           /* This value specifies the upper bound of the range of reserved indexes. */
+
+/**
  * ELF Section Header
  */
 typedef struct {
@@ -131,6 +145,64 @@ typedef struct {
 #define SHT_HIPROC    0x7fffffff       /* Values between this and SHT_LOPROC are reserved for processor-specific semantics. */
 #define SHT_LOUSER    0x80000000       /* The lower bound of range of indexes reserved for application programs. */
 #define SHT_HIUSER    0xffffffff       /* The upper bound of range of indexes reserved for application programs. */
+
+/**
+ * Symbol Table
+ */
+typedef struct {
+    Elf32_Word st_name;                /* This member holds and index into the object file's symbol string table. */
+    Elf32_Addr st_value;               /* This member gives the value of the associated symbol. May be an address, absolute value, etc. */
+    Elf32_Word st_size;                /* Size in bytes of different associated tpyes. May be 0 for none or unknown. */
+    unsigned char st_info;             /* This member specifies the symbol's type and binding attributes. */
+    unsigned char st_other;            /* This member currently holds 0 and has no defined meaning. */
+    Elf32_Half st_shndx;               /* Every symbol table is defined in relation to some section. This holds the relevent section header table index. Some have special meanings. */
+} Elf32_Sym;
+
+/**
+ * Symbol Table binding and type manipulation and definitions.
+ */
+
+/* Macros. */
+#define ELF32_ST_BIND(i)    ((i) >> 4)
+#define ELF32_ST_TYPE(i)    ((i) &  0xf)
+#define ELF32_ST_INFO(b, t) ((b) << 4) + ((t) & 0xf)
+
+/* Symbol bindings. */
+#define STB_LOCAL     0                /* Local symbols are not visible outside the object file containing their definition. */
+#define STB_GLOBAL    1                /* Glocal symbols are visible to all object files being combined. */
+#define STB_WEAK      2                /* Weak symbols resemble global symbols, but their definitions have lower precedence. */
+#define STB_LOPROC    13               /* Values between this and STB_HIPROC are reserved for processor-specific semantics. */
+#define STB_HIPROC    15               /* Values between this and STB_LOPROC are reserved for processor-specific semantics. */
+
+/* Symbol types. */
+#define STT_NOTYPE    0                /* The symbol's type is not specified. */
+#define STT_OBJECT    1                /* The symbol is associated with a data object, such as a variable, an array, etc. */
+#define STT_FUNC      2                /* The symbol is associated with a function or other executable code. */
+#define STT_SECTION   3                /* The symbol is associated with a section. Primarily used for relocation and have an STB_LOCAL binding. */
+#define STT_FILE      4                /* A file symbol has an STB_LOCAL binding, it's section index is SHN_ABS and ir precedes all other STB_LOCAL symbols. */
+#define STT_LOPROC    13               /* Values between this and STT_HIPROC are reserved for processor-specific semantics. */
+#define STT_HIPROC    15               /* Values between this and STT_LOPROC are reserved for processor-specific semantics. */
+
+/**
+ * Relocation Table.
+ */
+typedef struct {
+    Elf32_Addr  r_offset;              /* This member gives the location at which to apply the relocation action. */
+    Elf32_Word  r_info;                /* This member gives both the relocation type and symbol table index to be relocated. */
+} Elf32_Rel;
+
+/**
+ * Relocation Table with addends.
+ */
+typedef struct {
+    Elf32_Addr  r_offset;              /* This member gives the location at which to apply the relocation action. */
+    Elf32_Word  r_info;                /* This member gives both the relocation type and symbol table index to be relocated. */
+    Elf32_Sword r_addend;              /* This member specifies a constant addend used to compute the value to be stored in the relocatable field. */
+} Elf32_Rela;
+
+#define ELF32_R_SYM(i)     ((i) >> 8)
+#define ELF32_R_TYE(i)     ((unsigned char)(i)) 
+#define ELF32_R_INFO(s, t) (((s) << 8) + (unsigned char)(t))
 
 /**
  * ELF Program Header.

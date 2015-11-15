@@ -57,6 +57,7 @@ int KernelMain() {
 
     TerminalPrintString("Setting up PS/2 controller and devices.\n");
     SetupPS2();
+    PS2EnableA20();
 
     TerminalPrintString("Setting up kernel debug shell.\n");
     SetupShell();
@@ -67,7 +68,7 @@ int KernelMain() {
     int exit_status = 0;
 
     while(!exit_status) {
-        Shell();
+        //Shell();
     }
 
     return 0;

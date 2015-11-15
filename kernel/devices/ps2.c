@@ -1,10 +1,11 @@
 #include <devices/ps2.h>
+#include <devices/ps2keyboard.h>
+#include <devices/ps2mouse.h>
 
 #include <arch/IO.h>
-
 #include <common.h>
-#include <types.h>
-
+#include <libc/stdbool.h>
+#include <libc/stdint.h>
 #include <terminal.h>
 
 #define PS2_KEYBOARD_DATA_PORT 0x60
@@ -16,9 +17,6 @@
  * 0x60 Data port from PS2 controller.
  * 0x64 Command port from PS2 controller.
  */
-
-/* IO test code to reset the CPU, regardless of state. */
-// outb(0x64, 0xFE);
 
  /**
   * Keyboard Commands:
@@ -92,97 +90,159 @@
 uint8_t ps2_device1_type = 0x00;
 uint8_t ps2_device2_type = 0x00;
 
-uint8_t ps2_controller_present = 0;
-uint8_t ps2_has_first_channel = 0;
-uint8_t ps2_has_second_channel = 0;
+bool ps2_controller_present = 0;
+bool ps2_has_first_channel = 0;
+bool ps2_has_second_channel = 0;
 
 void PS2SendData(uint8_t data) {
-    while(BIT_CHECK(PS2ReadStatus(), 1)) {
-            io_wait();
-    }
-    outb(0x60, data);
+    outb(PS2_DATA_PORT, data);
 }
 
 uint8_t PS2ReadData() {
     uint8_t response;
-    wait:
-    if(BIT_CHECK(PS2ReadStatus(), 0)) {
-        response = inb(0x60);
-        return response;
-    } else {
-        goto wait;
-    }
-    return 0;
+    response = inb(PS2_DATA_PORT);
+    return response;
 }
 
 void PS2SendCommand(uint8_t command) {
-    while(BIT_CHECK(PS2ReadStatus(), 1)) {
-            io_wait();
-    }
-    outb(0x64, command);
+    outb(PS2_COMMAND_REGISTER, command);
 }
 
 uint8_t PS2ReadStatus() {
     uint8_t response;
-    response = inb(0x64);
+    response = inb(PS2_STATUS_REGISTER);
     return response;
 }
 
-void PS2DisableDevices() {
-    /* Disable first channel. */
-    PS2SendCommand(0xAD);
-    /* Disable second channel. */
-    PS2SendCommand(0xA7);
+void PS2WaitOutputBuffer() {
+    uint8_t response;
+    for(;;) {
+        response = PS2ReadStatus();
+        /* Check if the output buffer flag is set. */
+        if(BIT_CHECK(PS2ReadStatus(), 0)) {
+            break;
+        }
+    }
 }
 
-void PS2EnableDevices() {
-    /* Enable first channel. */
-    PS2SendCommand(0xAE);
-    /* Enable second channel. */
-    PS2SendCommand(0xA8);
+void PS2WaitInputBuffer() {
+    uint8_t response;
+    for(;;) {
+        response = PS2ReadStatus();
+        /* Check if the input buffer flag is clear. */
+        if(!BIT_CHECK(PS2ReadStatus(), 1)) {
+            break;
+        }
+    }
 }
 
-void PS2TestDevices() {
+/**
+ * We rely on our bootloader setting the A20, but we have code for it just in case.
+ */
+void PS2EnableA20() {
+    char response_byte;
 
-}
+    /* Disable both PS/2 ports. */
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_DISABLE_PORT1);
 
-void PS2CheckSecondChannel() {
-    /* Enable second channel. */
-    PS2SendCommand(0xA8);
-    /* Tell controller to check Controller Configuration Byte. */
-    PS2SendCommand(0x20);
-    /* Wait for response. */
-    io_wait();
-}
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_DISABLE_PORT2);
 
-/* The PS2 controller ties the CPU reset pin high. */
-void PS2PulseReset() {
-    PS2SendCommand(0xFE);
-    HALT();
+    /* Tell the PS/2 controller to send us the config. */
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_READ_CONFIG);
+
+    /* Get the status byte. */
+    response_byte = PS2ReadStatus();
+
+    /* Check if the A20 bit is set. */
+    if((response_byte & 0x02) != 0x02) {
+        /* A20 is NOT set. Set it and write it. */
+        PS2SendCommand(PS2_COMMAND_WRITE_CONFIG);
+        PS2SendCommand(response_byte | 0x02);
+        TerminalPrintString("A20 line set.\n");
+    } else {
+        /* A20 was set. */
+        TerminalPrintString("A20 line was already set.\n");
+    }
+    
+    /* Re-enable both ports. */
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_ENABLE_PORT1);
+
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_ENABLE_PORT2);
+
+    return;
 }
 
 void SetupPS2() {
+    char response_byte;
+
     /* Initialize USB controllers. */
     /* Determine if PS2 exists. */
 
     /* Disable devices so they don't send data. */
-    PS2DisableDevices();
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_DISABLE_PORT1);
+
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_DISABLE_PORT2);
 
     /* Flush output buffer. */
+    PS2ReadStatus();
+
     /* Set the controller configuration byte. */
+    response_byte = PS2ReadStatus();
 
     /* Perform controller self test. */
-    PS2SendCommand(0xAA);
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_TEST_CONTROLLER);
 
-    if(PS2ReadData() != 0x55) {
+    PS2WaitOutputBuffer();
+    if(PS2ReadData() == PS2_RESPONSE_TEST_PASS) {
+        TerminalPrintString("PS2 controller passed self test.\n");
+    } else {
         TerminalPrintString("PS2 controller did not pass self test.\n");
     }
 
     /* Determine if there is 2 channels. */
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_ENABLE_PORT2);
+
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_READ_CONFIG);
+
+    response_byte = PS2ReadStatus();
+
+    /* Check if bit 5 of the controller config is set. */
+    if(BIT_CHECK(response_byte, 5)) {
+        TerminalPrintString("PS/2 controller has no second channel.\n");
+        ps2_has_second_channel = false;
+    } else {
+        TerminalPrintString("PS/2 controller has a second channel.\n");
+        ps2_has_second_channel = true;
+    }
+
+    /* Disable port 2 again to finish startup. */
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_DISABLE_PORT2);
+
     /* Perform interface tests. */
 
     /* Finally re-enable the devices. */
-    PS2EnableDevices();
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_ENABLE_PORT1);
 
-    /* Reset devices. */
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_ENABLE_PORT2);
+
+    /* Reset device 1. */
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_KEYBOARD_RESET_SELF_TEST);
+
+    /* Reset device 2. */
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_WRITE_PORT2_INPUT);
 }

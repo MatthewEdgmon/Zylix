@@ -1,21 +1,16 @@
 #include <terminal.h>
 
+#include <libc/stdarg.h>
+#include <libc/stdbool.h>
+#include <libc/stdint.h>
+#include <libc/string.h>
 #include <vga.h>
-
-#include <va_list.h>
 
 bool        terminal_caught_escape;
 size_t      terminal_row;
 size_t      terminal_column;
 uint8_t     terminal_color;
 uint16_t*   terminal_buffer;
-
-size_t strlen(const char* string) {
-    size_t value = 0;
-    while (string[value] != 0 )
-        value++;
-    return value;
-}
 
 uint8_t TerminalMakeColor(enum vga_color foreground, enum vga_color background) {
     return foreground | background << 4;
