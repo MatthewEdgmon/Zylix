@@ -1,7 +1,6 @@
-#include <arch/CPUInfo.h>
+#include <arch/cpu_info.h>
 #include <libc/stdbool.h>
 #include <libc/stdint.h>
-#include "i386.h"
 
 /* Most information retrieved from http://en.wikipedia.org/wiki/CPUID */
 

@@ -86,7 +86,7 @@ CommonISR:
 
     # Restore all registers.
     popa
-    /* Cleanup error code and ISR # */
+    /* Cleanup error code and ISR */
     add $8, %esp
     /* pop CS, EIP, EFLAGS, SS and ESP */
     iret

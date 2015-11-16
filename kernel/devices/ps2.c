@@ -11,88 +11,18 @@
 #define PS2_KEYBOARD_DATA_PORT 0x60
 #define PS2_KEYBOARD_COMMAND_PORT 0x64
 
-/**
- * 0x20 and 0x21 Control/mask ports of the master PIC
- * 0xA0 and 0xA1 Control/mask ports of the slave PIC
- * 0x60 Data port from PS2 controller.
- * 0x64 Command port from PS2 controller.
- */
-
- /**
-  * Keyboard Commands:
-  *
-  * Set LEDs:
-  *		Command - 0xED
-  *		Data	- 0x00 Scroll Lock
-  *				- 0x01 Number Lock
-  *				- 0x02 Caps Lock
-  *
-  *		Returns	- 0xFA ACK
-  *				- 0xFE Resend
-  *		
-  *	Echo:
-  *		Command - 0xEE
-  *		Data	- N/A
-  *
-  *		Returns	- 0xEE Echo
-  *				- 0xFE Resend
-  *
-  * Get/Set scan code set:
-  *		Command - 0xF0
-  *		Data	- 0x
-  *
-  * Enable scanning:
-  *		Command - 0xF4
-  *		Data	- N/A
-  *
-  *		Returns - 0xFA ACK
-  *				- 0xFE Resend
-  *
-  * Disable scanning:
-  *		Command - 0xF5
-  *		Data	- N/A
-  *
-  *		Returns - 0xFA ACK
-  *				- 0xFE Resend
-  *
-  * Resend last byte:
-  *		Command - 0xFE
-  *		Data	- 0x00
-  *
-  * Self test:
-  *		Command - 0xFF
-  *		Data	- N/A
-  *
-  *		Returns	- 0xAA Self test passed
-  *				- 0xFC Self test failed
-  *				- 0xFD Self test failed
-  *				- 0xFE Resend
-  */
-
-/**
- * How to identify:
- *
- * Send 0xF5 - Disable scanning.
- * Get 0xFA or 0xFE
- * Send 0xF2 - Identify
- * Get 0xFA or 0xFE
- * Get 0x00 	Standard PS/2 mouse
- *	0x03 	Mouse with scroll wheel
- *	0x04 	5-button mouse
- *	0xAB, 0x41 or 0xAB, 0xC1 	MF2 keyboard with translation enabled in the PS/Controller (not possible for the second PS/2 port)
- *	0xAB, 0x83 	MF2 keyboard
- * Wait to see if two bytes.
- * Send 0xF4 - Enable scanning.
- * Get 0xFA or 0xFE
-*/
-
 /* We assume the first device is a keyboard, and the second is a mouse. */
 uint8_t ps2_device1_type = 0x00;
 uint8_t ps2_device2_type = 0x00;
 
+/* Do we actually have a PS/2 controller? */
 bool ps2_controller_present = 0;
+/* Which PS/2 channels are present? */
 bool ps2_has_first_channel = 0;
 bool ps2_has_second_channel = 0;
+/* Which ports have something plugged in? */
+bool ps2_first_channel_active = 0;
+bool ps2_second_channel_active = 0;
 
 void PS2SendData(uint8_t data) {
     outb(PS2_DATA_PORT, data);
@@ -139,8 +69,12 @@ void PS2WaitInputBuffer() {
 /**
  * We rely on our bootloader setting the A20, but we have code for it just in case.
  */
-void PS2EnableA20() {
+void SetupA20() {
     char response_byte;
+
+    /* Do a couple of dummy writes to clear the output buffers. */
+    PS2ReadData();
+    PS2ReadData();
 
     /* Disable both PS/2 ports. */
     PS2WaitInputBuffer();
@@ -161,10 +95,10 @@ void PS2EnableA20() {
         /* A20 is NOT set. Set it and write it. */
         PS2SendCommand(PS2_COMMAND_WRITE_CONFIG);
         PS2SendCommand(response_byte | 0x02);
-        TerminalPrintString("A20 line set.\n");
+        TerminalPrintString("PS/2 A20 line set.\n");
     } else {
         /* A20 was set. */
-        TerminalPrintString("A20 line was already set.\n");
+        TerminalPrintString("PS/2 A20 line was already set.\n");
     }
     
     /* Re-enable both ports. */
@@ -180,8 +114,12 @@ void PS2EnableA20() {
 void SetupPS2() {
     char response_byte;
 
+    /* Do a couple of dummy writes to clear the output buffers. */
+    PS2ReadData();
+    PS2ReadData();
+
     /* Initialize USB controllers. */
-    /* Determine if PS2 exists. */
+    /* Determine if PS2 exists using ACPI. */
 
     /* Disable devices so they don't send data. */
     PS2WaitInputBuffer();
@@ -202,9 +140,9 @@ void SetupPS2() {
 
     PS2WaitOutputBuffer();
     if(PS2ReadData() == PS2_RESPONSE_TEST_PASS) {
-        TerminalPrintString("PS2 controller passed self test.\n");
+        TerminalPrintString("PS/2 controller passed self test.\n");
     } else {
-        TerminalPrintString("PS2 controller did not pass self test.\n");
+        TerminalPrintString("PS/2 controller did not pass self test.\n");
     }
 
     /* Determine if there is 2 channels. */
@@ -229,12 +167,67 @@ void SetupPS2() {
     PS2WaitInputBuffer();
     PS2SendCommand(PS2_COMMAND_DISABLE_PORT2);
 
-    /* Perform interface tests. */
+    /* Test port 1. */
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_TEST_PORT1);
 
-    /* Finally re-enable the devices. */
+    PS2WaitOutputBuffer();
+    response_byte = PS2ReadData();
+
+    switch(response_byte) {
+        case PS2_RESPONSE_PORT_TEST_PASS:
+            TerminalPrintString("PS/2 port 1 has passed self-test.\n");
+            break;
+        case PS2_RESPONSE_CLOCK_STUCK_LOW:
+            TerminalPrintString("PS/2 port 1 has stuck low clock.\n");
+            break;
+        case PS2_RESPONSE_CLOCK_STUCK_HIGH:
+            TerminalPrintString("PS/2 port 1 has stuck high clock.\n");
+            break;
+        case PS2_RESPONSE_DATA_STUCK_LOW:
+            TerminalPrintString("PS/2 port 1 has stuck low data line.\n");
+            break;
+        case PS2_RESPONSE_DATA_STUCK_HIGH:
+            TerminalPrintString("PS/2 port 1 has stuck high data line.\n");
+            break;
+        default:
+            TerminalPrintString("PS/2 port 1 has failed self-test.\n");
+            break;
+    }
+
+    /* Test port 2. */
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_TEST_PORT2);
+
+    PS2WaitOutputBuffer();
+    response_byte = PS2ReadData();
+
+    switch(response_byte) {
+        case PS2_RESPONSE_PORT_TEST_PASS:
+            TerminalPrintString("PS/2 port 2 has passed self-test.\n");
+            break;
+        case PS2_RESPONSE_CLOCK_STUCK_LOW:
+            TerminalPrintString("PS/2 port 2 has stuck low clock.\n");
+            break;
+        case PS2_RESPONSE_CLOCK_STUCK_HIGH:
+            TerminalPrintString("PS/2 port 2 has stuck high clock.\n");
+            break;
+        case PS2_RESPONSE_DATA_STUCK_LOW:
+            TerminalPrintString("PS/2 port 2 has stuck low data line.\n");
+            break;
+        case PS2_RESPONSE_DATA_STUCK_HIGH:
+            TerminalPrintString("PS/2 port 2 has stuck high data line.\n");
+            break;
+        default:
+            TerminalPrintString("PS/2 port 2 has failed self-test.\n");
+            break;
+    }
+
+    /* Re-enable device 1. */
     PS2WaitInputBuffer();
     PS2SendCommand(PS2_COMMAND_ENABLE_PORT1);
 
+    /* Re-enable device 2. */
     PS2WaitInputBuffer();
     PS2SendCommand(PS2_COMMAND_ENABLE_PORT2);
 
@@ -245,4 +238,7 @@ void SetupPS2() {
     /* Reset device 2. */
     PS2WaitInputBuffer();
     PS2SendCommand(PS2_COMMAND_WRITE_PORT2_INPUT);
+
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_MOUSE_RESET_SELF_TEST);
 }

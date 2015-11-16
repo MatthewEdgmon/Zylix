@@ -4,6 +4,7 @@
 #include <shell.h>
 #include <shell_commands.h>
 #include <libc/stdint.h>
+#include <libc/stdio.h>
 #include <terminal.h>
 
 /* Table of commands. */
@@ -56,7 +57,7 @@ int FindShellCommand(char* name) {
 void Shell() {
 
     TerminalPrintString("\n>");
-    // TODO: TerminalGetString(input_string);
+    gets(input_string);
 
     void (*command_function)(void);
 

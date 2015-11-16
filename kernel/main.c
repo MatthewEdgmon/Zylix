@@ -11,9 +11,9 @@
 #include <stdint.h>
 #include <libc.h>
 
-#include <arch/IO.h>
-#include <arch/CPUInfo.h>
-#include <arch/SetupCPU.h>
+#include <arch/io.h>
+#include <arch/cpu_info.h>
+#include <arch/setup_cpu.h>
 
 #include <common.h>
 #include <devices/ps2.h>
@@ -56,19 +56,18 @@ int KernelMain() {
     TerminalPrintString("    Features:\n");
 
     TerminalPrintString("Setting up PS/2 controller and devices.\n");
+    SetupA20();
     SetupPS2();
-    PS2EnableA20();
+    SetupPS2Keyboard();
+    //SetupPS2Mouse();
 
     TerminalPrintString("Setting up kernel debug shell.\n");
     SetupShell();
 
-    // TODO: libc
-    // TODO: x86 arch code
-
     int exit_status = 0;
 
     while(!exit_status) {
-        //Shell();
+        Shell();
     }
 
     return 0;

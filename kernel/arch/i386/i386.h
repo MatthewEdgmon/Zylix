@@ -25,22 +25,13 @@ typedef struct registers registers_t;
 typedef void (*irq_handler_t) (struct registers *);
 typedef int (*irq_handler_chain_t) (struct registers *);
 
+void SetupISR();
+
 /* CPU.c */
 uint64_t rdtsc();
 
 /* CPUInfo.c */
 void StoreCPUInformation(void);
-
-/* PIC.c */
-void DisableInterrupts();
-void EnableInterrupts();
-void ResumeInterrupts();
-void InstallIRQHandler();
-void UninstallIRQHandler();
-void RemapPIC(int firstOffset, int secondOffset);
-void SendEOI(uint8_t IRQ);
-void DisablePIC();
-void SetupTimer(uint32_t frequency);
 
 /* GDT.c */
 void SetupGDT();
@@ -54,8 +45,5 @@ void CreateIDTEntry(uint8_t entry_number, idt_gate_t base, uint16_t sel, uint8_t
 /* IRQ.c */
 void RemapIRQ();
 void SetupIRQ();
-
-/* ISR.c */
-void SetupISR();
 
 #endif /* __I386_H__ */

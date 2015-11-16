@@ -31,6 +31,11 @@ void PS2MouseResend() {
 
 void PS2MouseDisableDataReporting() {
     uint8_t response;
+
+    /* Tell the PS/2 controller we're writing to port 2. */
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_WRITE_PORT2_INPUT);
+
     PS2SendCommand(0xFF);
     response = PS2ReadData();
 
@@ -50,15 +55,34 @@ void PS2MouseEnableDataReporting() {
 }
 
 void PS2MouseGetDataPacket() {
-    uint8_t byte1;
-    uint8_t byte2;
-    uint8_t byte3;
+    uint8_t byte1 = 0x00;
+    uint8_t byte2 = 0x00;
+    uint8_t byte3 = 0x00;
 
+    PS2WaitOutputBuffer();
     byte1 = PS2ReadData();
+    PS2WaitOutputBuffer();
     byte2 = PS2ReadData();
+    PS2WaitOutputBuffer();
     byte3 = PS2ReadData();
 
     if(BIT_CHECK(byte1, 3) == 0) {
-        TerminalPrintString("PS2 Mouse send errant packet data.");
+        TerminalPrintString("PS2 Mouse sent errant packet data.");
     }
+}
+
+void SetupPS2Mouse() {
+    uint8_t response_byte;
+
+    /* Tell the PS/2 controller we're writing to port 2. */
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_COMMAND_WRITE_PORT2_INPUT);
+
+    PS2WaitInputBuffer();
+    PS2SendCommand(PS2_MOUSE_SET_DEFAULTS);
+}
+
+/* Handler for IRQ12 */
+void PS2MouseHandler() {
+
 }
