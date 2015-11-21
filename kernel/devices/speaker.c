@@ -1,6 +1,6 @@
 #include <devices/speaker.h>
 
-#include <arch/IO.h>
+#include <arch/io.h>
 #include <common.h>
 
 #include <libc/stdint.h>

@@ -1,4 +1,4 @@
-#include <arch/IO.h>
+#include <arch/io.h>
 
 #include <devices/ps2.h>
 #include <devices/ps2keyboard.h>

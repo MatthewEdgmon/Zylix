@@ -2,7 +2,7 @@
 #include <devices/ps2keyboard.h>
 #include <devices/ps2mouse.h>
 
-#include <arch/IO.h>
+#include <arch/io.h>
 #include <common.h>
 #include <libc/stdbool.h>
 #include <libc/stdint.h>

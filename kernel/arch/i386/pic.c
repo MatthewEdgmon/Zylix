@@ -5,7 +5,7 @@
  *
  */
 
-#include <arch/IO.h>
+#include <arch/io.h>
 
 #include <libc/stdint.h>
 
