@@ -1,11 +1,22 @@
-#ifndef __VA_LIST_H__
-#define __VA_LIST_H__
+#ifndef __STDARG_H__
+#define __STDARG_H__
 
-/* Utilize built-in va_list */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if __GNUC__ >= 3
+#define va_start(v,l)   __builtin_va_start(v,l)
+#define va_end(v)       __builtin_va_end(v)
+#define va_arg(v,l)     __builtin_va_arg(v,l)
+#define va_copy(d,s)    __builtin_va_copy(d,s)
 typedef __builtin_va_list va_list;
-#define va_start(ap,last) __builtin_va_start(ap, last)
-#define va_end(ap) __builtin_va_end(ap)
-#define va_arg(ap,type) __builtin_va_arg(ap,type)
-#define va_copy(dest, src) __builtin_va_copy(dest,src)
+#else
+#error You need a modern compiler.
+#endif
 
-#endif /* __VA_LIST_H__ */
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* __STDARG_H__ */

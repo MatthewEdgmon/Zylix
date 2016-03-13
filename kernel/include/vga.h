@@ -1,7 +1,8 @@
 #ifndef __VGA_H__
 #define __VGA_H__
 
-#include <stdint.h>
+#include <libc/stddef.h>
+#include <libc/stdint.h>
 
 /**
  * VGA text mode colors.

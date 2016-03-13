@@ -1,6 +1,7 @@
 #include <arch/cpu_info.h>
 #include <libc/stdbool.h>
 #include <libc/stdint.h>
+#include <libc/string.h>
 
 /* Most information retrieved from http://en.wikipedia.org/wiki/CPUID */
 
@@ -116,7 +117,7 @@ typedef struct {
 	/* Information */
 	char* vendor;
 	char* brand;
-	
+
 	/* Features */
 	bool features_FPU;
 	bool features_APIC;
@@ -131,6 +132,13 @@ typedef struct {
 
 cpu_info_t* cpu_info;
 
+void ClearRegisters(unsigned long* eax, unsigned long* ebx , unsigned long* ecx, unsigned long* edx) {
+    eax = 0;
+    ebx = 0;
+    ecx = 0;
+    edx = 0;
+}
+
 /* C wrapper for CPUID */
 static inline void cpuid(int request_code, unsigned long *eax, unsigned long *ebx, unsigned long *ecx, unsigned long *edx) {
 	__asm__ __volatile__ (
@@ -141,10 +149,10 @@ static inline void cpuid(int request_code, unsigned long *eax, unsigned long *eb
 	);
 }
 
-/** 
- * Uses CPUID instruction to get info about CPU vendor, brand 
+/**
+ * Uses CPUID instruction to get info about CPU vendor, brand
  * string. For more information about CPUID, check Intel IA-32
- * Architecture Software Developer Manual; Volume 2A Page 3-156 
+ * Architecture Software Developer Manual; Volume 2A Page 3-156
  * We should call CPUID with EAX at 0 first, to get the highest
  * EAX parameter CPUID supports.
  */
@@ -154,7 +162,7 @@ void StoreCPUInformation(void) {
 	char brand_buffer[13];
 
 	unsigned long eax, ebx, ecx, edx;
-	
+
 	/* Get the Vendor string then save the highest supported request level. */
 	cpuid(CPUID_REQUEST_HIGHEST_CALL_PARAM, &eax, &ebx, &ecx, &edx);
 
@@ -211,15 +219,28 @@ void StoreCPUInformation(void) {
 	return;
  }
 
-/**
- * Support functions.
- */
+char* GetCPUArchitecture() {
+    return "i386";
+}
+
 char* GetCPUVendor() {
 	return cpu_info->vendor;
 }
 
 char* GetCPUBrand() {
 	return cpu_info->brand;
+}
+
+char* GetCPUFeatures() {
+	char buffer[32];
+
+	if(CheckCPUFeature(CPUID_FEAT_EDX_FPU)) {
+		strcpy(buffer, "FPU");
+	}
+
+	strcpy(buffer, "No FPU");
+
+	return "Has FPU";
 }
 
 bool CheckCPUFeature(int feature_code) {
@@ -240,11 +261,4 @@ bool CheckCPUExtendedFeature(int feature_code) {
 		return true;
 
 	return false;
-}
-
-void ClearRegisters(unsigned long* eax, unsigned long* ebx , unsigned long* ecx, unsigned long* edx) {
-    eax = 0;
-    ebx = 0;
-    ecx = 0;
-    edx = 0;
 }

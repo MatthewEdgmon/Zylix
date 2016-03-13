@@ -1,9 +1,8 @@
 #ifndef __TERMINAL_H__
 #define __TERMINAL_H__
 
-#include <stddef.h>
 #include <libc/stdint.h>
-#include <libc/stdarg.h>
+
 #include <vga.h>
 
 uint8_t TerminalMakeColor(enum vga_color foreground, enum vga_color background);

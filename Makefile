@@ -6,7 +6,7 @@
 ## the kernel and userspace utilities. It will be remade when we port GCC to Zylix.
 
 # Point to your local i686 elf cross compiler.
-CROSS_DIR = /home/matthew/cross/bin
+CROSS_DIR = /home/matth_000/cross/bin
 
 # Build using our cross compiler.
 CC  = $(CROSS_DIR)/i686-elf-gcc
@@ -64,21 +64,21 @@ KERNEL_OBJ_LINK_LIST = ${CRTI_OBJ} \
 
 # Emulator and arguments to pass to it.
 EMU = qemu-system-i386
-#EMU_ARGS  = -sdl -kernel zykernel -m 1024
-EMU_ARGS  = -kernel zykernel -m 1024
-EMU_ARGS += -hda $(HD_IMAGE_NAME) #-no-frame
-EMU_ARGS += -rtc base=localtime -net nic,model=rtl8139 -net user
+EMU_ARGS  = -kernel zykernel
+# Arguments for storage and memory
+EMU_ARGS += -m 1024 -hda $(HD_IMAGE_NAME)
+# Arguments for video
+EMU_ARGS += -vga std
+# Arguments for network
+EMU_ARGS += -net nic,model=rtl8139 -net user
+# Arguments for clock
+EMU_ARGS += -rtc base=localtime
 
 # Hard disk image generator.
 GENEXT2FS = genext2fs
 HD_IMAGE_NAME = zylix.img
 HD_IMAGE_DIR = sysroot
 HD_IMAGE_SIZE = 131072
-
-# CD image generator.
-CD_IMAGE_NAME = zylix-cd.iso
-CD_IMAGE_DIR = sysroot
-CD_IMAGE_SIZE = 131072
 
 # Pretty output utilities.
 BEG = tools/output/mk-beg
@@ -94,7 +94,7 @@ ERRORS = 2>>./.build-errors
 
 .PHONY: all system zykernel ctags userspace
 .SECONDARY:
-.SUFFIXES: 
+.SUFFIXES:
 
 all: system ctags install
 system: zykernel userspace
@@ -119,22 +119,26 @@ kernel/%.o: kernel/%.s
 	@${AS} -c $< -o $@ ${ERRORS}
 	@${END} "CC" "$<"
 
-install-kernel:
+install-kernel: zykernel
+	@${BEG} "CP" "Copying kernel to sysroot."
+	@rm -f $(HD_IMAGE_DIR)/boot/zykernel
+	@cp zykernel $(HD_IMAGE_DIR)/boot
+	@${END} "CP" "Copied kernel to sysroot."
 
-install-kernel-headers:
+install-kernel-headers: zykernel
+	@${BEG} "CP" "Copying kernel headers to sysroot."
+	@rm -r -f $(HD_IMAGE_DIR)/usr/include/zykernel
+	@cp -RT kernel/include $(HD_IMAGE_DIR)/usr/include/zykernel
+	@${END} "CP" "Copied kernel headers to sysroot."
 
 ###############################################################################
 #                                  Userspace                                  #
 ###############################################################################
 
-userspace: 
+userspace:
 	@${BEG} "USER" "Building userspace binaries."
 	@${END} "USER" "Userspace binaries built."
 	@${INFO} "--" "Finished building userspace."
-
-install-userspace:
-
-install-userspace-headers:
 
 ###############################################################################
 #                                  Toolchain                                  #
@@ -158,10 +162,11 @@ run: zykernel zylix.img
 #                                  Disk Image                                 #
 ###############################################################################
 
-zylix.img:
+zylix.img: install-kernel install-kernel-headers
 	@${BEG} "HDD" "Building emulation hard disk image."
 	@$(GENEXT2FS) -d $(HD_IMAGE_DIR) -D tools/devtable -b $(HD_IMAGE_SIZE) -N 4096 $(HD_IMAGE_NAME)
 	@${END} "HDD" "Finished building emulation image."
+	@${INFO} "--" "Hard disk image for Zylix is available."
 
 ###############################################################################
 #                                    CTags                                    #
@@ -183,6 +188,7 @@ install: install-kernel install-kernel-headers
 ###############################################################################
 
 clean: clean-arch-objects clean-objects clean-kernel clean-tags clean-image clean-build-errors
+	@${INFO} "--" "Cleaning complete."
 
 clean-arch-objects:
 	@${BEGRM} "RM" "Cleaning kernel arch-specific objects..."
@@ -207,6 +213,8 @@ clean-tags:
 clean-image:
 	@${BEGRM} "RM" "Cleaning emulation hard disk image..."
 	@rm -f zylix.img
+	@rm -f $(HD_IMAGE_DIR)/boot/zykernel
+	@rm -r -f $(HD_IMAGE_DIR)/usr/include/zykernel
 	@${ENDRM} "RM" "Cleaned emulation hard disk image."
 
 clean-build-errors:

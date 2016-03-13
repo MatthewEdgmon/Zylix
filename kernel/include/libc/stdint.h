@@ -1,6 +1,10 @@
 #ifndef __STDINT_H__
 #define __STDINT_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* 7.8.1.1 Exact-width integer types */
 
 #ifdef __INT8_TYPE__
@@ -59,9 +63,8 @@ typedef __INTPTR_TYPE__ intptr_t;
 typedef __UINTPTR_TYPE__ uintptr_t;
 #endif
 
-typedef unsigned long size_t;
-
-#undef NULL
-#define NULL ((void *)0UL)
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* __STDINT_H__ */

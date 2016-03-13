@@ -2,7 +2,7 @@
 
 #include "arm.h"
 
-void setup_cpu() {
-	store_cpu_information();
+void SetupCPU() {
+	StoreCPUInformation();
 	return;
 }

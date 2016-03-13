@@ -2,6 +2,7 @@
  * WARNING: Incoming terrible test memory allocator.
  */
 
+#include <libc/stddef.h>
 #include <libc/stdint.h>
 
 #define MALLOC_MAGIC	0xDEADD00D
@@ -17,4 +18,3 @@ void* malloc(size_t size) {
 
 	return NULL;
 }
-

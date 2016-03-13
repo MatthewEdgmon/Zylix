@@ -23,4 +23,6 @@ struct rsdp_descriptor_ext {
     uint8_t reserved[3];
 } __attribute__ ((packed));
 
+void SetupACPI();
+
 #endif /* __ACPI_H__ */

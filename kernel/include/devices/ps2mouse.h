@@ -1,6 +1,7 @@
 #ifndef __PS2MOUSE_H__
 #define __PS2MOUSE_H__
 
+/* PS/2 Data port mouse commands. */
 #define PS2_MOUSE_STATUS_REQUEST         0xE9
 #define PS2_MOUSE_READ_DATA              0xEB
 #define PS2_MOUSE_RESET_WRAP_MODE        0xEC
@@ -13,6 +14,9 @@
 #define PS2_MOUSE_SET_DEFAULTS           0xF6
 #define PS2_MOUSE_RESEND                 0xFE
 #define PS2_MOUSE_RESET_SELF_TEST        0xFF    /* Reset and start self test. */
+
+/* PS/2 Keyboard special response bytes. */
+#define PS2_MOUSE_RESPONSE_ACK           0xFA    /* Command acknowledged. */
 
 void SetupPS2Mouse();
 

@@ -74,7 +74,7 @@ void TerminalPrintCharacter(char character) {
             terminal_caught_escape = false;
             break;
     }
-    
+
     /* Escape characters are never meant to be printed. */
     if(terminal_caught_escape)
         return;

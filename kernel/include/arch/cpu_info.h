@@ -3,6 +3,7 @@
 
 #include <libc/stdbool.h>
 
+char* GetCPUArchitecture();
 char* GetCPUVendor();
 char* GetCPUBrand();
 char* GetCPUFeatures();

@@ -1,4 +1,4 @@
-.section text
+.section .text
 .align 4
 
 .global FlushIDT

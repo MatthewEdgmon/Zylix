@@ -1,7 +1,7 @@
 #ifndef __LIBC_H__
 #define __LIBC_H__
 
-#include <stddef.h>
+#include <libc/stddef.h>
 
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
@@ -28,7 +28,5 @@ extern int strcmp(const char * l, const char * r);
 extern size_t strcspn(const char * s, const char * c);
 extern size_t strspn(const char * s, const char * c);
 extern size_t strlen(const char * s);
-
-extern int atoi(const char * s);
 
 #endif /* __LIBC_H__ */

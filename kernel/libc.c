@@ -1,16 +1,7 @@
 #include <limits.h>
+#include <libc/common.h>
+#include <libc/stddef.h>
 #include <libc/stdint.h>
-
-#define ALIGN (sizeof(size_t))
-#define ONES ((size_t)-1/UCHAR_MAX)
-#define HIGHS (ONES * (UCHAR_MAX/2+1))
-#define HASZERO(X) (((X)-ONES) & ~(X) & HIGHS)
-
-#define BITOP(A, B, OP) \
- ((A)[(size_t)(B)/(8*sizeof *(A))] OP (size_t)1<<((size_t)(B)%(8*sizeof *(A))))
-
-#define asm __asm__
-#define volatile __volatile__
 
 void * memcpy(void * restrict dest, const void * restrict src, size_t n) {
     asm volatile("rep movsb"
@@ -100,37 +91,6 @@ void * memmove(void * dest, const void * src, size_t n) {
     return dest;
 }
 
-int strcmp(const char * l, const char * r) {
-    for (; *l == *r && *l; l++, r++);
-    return *(unsigned char *)l - *(unsigned char *)r;
-}
-
-char * stpcpy(char * restrict d, const char * restrict s) {
-    size_t * wd;
-    const size_t * ws;
-
-    if ((uintptr_t)s % ALIGN == (uintptr_t)d % ALIGN) {
-        for (; (uintptr_t)s % ALIGN; s++, d++) {
-            if (!(*d = *s)) {
-                return d;
-            }
-        }
-        wd = (void *)d;
-        ws = (const void *)s;
-        for (; !HASZERO(*ws); *wd++ = *ws++);
-        d = (void *)wd;
-        s = (const void *)ws;
-    }
-
-    for (; (*d=*s); s++, d++);
-
-    return d;
-}
-
-char * strcpy(char * restrict dest, const char * restrict src) {
-    stpcpy(dest, src);
-    return dest;
-}
 
 size_t strspn(const char * s, const char * c) {
     const char * a = s;

@@ -8,9 +8,6 @@
 #include <libc/stdint.h>
 #include <terminal.h>
 
-#define PS2_KEYBOARD_DATA_PORT 0x60
-#define PS2_KEYBOARD_COMMAND_PORT 0x64
-
 /* We assume the first device is a keyboard, and the second is a mouse. */
 uint8_t ps2_device1_type = 0x00;
 uint8_t ps2_device2_type = 0x00;
@@ -100,7 +97,7 @@ void SetupA20() {
         /* A20 was set. */
         TerminalPrintString("PS/2 A20 line was already set.\n");
     }
-    
+
     /* Re-enable both ports. */
     PS2WaitInputBuffer();
     PS2SendCommand(PS2_COMMAND_ENABLE_PORT1);

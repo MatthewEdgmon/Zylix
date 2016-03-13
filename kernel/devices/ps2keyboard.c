@@ -46,7 +46,7 @@ char US_QWERTY_1[128] = {
 0,//Scroll Lock
 
 //Number Pad with Number Lock:
-  
+
 '7',//Home
 '8',//Up Arrow
 '9',//Page Up
@@ -58,7 +58,7 @@ char US_QWERTY_1[128] = {
 '1',//End
 '2',//Down Arrow
 '3',//Page Down
-'0',//Insert           
+'0',//Insert
 '.',//Delete
 0, 0, 0,//Absolutely Nothing
 0, 0, // F11 and F12
@@ -67,7 +67,7 @@ char US_QWERTY_1[128] = {
 };
 
 char US_QWERTY_sh[128]= {
-  
+
   // Key Presses
 
   0,//Escape
@@ -92,9 +92,9 @@ char US_QWERTY_sh[128]= {
   0,0,0,0,0,0,0,0,0,0,//F1 to F10
   0,//Number Lock
   0,//Scroll Lock
-  
+
   //Number Pad with Number Lock:
-  
+
   '7',//Home
   '8',//Up Arrow
   '9',//Page Up
@@ -106,16 +106,16 @@ char US_QWERTY_sh[128]= {
   '1',//End
   '2',//Down Arrow
   '3',//Page Down
-  '0',//Insert           
+  '0',//Insert
   '.',//Delete
   0,0,0,//Absolutely Nothing
   0,0,// F11 and F12
-  
+
   // Key Presses End
   0     // That's all
-  
+
   };
-  
+
 char US_QWERTY_extended[]= {
 '\n',         /* Keypad Enter */
 0,            //Right Control */
@@ -201,6 +201,7 @@ void SetupPS2Keyboard() {
 
     PS2WaitOutputBuffer();
     response_byte = PS2ReadData();
+    PS2WaitOutputBuffer();
 
     switch(response_byte) {
         case PS2_KEYBOARD_RESPONSE_TEST_PASS:
@@ -285,7 +286,7 @@ void PS2KeyboardHandler() {
             keyboard_scan_code = PS2ReadData();
         }
     }
-    
+
     /* Handle a shift press. */
     if(US_QWERTY_1[keyboard_scan_code - 1] == 127) {
         left_shift_state = 1;
@@ -297,7 +298,7 @@ void PS2KeyboardHandler() {
         left_control_state = 1;
         right_control_state = 1;
     }
-    
+
     /* Handle an alt press. */
     if(US_QWERTY_1[keyboard_scan_code-1] == 129) {
         left_alt_state = 1;

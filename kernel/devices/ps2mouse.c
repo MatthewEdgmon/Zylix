@@ -7,27 +7,6 @@
 #include <common.h>
 #include <terminal.h>
 
-void PS2MouseReset() {
-    uint8_t response;
-    PS2SendCommand(0xFF);
-    response = PS2ReadData();
-
-    if(response == 0xFA) {
-        TerminalPrintString("PS2 Mouse reset.");
-    }
-
-}
-
-void PS2MouseResend() {
-    uint8_t response;
-    PS2SendCommand(0xFF);
-    response = PS2ReadData();
-
-    if(response == 0xFA) {
-        TerminalPrintString("PS2 Mouse reset.");
-    }
-
-}
 
 void PS2MouseDisableDataReporting() {
     uint8_t response;
@@ -69,6 +48,24 @@ void PS2MouseGetDataPacket() {
     if(BIT_CHECK(byte1, 3) == 0) {
         TerminalPrintString("PS2 Mouse sent errant packet data.");
     }
+}
+
+/**
+ * Asks the mouse to send us a packet
+ */
+void PS2MouseCheckConnection() {
+
+    /*
+
+    PS2SendCommand(PS2_MOUSE_)
+
+    */
+
+    // Send 0xEB
+    // If receive 0xFA AND blank mouse packet
+    // Then mouse is still connected, return
+    // Else wait mouse is disconnected
+
 }
 
 void SetupPS2Mouse() {
