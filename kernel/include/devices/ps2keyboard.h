@@ -29,6 +29,16 @@
 #define PS2_KEYBOARD_RESPONSE_RESEND     0xFE    /* Resend last command. */
 #define PS2_KEYBOARD_RESPONSE_ERROR2     0xFF    /* Key detection error or internal buffer overrun. */
 
+typedef struct {
+    /* If the keyboard physically exists, non-zero. */
+    uint8_t available;
+    /* Which PS/2 port this keyboard is plugged into. */
+    uint8_t ps2_port;
+
+    uint8_t scan_code;
+
+} keyboard_state_t;
+
 void PS2KeyboardSetLED(uint8_t caps_lock, uint8_t num_lock, uint8_t scroll_lock);
 char PS2KeyboardGetKey();
 char PS2KeyboardGetExtendedKey();

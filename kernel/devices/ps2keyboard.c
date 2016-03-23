@@ -1,11 +1,14 @@
 #include <arch/io.h>
+#include <arch/interrupts.h>
 
 #include <devices/ps2.h>
 #include <devices/ps2keyboard.h>
 
 #include <common.h>
 #include <libc/stdint.h>
-#include <terminal.h>
+#include <libc/stdio.h>
+
+#define DEBUG_KEYBOARD 1
 
 uint8_t number_lock_state = 0;
 uint8_t caps_lock_state = 0;
@@ -18,7 +21,7 @@ uint8_t right_control_state = 0;
 uint8_t left_alt_state = 0;
 uint8_t right_alt_state = 0;
 
-char current_key;
+char current_key = 0;
 char current_extended_key = 0;
 
 char US_QWERTY_1[128] = {
@@ -143,6 +146,7 @@ char US_QWERTY_extended[]= {
 };
 
 void PS2KeyboardSetLED(uint8_t caps_lock, uint8_t num_lock, uint8_t scroll_lock) {
+    uint8_t response_byte = 0x00;
     uint8_t byte_to_send = 0x00;
     uint8_t byte = 0x00;
 
@@ -174,6 +178,9 @@ void PS2KeyboardSetLED(uint8_t caps_lock, uint8_t num_lock, uint8_t scroll_lock)
     PS2WaitInputBuffer();
     PS2SendData(PS2_KEYBOARD_SET_LEDS);
 
+    PS2WaitOutputBuffer();
+    response_byte = PS2ReadData();
+
     /* Send the status byte. */
     PS2WaitInputBuffer();
     PS2SendData(byte_to_send);
@@ -187,64 +194,14 @@ char PS2KeyboardGetExtendedKey() {
     return current_extended_key;
 }
 
-void SetupPS2Keyboard() {
-    uint8_t response_byte;
+void PS2KeyboardTranslateScancode(uint8_t scan_code) {
 
-    /* Disable scanning. */
-    PS2WaitInputBuffer();
-    PS2SendData(PS2_KEYBOARD_DISABLE_SCANNING);
-
-    /* Perform self-test. */
-    SelfTest:
-    PS2WaitInputBuffer();
-    PS2SendData(PS2_KEYBOARD_RESET_SELF_TEST);
-
-    PS2WaitOutputBuffer();
-    response_byte = PS2ReadData();
-    PS2WaitOutputBuffer();
-
-    switch(response_byte) {
-        case PS2_KEYBOARD_RESPONSE_TEST_PASS:
-            TerminalPrintString("PS/2 keyboard self-test passed.\n");
-            break;
-        case PS2_KEYBOARD_RESPONSE_ACK:
-            TerminalPrintString("PS/2 keyboard unexpected ACK.\n");
-            break;
-        case PS2_KEYBOARD_RESPONSE_TEST_FAIL1:
-            TerminalPrintString("PS/2 keyboard self-test failed.\n");
-            break;
-        case PS2_KEYBOARD_RESPONSE_TEST_FAIL2:
-            TerminalPrintString("PS/2 keyboard self-test failed.\n");
-            break;
-        case PS2_KEYBOARD_RESPONSE_RESEND:
-            TerminalPrintString("PS/2 keyboard requests resend.\n");
-            goto SelfTest;
-            break;
-        default:
-            TerminalPrintString("PS/2 keyboard self-test failed with unknown response.\n");
-            break;
-    }
-
-    /* Change scan code set to 1. */
-    PS2WaitInputBuffer();
-
-    /* Set typematic info. */
-    PS2WaitInputBuffer();
-    PS2SendData(PS2_KEYBOARD_SET_TYPEMATIC);
-
-    PS2WaitInputBuffer();
-    PS2SendData(0x23);
-
-    /* Enable scanning. */
-    PS2WaitInputBuffer();
-    PS2SendData(PS2_KEYBOARD_ENABLE_SCANNING);
-
-    /* Set num-lock on. */
-    PS2KeyboardSetLED(0, 1, 0);
 }
 
 /* Handler for IRQ1 */
-void PS2KeyboardHandler() {
+void PS2KeyboardHandler(registers_t registers) {
+    printf("Got a keyboard interrupt!\n");
+
     uint8_t keyboard_scan_code;
 
     /* We do not need to probe the status bit on an IRQ. */
@@ -318,4 +275,114 @@ void PS2KeyboardHandler() {
 
     /* Send EOI */
 
+}
+
+void SetupPS2Keyboard() {
+    uint8_t response_byte;
+
+    /* Disable scanning. */
+    PS2WaitInputBuffer();
+    PS2SendData(PS2_KEYBOARD_DISABLE_SCANNING);
+
+    PS2WaitOutputBuffer();
+    response_byte = PS2ReadData();
+
+    /* Identify device. */
+    PS2WaitInputBuffer();
+    PS2SendData(PS2_KEYBOARD_IDENTIFY);
+
+    PS2WaitOutputBuffer();
+    response_byte = PS2ReadData();
+
+    if(response_byte == 0xFA) {
+        uint8_t identify_byte;
+
+        PS2WaitOutputBuffer();
+        identify_byte = PS2ReadData();
+
+        switch(identify_byte) {
+            /* Standard PS/2 mouse. */
+            case 0x00:
+                printf("Device in PS/2 port 1 is a standard PS/2 mouse.\n");
+                break;
+            /* Scroll mouse. */
+            case 0x03:
+                printf("Device in PS/2 port 1 is a mouse with scroll wheel.\n");
+                break;
+            /* 5-button mouse. */
+            case 0x04:
+                printf("Device in PS/2 port 1 is a 5-button mouse.\n");
+                break;
+            /* MF2 keyboard. */
+            case 0xAB:
+                PS2WaitOutputBuffer();
+                identify_byte = PS2ReadData();
+                switch(identify_byte) {
+                    case 0x41:
+                    case 0xC1:
+                        printf("Device in PS/2 port 1 is an MF2 keyboard with translation.\n");
+                        break;
+                    case 0x83:
+                        printf("Device in PS/2 port 1 is an MF2 keyboard.\n");
+                        break;
+                    default:
+                        printf("WARNING! Unknown device type in PS/2 port 1!\n");
+                }
+                break;
+            default:
+                printf("WARNING! Unknown device type in PS/2 port 1!\n");
+                break;
+        }
+
+    }
+
+    /* Perform self-test. */
+    SelfTest:
+    PS2WaitInputBuffer();
+    PS2SendData(PS2_KEYBOARD_RESET_SELF_TEST);
+
+    PS2WaitOutputBuffer();
+    response_byte = PS2ReadData();
+
+    switch(response_byte) {
+        case PS2_KEYBOARD_RESPONSE_TEST_PASS:
+            printf("PS/2 keyboard self-test passed.\n");
+            break;
+        case PS2_KEYBOARD_RESPONSE_ACK:
+            printf("PS/2 keyboard unexpected ACK.\n");
+            break;
+        case PS2_KEYBOARD_RESPONSE_TEST_FAIL1:
+            printf("PS/2 keyboard self-test failed.\n");
+            break;
+        case PS2_KEYBOARD_RESPONSE_TEST_FAIL2:
+            printf("PS/2 keyboard self-test failed.\n");
+            break;
+        case PS2_KEYBOARD_RESPONSE_RESEND:
+            printf("PS/2 keyboard requests resend.\n");
+            goto SelfTest;
+            break;
+        default:
+            printf("PS/2 keyboard self-test failed with unknown response: 0x%X\n", response_byte);
+            break;
+    }
+
+    /* Change scan code set to 1. */
+    PS2WaitInputBuffer();
+
+    /* Set typematic info. */
+    PS2WaitInputBuffer();
+    PS2SendData(PS2_KEYBOARD_SET_TYPEMATIC);
+
+    PS2WaitInputBuffer();
+    PS2SendData(0x23);
+
+    /* Enable scanning. */
+    PS2WaitInputBuffer();
+    PS2SendData(PS2_KEYBOARD_ENABLE_SCANNING);
+
+    /* Set num-lock on. */
+    PS2KeyboardSetLED(0, 1, 0);
+
+    /* Setup the Interrupt Handler. */
+    ISRInstallHandler(1, &PS2KeyboardHandler);
 }

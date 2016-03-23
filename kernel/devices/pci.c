@@ -36,3 +36,7 @@ uint16_t PCICheckVendor(uint8_t bus, uint8_t slot) {
 
     return vendor;
 }
+
+void PCISetup() {
+    
+}

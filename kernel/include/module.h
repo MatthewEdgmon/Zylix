@@ -3,4 +3,6 @@
 
 #include <libc/stdint.h>
 
+void (* symbol_find(const char * name))(void);
+
 #endif /* __MODULE_H__ */

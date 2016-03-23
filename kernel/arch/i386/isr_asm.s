@@ -3,8 +3,8 @@
 
 # For defining an interrupt that doesn't push an error code, we push a zero instead.
 .macro ISR_NOERROR index
-    .global _isr\index
-    _isr\index:
+    .global isr\index
+    isr\index:
         cli
         push $0
         push $\index
@@ -13,8 +13,8 @@
 
 # For defining an interrupt that pushes an error code on the stack.
 .macro ISR_ERROR index
-    .global _isr\index
-    _isr\index:
+    .global isr\index
+    isr\index:
         cli
         push $\index
         jmp CommonISR
@@ -55,8 +55,8 @@ ISR_NOERROR 30
 ISR_NOERROR 31
 ISR_NOERROR 127
 
-.extern FaultHandler
-.type FaultHandler, @function
+.extern ISRFaultHandler
+.type ISRFaultHandler, @function
 
 CommonISR:
     # Push all registers.
@@ -75,7 +75,7 @@ CommonISR:
 
     # Call fault handler.
     push %esp
-    call FaultHandler
+    call ISRFaultHandler
     add $4, %esp
 
     # Restore segment registers.

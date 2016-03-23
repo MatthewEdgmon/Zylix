@@ -31,7 +31,7 @@ _start:
 	# Transfer control to the main kernel.
 	call KernelMain
 
-	# Hang if kernel_main unexpectedly returns.
+	# Hang if KernelMain unexpectedly returns.
 	cli
 
 .Lhang:

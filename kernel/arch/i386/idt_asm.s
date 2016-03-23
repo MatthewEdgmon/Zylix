@@ -1,3 +1,4 @@
+.section .text
 .align 4
 
 .global LoadIDT

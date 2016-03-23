@@ -1,10 +1,10 @@
 .section .text
 .align 4
 
-.global FlushTSS
-.type FlushTSS, @function
+.global LoadTSS
+.type LoadTSS, @function
 
-FlushTSS:
+LoadTSS:
     mov $0x2B, %ax
     ltr %ax
     ret

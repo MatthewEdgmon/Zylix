@@ -1,14 +1,20 @@
 #ifndef __PIC_H__
 #define __PIC_H__
 
-void DisableInterrupts();
-void EnableInterrupts();
-void ResumeInterrupts();
-void InstallIRQHandler();
-void UninstallIRQHandler();
-void RemapPIC(int firstOffset, int secondOffset);
-void SendEOI(uint8_t IRQ);
-void DisablePIC();
-void SetupTimer(uint32_t frequency);
+#include <libc/stdint.h>
+
+#include <arch/interrupts.h>
+
+void PICDisableInterrupts();
+void PICEnableInterrupts();
+void PICResumeInterrupts();
+void PICInstallIRQHandler();
+void PICUninstallIRQHandler();
+void PICHandlerIRQ();
+void PICRemap(int first_offset, int second_offset);
+void PICSendEOI(unsigned char irq);
+void PICDisable();
+void PICSetupTimer(uint32_t frequency);
+void SetupPIC();
 
 #endif /* __PIC_H__ */

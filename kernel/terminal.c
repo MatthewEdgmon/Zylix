@@ -63,27 +63,80 @@ void TerminalScroll() {
 void TerminalPrintCharacter(char character) {
 
     switch(character) {
+        /* Alrarm/bell .*/
+        case '\a':
+            terminal_caught_escape = true;
+            break;
+        /* Backspace. */
+        case '\b':
+            /* C standard doesn't define behaivor for backspace at initial position. */
+            /* I just ignore it. */
+            if(terminal_column != 0) {
+                terminal_column--;
+            }
+            terminal_caught_escape = true;
+            break;
+        /* Formfeed? */
+        case '\f':
+            terminal_caught_escape = true;
+            break;
+        /* New line. */
         case '\n':
             terminal_row++;
             terminal_column = 0;
             terminal_caught_escape = true;
             TerminalScroll();
             break;
+        /* Carriage return. */
+        case '\r':
+            terminal_column = 0;
+            terminal_caught_escape = true;
+            break;
+        /* Horizontal tab. */
+        case '\t':
+            terminal_column += 8;
+            break;
+        /* Vertical tab. */
+        case '\v':
+            /* Move 6 lines vertically. */
+            for(int i = 0; i < 6; i++) {
+                terminal_row++;
+                TerminalScroll();
+            }
+            break;
+        /* Backslash. */
+        case '\\':
+            TerminalMakeVGAEntryAt(0x5C, terminal_color, terminal_column, terminal_row);
+            terminal_caught_escape = false;
+            break;
+        /* Single quotation mark. */
+        case '\'':
+            TerminalMakeVGAEntryAt(0x27, terminal_color, terminal_column, terminal_row);
+            terminal_caught_escape = false;
+            break;
+        /* Double quotation mark. */
+        case '\"':
+            TerminalMakeVGAEntryAt(0x22, terminal_color, terminal_column, terminal_row);
+            terminal_caught_escape = false;
+            break;
+        /* Question mark. */
+        case '\?':
+            TerminalMakeVGAEntryAt(0x3F, terminal_color, terminal_column, terminal_row);
+            terminal_caught_escape = false;
+            break;
+        /* NOT an escape code character. */
         default:
             TerminalMakeVGAEntryAt(character, terminal_color, terminal_column, terminal_row);
             terminal_caught_escape = false;
             break;
     }
 
-    /* Escape characters are never meant to be printed. */
+    /* Certain escape characters aren't meant to be printed. */
     if(terminal_caught_escape)
         return;
 
-    if(++terminal_column == VGA_WIDTH) {
-        terminal_column = 0;
-        if(++terminal_row == VGA_HEIGHT) {
-            terminal_row = 0;
-        }
+    if(++terminal_column == VGA_WIDTH && terminal_row == VGA_HEIGHT) {
+        TerminalScroll();
     }
 }
 

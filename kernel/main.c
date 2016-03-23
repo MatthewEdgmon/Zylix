@@ -12,8 +12,8 @@
 #include <libc.h>
 
 #include <arch/io.h>
+#include <arch/cpu.h>
 #include <arch/cpu_info.h>
-#include <arch/setup_cpu.h>
 
 #include <common.h>
 #include <devices/cmos.h>
@@ -45,19 +45,18 @@ void PrintLogo() {
 
 int KernelMain() {
 
-    SetupCPU();
-
     SetupTerminal();
 
-    PrintLogo();
+    SetupCPU();
 
-    printf("Zylix Version 0.0.1 Starting.\n");
+    PrintLogo();
 
     printf("CPU Information:\n");
     printf("    Arch: %s \n", GetCPUArchitecture());
     printf("    Vendor: %s \n", GetCPUVendor());
     printf("    Brand: %s \n", GetCPUBrand());
     printf("    Features: %s \n", GetCPUFeatures());
+    printf("    Max Request: 0x%X \n", GetCPUMaxRequestLevel());
 
     printf("Setting up SMBIOS.\n");
     SetupSMBIOS();
@@ -71,24 +70,16 @@ int KernelMain() {
     printf("Switching to ACPI mode.\n");
     SetupACPI();
 
-    printf("Setting up PCI devices.\n");
-    TerminalPrintString(PCICheckVendor(0, 0));
-
     printf("Setting up CMOS chip.\n");
     CMOSReadRTC();
+    printf("Current date and time: %d/%d/%d %d:%d:%d \n", CMOSGetMonth(), CMOSGetDay(), CMOSGetYear(),
+                                                          CMOSGetHours(), CMOSGetMinutes(), CMOSGetSeconds());
 
     printf("Setting up kernel debug shell.\n");
     SetupShell();
 
-    //printf("Character: %c \n", 'a');
-    //printf("Unsigned decimal: %u \n", -1977);
-    //printf("Signed decimal: %i \n", -1977);
-    //printf("Hexadecimal uppercase: %X \n", 0xafff);
-    //printf("Hexadecimal lowercase: %x \n", 0xFFFA);
-    //printf("A string: %s \n", "test");
-    //printf("A percentage: %%100 \n");
-
-    char test_buffer[64];
+    //printf("Launching RAM monitor.\n");
+    //RAMMonitorMain();
 
     int exit_status = 0;
 

@@ -197,7 +197,7 @@ clean-arch-objects:
 
 clean-objects:
 	@${BEGRM} "RM" "Cleaning kernel objects..."
-	@rm -f ${KERNEL_OBJS}
+	@rm -f ${KERNEL_OBJS} kernel/symbols.s kernel/symbols.o
 	@${ENDRM} "RM" "Cleaned kernel objects."
 
 clean-kernel:

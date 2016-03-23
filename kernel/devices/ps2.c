@@ -6,7 +6,6 @@
 #include <common.h>
 #include <libc/stdbool.h>
 #include <libc/stdint.h>
-#include <terminal.h>
 
 /* We assume the first device is a keyboard, and the second is a mouse. */
 uint8_t ps2_device1_type = 0x00;
@@ -67,7 +66,7 @@ void PS2WaitInputBuffer() {
  * We rely on our bootloader setting the A20, but we have code for it just in case.
  */
 void SetupA20() {
-    char response_byte;
+    uint8_t response_byte;
 
     /* Do a couple of dummy writes to clear the output buffers. */
     PS2ReadData();
@@ -80,22 +79,26 @@ void SetupA20() {
     PS2WaitInputBuffer();
     PS2SendCommand(PS2_COMMAND_DISABLE_PORT2);
 
+    A20_check:
+
     /* Tell the PS/2 controller to send us the config. */
     PS2WaitInputBuffer();
     PS2SendCommand(PS2_COMMAND_READ_CONFIG);
 
     /* Get the status byte. */
-    response_byte = PS2ReadStatus();
+    response_byte = PS2ReadData();
 
     /* Check if the A20 bit is set. */
     if((response_byte & 0x02) != 0x02) {
         /* A20 is NOT set. Set it and write it. */
+        PS2WaitOutputBuffer();
         PS2SendCommand(PS2_COMMAND_WRITE_CONFIG);
-        PS2SendCommand(response_byte | 0x02);
-        TerminalPrintString("PS/2 A20 line set.\n");
+        PS2WaitOutputBuffer();
+        PS2SendData(response_byte | 0x02);
+        goto A20_check;
     } else {
         /* A20 was set. */
-        TerminalPrintString("PS/2 A20 line was already set.\n");
+        printf("PS/2 A20 line set.\n");
     }
 
     /* Re-enable both ports. */
@@ -137,9 +140,9 @@ void SetupPS2() {
 
     PS2WaitOutputBuffer();
     if(PS2ReadData() == PS2_RESPONSE_TEST_PASS) {
-        TerminalPrintString("PS/2 controller passed self test.\n");
+        printf("PS/2 controller passed self test.\n");
     } else {
-        TerminalPrintString("PS/2 controller did not pass self test.\n");
+        printf("PS/2 controller did not pass self test.\n");
     }
 
     /* Determine if there is 2 channels. */
@@ -149,14 +152,14 @@ void SetupPS2() {
     PS2WaitInputBuffer();
     PS2SendCommand(PS2_COMMAND_READ_CONFIG);
 
-    response_byte = PS2ReadStatus();
+    response_byte = PS2ReadData();
 
     /* Check if bit 5 of the controller config is set. */
     if(BIT_CHECK(response_byte, 5)) {
-        TerminalPrintString("PS/2 controller has no second channel.\n");
+        printf("PS/2 controller has no second channel.\n");
         ps2_has_second_channel = false;
     } else {
-        TerminalPrintString("PS/2 controller has a second channel.\n");
+        printf("PS/2 controller has a second channel.\n");
         ps2_has_second_channel = true;
     }
 
@@ -173,22 +176,22 @@ void SetupPS2() {
 
     switch(response_byte) {
         case PS2_RESPONSE_PORT_TEST_PASS:
-            TerminalPrintString("PS/2 port 1 has passed self-test.\n");
+            printf("PS/2 port 1 has passed self-test.\n");
             break;
         case PS2_RESPONSE_CLOCK_STUCK_LOW:
-            TerminalPrintString("PS/2 port 1 has stuck low clock.\n");
+            printf("PS/2 port 1 has stuck low clock.\n");
             break;
         case PS2_RESPONSE_CLOCK_STUCK_HIGH:
-            TerminalPrintString("PS/2 port 1 has stuck high clock.\n");
+            printf("PS/2 port 1 has stuck high clock.\n");
             break;
         case PS2_RESPONSE_DATA_STUCK_LOW:
-            TerminalPrintString("PS/2 port 1 has stuck low data line.\n");
+            printf("PS/2 port 1 has stuck low data line.\n");
             break;
         case PS2_RESPONSE_DATA_STUCK_HIGH:
-            TerminalPrintString("PS/2 port 1 has stuck high data line.\n");
+            printf("PS/2 port 1 has stuck high data line.\n");
             break;
         default:
-            TerminalPrintString("PS/2 port 1 has failed self-test.\n");
+            printf("PS/2 port 1 has failed self-test.\n");
             break;
     }
 
@@ -201,22 +204,22 @@ void SetupPS2() {
 
     switch(response_byte) {
         case PS2_RESPONSE_PORT_TEST_PASS:
-            TerminalPrintString("PS/2 port 2 has passed self-test.\n");
+            printf("PS/2 port 2 has passed self-test.\n");
             break;
         case PS2_RESPONSE_CLOCK_STUCK_LOW:
-            TerminalPrintString("PS/2 port 2 has stuck low clock.\n");
+            printf("PS/2 port 2 has stuck low clock.\n");
             break;
         case PS2_RESPONSE_CLOCK_STUCK_HIGH:
-            TerminalPrintString("PS/2 port 2 has stuck high clock.\n");
+            printf("PS/2 port 2 has stuck high clock.\n");
             break;
         case PS2_RESPONSE_DATA_STUCK_LOW:
-            TerminalPrintString("PS/2 port 2 has stuck low data line.\n");
+            printf("PS/2 port 2 has stuck low data line.\n");
             break;
         case PS2_RESPONSE_DATA_STUCK_HIGH:
-            TerminalPrintString("PS/2 port 2 has stuck high data line.\n");
+            printf("PS/2 port 2 has stuck high data line.\n");
             break;
         default:
-            TerminalPrintString("PS/2 port 2 has failed self-test.\n");
+            printf("PS/2 port 2 has failed self-test.\n");
             break;
     }
 
@@ -228,14 +231,8 @@ void SetupPS2() {
     PS2WaitInputBuffer();
     PS2SendCommand(PS2_COMMAND_ENABLE_PORT2);
 
-    /* Reset device 1. */
-    PS2WaitInputBuffer();
-    PS2SendCommand(PS2_KEYBOARD_RESET_SELF_TEST);
+    /* Identify device 1. */
 
-    /* Reset device 2. */
-    PS2WaitInputBuffer();
-    PS2SendCommand(PS2_COMMAND_WRITE_PORT2_INPUT);
+    /* Identify device 2. */
 
-    PS2WaitInputBuffer();
-    PS2SendCommand(PS2_MOUSE_RESET_SELF_TEST);
 }

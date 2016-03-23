@@ -2,8 +2,6 @@
  * Note: due to the hacky nature of the OS, CMOS /wiritng/ is not recomended. Could brick your motherboard.
  */
 
-#include <terminal.h>
-
 #include <arch/io.h>
 
 /* Changed every year, in order to support CMOS without century registers. */
@@ -156,4 +154,28 @@ void CMOSReadRTC() {
     year += century * 100;
 
     return;
+}
+
+uint16_t CMOSGetYear() {
+    return year;
+}
+
+uint16_t CMOSGetMonth() {
+    return month;
+}
+
+uint16_t CMOSGetDay() {
+    return day;
+}
+
+uint16_t CMOSGetHours() {
+    return hours;
+}
+
+uint16_t CMOSGetMinutes() {
+    return minutes;
+}
+
+uint16_t CMOSGetSeconds() {
+    return seconds;
 }

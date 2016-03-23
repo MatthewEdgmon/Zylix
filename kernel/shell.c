@@ -56,7 +56,7 @@ int FindShellCommand(char* name) {
 
 void Shell() {
 
-    TerminalPrintString("\n>");
+    printf("\n>");
     gets(input_string);
 
     void (*command_function)(void);

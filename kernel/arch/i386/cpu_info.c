@@ -1,6 +1,7 @@
 #include <arch/cpu_info.h>
 #include <libc/stdbool.h>
 #include <libc/stdint.h>
+#include <libc/stdio.h>
 #include <libc/string.h>
 
 /* Most information retrieved from http://en.wikipedia.org/wiki/CPUID */
@@ -114,9 +115,13 @@
 
 typedef struct {
 
+	/* What's the max value CPUID supports? */
+	long highest_request_level;
+
 	/* Information */
-	char* vendor;
-	char* brand;
+	char vendor[13];
+	char brand[48];
+	char features[128];
 
 	/* Features */
 	bool features_FPU;
@@ -131,13 +136,6 @@ typedef struct {
 } cpu_info_t;
 
 cpu_info_t* cpu_info;
-
-void ClearRegisters(unsigned long* eax, unsigned long* ebx , unsigned long* ecx, unsigned long* edx) {
-    eax = 0;
-    ebx = 0;
-    ecx = 0;
-    edx = 0;
-}
 
 /* C wrapper for CPUID */
 static inline void cpuid(int request_code, unsigned long *eax, unsigned long *ebx, unsigned long *ecx, unsigned long *edx) {
@@ -158,60 +156,96 @@ static inline void cpuid(int request_code, unsigned long *eax, unsigned long *eb
  */
 void StoreCPUInformation(void) {
 
-	char vendor_buffer[13];
-	char brand_buffer[13];
-
 	unsigned long eax, ebx, ecx, edx;
 
-	/* Get the Vendor string then save the highest supported request level. */
+	/**
+	 * Max CPUID request level.
+	 */
+
 	cpuid(CPUID_REQUEST_HIGHEST_CALL_PARAM, &eax, &ebx, &ecx, &edx);
+	cpu_info->highest_request_level = eax;
 
 	/**
 	 * Vendor string.
 	 */
-	eax = ebx = ecx = edx = 0;
-
 	cpuid(CPUID_REQUEST_VENDOR_STRING, &eax, &ebx, &ecx, &edx);
 
-	*(uint32_t *)(&vendor_buffer[0]) = ebx;
-	*(uint32_t *)(&vendor_buffer[4]) = edx;
-	*(uint32_t *)(&vendor_buffer[8]) = ecx;
-	vendor_buffer[12] = 0;
+	*(uint32_t *)(&cpu_info->vendor[0]) = ebx;
+	*(uint32_t *)(&cpu_info->vendor[4]) = edx;
+	*(uint32_t *)(&cpu_info->vendor[8]) = ecx;
+	cpu_info->vendor[12] = 0;
 
-	cpu_info->vendor = *vendor_buffer;
+	/**
+	 * Brand string.
+	 */
+	cpuid(CPUID_REQUEST_BRAND_STRING_ONE, &eax, &ebx, &ecx, &edx);
+	*(uint32_t *)(&cpu_info->brand[0])  = eax;
+	*(uint32_t *)(&cpu_info->brand[4])  = ebx;
+	*(uint32_t *)(&cpu_info->brand[8])  = ecx;
+	*(uint32_t *)(&cpu_info->brand[12]) = edx;
+
+	cpuid(CPUID_REQUEST_BRAND_STRING_TWO, &eax, &ebx, &ecx, &edx);
+	*(uint32_t *)(&cpu_info->brand[16]) = eax;
+	*(uint32_t *)(&cpu_info->brand[20]) = ebx;
+	*(uint32_t *)(&cpu_info->brand[24]) = ecx;
+	*(uint32_t *)(&cpu_info->brand[28]) = edx;
+
+	cpuid(CPUID_REQUEST_BRAND_STRING_THREE, &eax, &ebx, &ecx, &edx);
+	*(uint32_t *)(&cpu_info->brand[32]) = eax;
+	*(uint32_t *)(&cpu_info->brand[36]) = ebx;
+	*(uint32_t *)(&cpu_info->brand[40]) = ecx;
+	*(uint32_t *)(&cpu_info->brand[44]) = edx;
 
 	/**
 	 * Features request.
 	 */
-	ClearRegisters(eax, ebx, ecx, edx);
 
 	cpuid(CPUID_REQUEST_FEATURES, &eax, &ebx, &ecx, &edx);
 
-	if(edx & CPUID_FEAT_EDX_FPU)
+	if(edx & CPUID_FEAT_EDX_FPU) {
+		sprintf(cpu_info->features, "FPU ");
 		cpu_info->features_FPU = true;
+	}
 
-	if(edx & CPUID_FEAT_EDX_APIC)
+	if(edx & CPUID_FEAT_EDX_APIC) {
+		sprintf(cpu_info->features, "APIC ");
 		cpu_info->features_APIC = true;
+	}
 
-	if(edx & CPUID_FEAT_EDX_MMX)
+	if(edx & CPUID_FEAT_EDX_MMX) {
+		sprintf(cpu_info->features, "MMX ");
 		cpu_info->features_MMX = true;
+	}
 
-	if(edx & CPUID_FEAT_EDX_SSE)
+	if(edx & CPUID_FEAT_EDX_SSE) {
+		sprintf(cpu_info->features, "SSE ");
 		cpu_info->features_SSE = true;
+	}
 
-	if(edx & CPUID_FEAT_EDX_SSE2)
+	if(edx & CPUID_FEAT_EDX_SSE2) {
+		sprintf(cpu_info->features, "SSE2 ");
 		cpu_info->features_SSE2 = true;
+	}
 
-	if(edx & CPUID_FEAT_EDX_IA64)
+	if(ecx & CPUID_FEAT_ECX_SSE3) {
+		sprintf(cpu_info->features, "SSE3 ");
+		cpu_info->features_SSE3 = true;
+	}
+
+	if(edx & CPUID_FEAT_EDX_IA64) {
+		sprintf(cpu_info->features, "IA64 ");
 		cpu_info->features_IA64 = true;
+	}
 
-	if(edx & CPUID_FEAT_EDX_HTT)
+	if(edx & CPUID_FEAT_EDX_HTT) {
+		sprintf(cpu_info->features, "Hyper-Threading ");
 		cpu_info->features_HYPERTHREADING = true;
+	}
 
 	/**
 	 * Serial number.
 	 */
-	ClearRegisters(eax, ebx, ecx, edx);
+	eax = ebx = ecx = edx = 0;
 
 	cpuid(CPUID_REQUEST_SERIAL_NUMBER, &eax, &ebx, &ecx, &edx);
 
@@ -232,15 +266,11 @@ char* GetCPUBrand() {
 }
 
 char* GetCPUFeatures() {
-	char buffer[32];
+	return cpu_info->features;
+}
 
-	if(CheckCPUFeature(CPUID_FEAT_EDX_FPU)) {
-		strcpy(buffer, "FPU");
-	}
-
-	strcpy(buffer, "No FPU");
-
-	return "Has FPU";
+long GetCPUMaxRequestLevel() {
+	return cpu_info->highest_request_level;
 }
 
 bool CheckCPUFeature(int feature_code) {

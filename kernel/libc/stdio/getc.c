@@ -4,8 +4,15 @@
 #include <devices/ps2keyboard.h>
 
 char getc() {
+
     char current_key = PS2KeyboardGetKey();
     char current_extended_key = PS2KeyboardGetExtendedKey();
+
+    while(current_key != ' ') {
+        PS2KeyboardGetKey();
+    }
+
+    printf("%c\n", current_key);
 
     /* Are we dealing with an extended key? */
     if(current_key == 0xFF) {

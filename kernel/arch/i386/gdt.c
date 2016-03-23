@@ -1,11 +1,28 @@
 /**
  * Global Descriptor Tables
  */
-
-#include "i386.h"
-
 #include <libc/stdint.h>
 #include <libc/string.h>
+
+#include "gdt.h"
+#include "pic.h"
+
+#define SEG_DATA_RD        0x00 // Read-Only
+#define SEG_DATA_RDA       0x01 // Read-Only, accessed
+#define SEG_DATA_RDWR      0x02 // Read/Write
+#define SEG_DATA_RDWRA     0x03 // Read/Write, accessed
+#define SEG_DATA_RDEXPD    0x04 // Read-Only, expand-down
+#define SEG_DATA_RDEXPDA   0x05 // Read-Only, expand-down, accessed
+#define SEG_DATA_RDWREXPD  0x06 // Read/Write, expand-down
+#define SEG_DATA_RDWREXPDA 0x07 // Read/Write, expand-down, accessed
+#define SEG_CODE_EX        0x08 // Execute-Only
+#define SEG_CODE_EXA       0x09 // Execute-Only, accessed
+#define SEG_CODE_EXRD      0x0A // Execute/Read
+#define SEG_CODE_EXRDA     0x0B // Execute/Read, accessed
+#define SEG_CODE_EXC       0x0C // Execute-Only, conforming
+#define SEG_CODE_EXCA      0x0D // Execute-Only, conforming, accessed
+#define SEG_CODE_EXRDC     0x0E // Execute/Read, conforming
+#define SEG_CODE_EXRDCA    0x0F // Execute/Read, conforming, accessed
 
 /**
  * Structure of one GDT entry.
@@ -67,39 +84,39 @@ typedef struct {
  * The GDT itself.
  */
 static struct {
-    gdt_entry_t     gdt_entries[6];
-    gdt_pointer_t   gdt_pointer;
+    gdt_entry_t     entries[6];
+    gdt_pointer_t   pointer;
     tss_entry_t     tss_entry;
 } gdt __attribute__((used));
 
-extern void FlushGDT(uintptr_t);
+extern void LoadGDT(uintptr_t);
 extern void FlushTSS(void);
 
-void SetKernelStack(uintptr_t stack) {
+void GDTSetKernelStack(uintptr_t stack) {
     gdt.tss_entry.esp0 = stack;
 }
 
-void CreateGDTEntry(uint8_t entry_number, uint64_t base, uint64_t limit, uint8_t access, uint8_t gran) {
+void GDTCreateEntry(uint8_t number, uint64_t base, uint64_t limit, uint8_t access, uint8_t gran) {
     /* Base Address */
-    gdt.gdt_entries[entry_number].base_low      = (base & 0xFFFF);
-    gdt.gdt_entries[entry_number].base_middle   = (base >> 16) & 0xFF;
-    gdt.gdt_entries[entry_number].base_high     = (base >> 24) & 0xFF;
+    gdt.entries[number].base_low      = (base & 0xFFFF);
+    gdt.entries[number].base_middle   = (base >> 16) & 0xFF;
+    gdt.entries[number].base_high     = (base >> 24) & 0xFF;
     /* Limits */
-    gdt.gdt_entries[entry_number].limit_low     = (limit & 0xFFFF);
-    gdt.gdt_entries[entry_number].granularity   = (limit >> 16) & 0X0F;
+    gdt.entries[number].limit_low     = (limit & 0xFFFF);
+    gdt.entries[number].granularity   = (limit >> 16) & 0X0F;
     /* Granularity */
-    gdt.gdt_entries[entry_number].granularity   |= (gran & 0xF0);
+    gdt.entries[number].granularity   |= (gran & 0xF0);
     /* Access flags */
-    gdt.gdt_entries[entry_number].access        = access;
+    gdt.entries[number].access        = access;
 }
 
-void CreateTSSEntry(uint8_t entry_number, uint16_t ss0, uint32_t esp0) {
+static void TSSCreateEntry(uint8_t number, uint16_t ss0, uint32_t esp0) {
     tss_entry_t *tss = &gdt.tss_entry;
     uintptr_t tss_low = (uintptr_t) tss;
     uintptr_t tss_high = (uintptr_t) tss + sizeof *tss;
 
     /* Write the TSS entry to the GDT */
-    CreateGDTEntry(entry_number, tss_low, tss_high, 0xE9, 0x00);
+    GDTCreateEntry(number, tss_low, tss_high, 0xE9, 0x00);
 
     memset(tss, 0x0, sizeof *tss);
 
@@ -116,17 +133,17 @@ void CreateTSSEntry(uint8_t entry_number, uint16_t ss0, uint32_t esp0) {
 }
 
 void SetupGDT() {
-    gdt_pointer_t *gdt_pointer  =             &gdt.gdt_pointer;
-    gdt_pointer->limit          = sizeof       gdt.gdt_entries - 1;
-    gdt_pointer->base           = (uintptr_t) &gdt.gdt_entries[0];
+    gdt_pointer_t *gdt_pointer  =             &gdt.pointer;
+    gdt_pointer->limit          = sizeof       gdt.entries - 1;
+    gdt_pointer->base           = (uintptr_t) &gdt.entries[0];
 
-    CreateGDTEntry(0, 0, 0, 0, 0);                  /* NULL descriptor. */
-    CreateGDTEntry(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);   /* Kernel code segment. */
-    CreateGDTEntry(2, 0, 0xFFFFFFFF, 0x92, 0xCF);   /* Kernel data segment. */
-    CreateGDTEntry(3, 0, 0xFFFFFFFF, 0xFA, 0xCF);   /* User code segment. */
-    CreateGDTEntry(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);   /* User data segment. */
-    CreateTSSEntry(5, 0x10, 0x0);                   /* TSS */
+    GDTCreateEntry(0, 0, 0, 0, 0);                  /* NULL descriptor. */
+    GDTCreateEntry(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);   /* Kernel code segment. */
+    GDTCreateEntry(2, 0, 0xFFFFFFFF, 0x92, 0xCF);   /* Kernel data segment. */
+    GDTCreateEntry(3, 0, 0xFFFFFFFF, 0xFA, 0xCF);   /* User code segment. */
+    GDTCreateEntry(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);   /* User data segment. */
+    TSSCreateEntry(5, 0x10, 0x0);                   /* TSS */
 
-    FlushGDT((uintptr_t) gdt_pointer);
-    FlushTSS();
+    LoadGDT((uintptr_t) gdt_pointer);
+    LoadTSS();
 }
