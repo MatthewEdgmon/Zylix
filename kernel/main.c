@@ -9,9 +9,11 @@
 
 #include <libc/stddef.h>
 #include <libc/stdint.h>
+#include <libc/stdio.h>
 #include <libc.h>
 
 #include <arch/io.h>
+#include <arch/interrupts.h>
 #include <arch/cpu.h>
 #include <arch/cpu_info.h>
 
@@ -29,6 +31,8 @@
 #include <shell.h>
 #include <vga.h>
 #include <terminal.h>
+
+#include <menu/monitor.h>
 
 void PrintLogo() {
     TerminalSetColor(TerminalMakeColor(COLOR_LIGHT_GREEN, COLOR_BLACK));
@@ -71,12 +75,13 @@ int KernelMain() {
     SetupACPI();
 
     printf("Setting up CMOS chip.\n");
+    SetupRTC();
     CMOSReadRTC();
     printf("Current date and time: %d/%d/%d %d:%d:%d \n", CMOSGetMonth(), CMOSGetDay(), CMOSGetYear(),
                                                           CMOSGetHours(), CMOSGetMinutes(), CMOSGetSeconds());
 
-    printf("Setting up kernel debug shell.\n");
-    SetupShell();
+    //printf("Setting up kernel debug shell.\n");
+    //SetupShell();
 
     //printf("Launching RAM monitor.\n");
     //RAMMonitorMain();
@@ -85,6 +90,7 @@ int KernelMain() {
 
     while(!exit_status) {
         //Shell();
+        //printf(getc());
     }
 
     return 0;

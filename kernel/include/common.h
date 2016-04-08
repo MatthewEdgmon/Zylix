@@ -5,7 +5,7 @@
 #define BIT_SET(var, pos)       ((var) |=  (1 << (pos)))
 #define BIT_CHECK(var, pos)     ((var) &   (1 << (pos)))
 #define BIT_FLIP(var, pos)      ((var) ^=  (1 << (pos)))
-#define BIT_CLEAR(var, pos)     ((var) &= ~(1 << (pos)))   
+#define BIT_CLEAR(var, pos)     ((var) &= ~(1 << (pos)))
 
 #define SECOND      1
 #define MINUTE      (60 * SECOND)

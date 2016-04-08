@@ -51,28 +51,29 @@ extern void isr30();
 extern void isr31();
 //extern void isr32();
 //extern void isr33();
-extern void isr_syscall();
+//extern void isr_syscall();
+extern void isr99();
 
 static const char *exception_messages[32] = {
     "Division by zero",
     "Debug",
-    "Non-maskable interrupt",
+    "Non-Maskable Interrupt",
     "Breakpoint",
-    "Detected overflow",
+    "Detected Overflow",
     "Out-of-bounds",
-    "Invalid opcode",
-    "No coprocessor",
-    "Double fault",
-    "Coprocessor segment overrun",
+    "Invalid Opcode",
+    "No Coprocessor",
+    "Double Fault",
+    "Coprocessor Segment Overrun",
     "Bad TSS",
-    "Segment not present",
-    "Stack fault",
-    "General protection fault",
-    "Page fault",
-    "Unknown interrupt",
+    "Segment Not Present",
+    "Stack Fault",
+    "General Protection Fault",
+    "Page Fault",
+    "Unknown Interrupt",
     "Coprocessor fault",
-    "Alignment check",
-    "Machine check",
+    "Alignment Check",
+    "Machine Check",
     "Reserved",
     "Reserved",
     "Reserved",
@@ -110,7 +111,6 @@ void ISRFaultHandler(struct registers *regs) {
 		handler(regs);
 	} else {
 		printf("Unhandled exception: [%d] %s \n", regs->interrupt_number, exception_messages[regs->interrupt_number]);
-        while(1);
 	}
 }
 
@@ -123,27 +123,24 @@ func_pointer_t isr_functions[] = {
     isr15, isr16, isr17, isr18, isr19,
     isr20, isr21, isr22, isr23, isr24,
     isr25, isr26, isr27, isr28, isr29,
-    isr30, isr31
-};
+    isr30, isr31,
 
-void test() {
-    printf("Caught an exception yo.");
-}
+    /* Last one is always syscall. */
+    isr99
+};
 
 void SetupISR(void) {
     for(int i = 0; i < ISR_COUNT; i++) {
         isrs[i].index = i;
         isrs[i].stub = isr_functions[i];
-        printf("Installing ISR #%d, with stub address 0x%X\n", i, *isr_functions[i]);
     }
 
-    while(1);
-
-    // TODO: This freaks out for some reason.
-	//isrs[ISR_COUNT].index = SYSCALL_VECTOR;
-	//isrs[ISR_COUNT].stub = isr127();
+	isrs[ISR_COUNT].index = SYSCALL_VECTOR;
+	isrs[ISR_COUNT].stub = isr_functions[ISR_COUNT];
 
 	for(int i = 0; i < ISR_COUNT + 1; i++) {
 		IDTCreateEntry(isrs[i].index, isrs[i].stub, 0x08, 0x8E);
 	}
+
+    return;
 }

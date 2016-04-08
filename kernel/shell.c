@@ -1,10 +1,13 @@
 /**
  * A kernel shell. This is not a userspace shell, all commands are run in kernel mode.
  */
-#include <shell.h>
-#include <shell_commands.h>
 #include <libc/stdint.h>
 #include <libc/stdio.h>
+#include <libc/string.h>
+
+#include <shell.h>
+#include <shell_commands.h>
+
 #include <terminal.h>
 
 /* Table of commands. */

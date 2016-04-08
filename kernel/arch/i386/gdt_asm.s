@@ -19,3 +19,19 @@ ReloadSegments:
     ljmp $0x08, $.flush
 .flush:
     ret
+
+.global StoreGDT
+.type StoreGDT, @function
+
+StoreGDT:
+    mov 4(%esp), %eax
+    sgdt (%eax)
+    ret
+
+.global LoadTSS
+.type LoadTSS, @function
+
+    LoadTSS:
+        mov $0x2B, %ax
+        ltr %ax
+        ret

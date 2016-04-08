@@ -43,12 +43,38 @@
 #define SYNC_CLI()          __asm__ __volatile__("cli")
 #define SYNC_STI()          __asm__ __volatile__("sti")
 
+extern void  irq0();
+extern void  irq1();
+extern void  irq2();
+extern void  irq3();
+extern void  irq4();
+extern void  irq5();
+extern void  irq6();
+extern void  irq7();
+extern void  irq8();
+extern void  irq9();
+extern void irq10();
+extern void irq11();
+extern void irq12();
+extern void irq13();
+extern void irq14();
+extern void irq15();
+
 uint32_t timer_tick = 0;
 
 static volatile int sync_depth = 0;
 
-/* reinitialize the PIC controllers, giving them specified vector offsets
-   rather than 8h and 70h, as configured by default */
+static void (*irqs[IRQ_CHAIN_SIZE])(void);
+static irq_handler_chain_t irq_routines[IRQ_CHAIN_SIZE * IRQ_CHAIN_DEPTH] = { NULL };
+
+typedef void (*func_pointer_t)();
+
+func_pointer_t irq_functions[] = {
+    irq0,   irq1,  irq2,  irq3,  irq4,
+    irq5,   irq6,  irq7,  irq8,  irq9,
+    irq10, irq11, irq12, irq13, irq14,
+    irq15,
+};
 
 void PICDisableInterrupts() {
 	/* Check if interrupts are enabled */
@@ -86,9 +112,6 @@ void PICResumeInterrupts() {
 	}
 }
 
-static void (*irqs[IRQ_CHAIN_SIZE])(void);
-static irq_handler_chain_t irq_routines[IRQ_CHAIN_SIZE * IRQ_CHAIN_DEPTH] = { NULL };
-
 void PICInstallIRQHandler(size_t irq, irq_handler_chain_t handler) {
 	/* Disable interrupts when changing handlers */
 	SYNC_CLI();
@@ -109,19 +132,53 @@ void PICUninstallIRQHandler(size_t irq) {
 	SYNC_STI();
 }
 
-void PICHandlerIRQ(struct registers *regs) {
+void PICHandlerIRQ(registers_t* registers) {
 	PICDisableInterrupts();
-	if(regs->interrupt_number <= 47 && regs->interrupt_number >= 32) {
+	if(registers->interrupt_number <= 47 && registers->interrupt_number >= 32) {
 		for(size_t i = 0; i < IRQ_CHAIN_DEPTH; i++) {
-			irq_handler_chain_t handler = irq_routines[i * IRQ_CHAIN_SIZE + (regs->interrupt_number - 32)];
-			if(handler && handler(regs)) {
+			irq_handler_chain_t handler = irq_routines[i * IRQ_CHAIN_SIZE + (registers->interrupt_number - 32)];
+			if(handler && handler(registers)) {
 				goto done;
 			}
 		}
-		PICSendEOI(regs->interrupt_number - 32);
+		PICSendEOI(registers->interrupt_number - 32);
 	}
 done:
 	PICResumeInterrupts();
+}
+
+void PICSetMask(uint16_t irq) {
+    uint16_t port;
+    uint8_t value;
+
+    if(irq < 8) {
+        /* Send to master PIC. */
+        port = PIC1_DATA;
+    } else {
+        /* Send to slave PIC. */
+        port = PIC2_DATA;
+        /* And translate the IRQ line. */
+        irq -= 8;
+    }
+    value = inb(port) | (1 << irq);
+    outb(port, value);
+}
+
+void PICClearMask(uint16_t irq) {
+    uint16_t port;
+    uint8_t value;
+
+    if(irq < 8) {
+        /* Send to master PIC. */
+        port = PIC1_DATA;
+    } else {
+        /* Send to slave PIC. */
+        port = PIC2_DATA;
+        /* And translate the IRQ line. */
+        irq -= 8;
+    }
+    value = inb(port) & ~(1 << irq);
+    outb(port, value);
 }
 
 /**
@@ -130,7 +187,6 @@ done:
  *	offset2 - same for slave PIC: offset2..offset2+7
  */
 void PICRemap(int offset1, int offset2) {
-
 	/* Save PIC masks. */
 	unsigned char mask1, mask2;
 
@@ -138,44 +194,34 @@ void PICRemap(int offset1, int offset2) {
 	mask2 = inb(PIC2_DATA);
 
 	/* Initialize both PICs in cascade mode. */
-	outb(PIC1_COMMAND, ICW1_INIT+ICW1_ICW4);
-	io_wait();
-	outb(PIC2_COMMAND, ICW1_INIT+ICW1_ICW4);
-	io_wait();
+	outb(PIC1_COMMAND, ICW1_INIT+ICW1_ICW4); io_wait();
+	outb(PIC2_COMMAND, ICW1_INIT+ICW1_ICW4); io_wait();
 
 	/* Set vector offsets for master and slave. */
-	outb(PIC1_DATA, offset1);
-	io_wait();
-	outb(PIC2_DATA, offset2);
-	io_wait();
+	outb(PIC1_DATA, offset1); io_wait();
+	outb(PIC2_DATA, offset2); io_wait();
 
 	/* Tell the master it has a slave, and tell the slave it has a master at IRQ2 (0000 0100) */
-	outb(PIC1_DATA, 4);
-	io_wait();
-	outb(PIC2_DATA, 2);
-	io_wait();
+	outb(PIC1_DATA, 4); io_wait();
+	outb(PIC2_DATA, 2); io_wait();
 
 	/* Tell the PIC it's in 8086 mode. */
-	outb(PIC1_DATA, ICW4_8086);
-	io_wait();
-	outb(PIC2_DATA, ICW4_8086);
-	io_wait();
+	outb(PIC1_DATA, ICW4_8086); io_wait();
+	outb(PIC2_DATA, ICW4_8086); io_wait();
 
 	/* Restore saved PIC masks. */
-	outb(PIC1_DATA, mask1);
-	outb(PIC2_DATA, mask2);
+	outb(PIC1_DATA, mask1); io_wait();
+	outb(PIC2_DATA, mask2); io_wait();
 }
 
 /**
  * Tell the PIC we are done handling an IRQ, and optionally tell the slave.
  */
-void PICSendEOI(unsigned char irq) {
-
+void PICSendEOI(unsigned int irq) {
 	/* If the interrupt came from the slave PIC, pass the EOI to it too. */
 	if(irq >= 8) {
 		outb(PIC2_COMMAND, PIC_EOI);
  	}
-
 	outb(PIC1_COMMAND, PIC_EOI);
 }
 
@@ -193,33 +239,18 @@ static void PICSetupGates(void) {
 	}
 }
 
-/* Is run everytime the PIT fires. */
-static void TimerCallback() {
-	timer_tick++;
-}
-
-/* Setup the PIT with a specific frequency. */
-void PICSetupTimer(uint32_t frequency) {
-
-	/* TODO: Register timer callback handler. */
-	//RegisterInterruptHandler(IRQ0, &TimerCallback);
-
-	uint32_t divisor = 1193180 / frequency;
-
-	/* Send the command byte. */
-	outb(0x43, 0x36);
-
-	uint8_t frequency_lower = (uint8_t)(divisor & 0xFF);
-	uint8_t frequency_higher = (uint8_t)( (divisor>>8) & 0xFF);
-
-	/* Send the frequency divisor. */
-	outb(0x40, frequency_lower);
-	outb(0x40, frequency_higher);
-
+int PICCascadeIRQHandler() {
+    printf("PIC2 Cascade Handled.");
+    PICSendEOI(IRQ_CASCADE);
+    return 1;
 }
 
 void SetupPIC() {
+	/* Load the IRQ routines. */
+	for(int i = 0; i < IRQ_CHAIN_SIZE; i++) {
+		irqs[i] = irq_functions[i];
+	}
 	PICRemap(0x20, 0x28);
-	PICSetupGates();
-	PICSetupTimer(50); /* 50 Hz */
+    PICSetupGates();
+    PICInstallIRQHandler(IRQ_CASCADE, PICCascadeIRQHandler);
 }

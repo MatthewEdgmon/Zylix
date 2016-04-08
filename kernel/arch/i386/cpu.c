@@ -4,6 +4,8 @@
 #include "i386.h"
 #include "idt.h"
 #include "pic.h"
+#include "gdt.h"
+#include "pit.h"
 
 /**
  * Read the current value of the CPU's time-stamp counter and store into EDX:EAX.
@@ -22,6 +24,7 @@ void SetupCPU() {
 	SetupIDT();
     SetupISR();
 	SetupPIC();
+    SetupPIT();
 }
 
 void SetupFPU() {

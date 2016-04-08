@@ -34,9 +34,10 @@ KERNEL_HEADERS = $(shell find kernel/include/ -type f -name '*.h')
 
 # Kernel object files.
 KERNEL_OBJS  = $(patsubst %.c,%.o,$(wildcard kernel/devices/*.c))
-KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/filesystem/*.c))
+KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/filesystems/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/libc/*/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/memory/*.c))
+KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/menu/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/*.c))
 
 # Change TARGET_ARCH to match the platform you're targeting.
@@ -67,6 +68,8 @@ EMU = qemu-system-i386
 EMU_ARGS  = -kernel zykernel
 # Arguments for storage and memory
 EMU_ARGS += -m 1024 -hda $(HD_IMAGE_NAME)
+# Arguments for keyboard mouse and language
+EMU_ARGS += -k en-us -show-cursor
 # Arguments for video
 EMU_ARGS += -vga std
 # Arguments for network

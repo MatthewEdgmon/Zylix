@@ -24,6 +24,10 @@
 #define SEG_CODE_EXRDC     0x0E // Execute/Read, conforming
 #define SEG_CODE_EXRDCA    0x0F // Execute/Read, conforming, accessed
 
+extern void LoadGDT(uintptr_t);
+extern void StoreGDT(uintptr_t);
+extern void FlushTSS(void);
+
 /**
  * Structure of one GDT entry.
  */
@@ -89,9 +93,6 @@ static struct {
     tss_entry_t     tss_entry;
 } gdt __attribute__((used));
 
-extern void LoadGDT(uintptr_t);
-extern void FlushTSS(void);
-
 void GDTSetKernelStack(uintptr_t stack) {
     gdt.tss_entry.esp0 = stack;
 }
@@ -146,4 +147,10 @@ void SetupGDT() {
 
     LoadGDT((uintptr_t) gdt_pointer);
     LoadTSS();
+}
+
+void VerifyGDT() {
+    gdt_pointer_t *stored_gdt;
+
+    StoreGDT((uintptr_t) stored_gdt);
 }

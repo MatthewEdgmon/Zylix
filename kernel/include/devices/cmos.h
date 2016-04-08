@@ -14,4 +14,10 @@ uint16_t CMOSGetHours();
 uint16_t CMOSGetMinutes();
 uint16_t CMOSGetSeconds();
 
+char* CMOSGetDateAndTimeString();
+
+int RTCHandlerIRQ();
+
+void SetupRTC();
+
 #endif /* __CMOS_H__ */

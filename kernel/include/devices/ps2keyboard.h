@@ -1,6 +1,8 @@
 #ifndef __PS2KEYBOARD_H__
 #define __PS2KEYBOARD_H__
 
+#include <arch/interrupts.h>
+
 #include <devices/ps2.h>
 
 /* PS/2 Data port keyboard commands. */
@@ -44,6 +46,6 @@ char PS2KeyboardGetKey();
 char PS2KeyboardGetExtendedKey();
 void SetupPS2Keyboard();
 
-void PS2KeyboardHandler();
+int PS2KeyboardHandler(registers_t* registers);
 
 #endif /* __PS2KEYBOARD_H__ */

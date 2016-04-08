@@ -1,8 +1,11 @@
 /**
  * Note: due to the hacky nature of the OS, CMOS /wiritng/ is not recomended. Could brick your motherboard.
  */
-
 #include <arch/io.h>
+#include <arch/interrupts.h>
+
+#include <libc/stdio.h>
+#include <libc/stdint.h>
 
 /* Changed every year, in order to support CMOS without century registers. */
 #define CMOS_CURRENT_YEAR         2016
@@ -83,6 +86,9 @@ int CMOSIsBatteryDead() {
  */
 void CMOSReadRTC() {
 
+    /* Leaving interrupts enabled during a CMOS read could leave it broken. */
+    PICDisableInterrupts();
+
     uint16_t century;
     uint16_t last_seconds;
     uint16_t last_minutes;
@@ -94,6 +100,7 @@ void CMOSReadRTC() {
     uint16_t status_register_b;
 
     /* Do an initial read. */
+
     while(CMOSIsUpdateInProgress()) {
         seconds = CMOSReadRegister(CMOS_REGISTER_SECONDS);
         minutes = CMOSReadRegister(CMOS_REGISTER_MINUTES);
@@ -133,6 +140,9 @@ void CMOSReadRTC() {
 
     /* Read the B status register to determine time format. */
     status_register_b = CMOSReadRegister(CMOS_REGISTER_STATUSB);
+
+    /* Done reading CMOS. */
+    PICResumeInterrupts();
 
     /* If we're in BCD format, convert. */
     if(!(status_register_b & 0x04)) {
@@ -178,4 +188,45 @@ uint16_t CMOSGetMinutes() {
 
 uint16_t CMOSGetSeconds() {
     return seconds;
+}
+
+char* CMOSGetDateAndTimeString() {
+    char buffer[512];
+    sprintf(buffer, "%d/%d/%d %d:%d:%d\n", CMOSGetMonth(), CMOSGetDay(), CMOSGetYear(),
+                                           CMOSGetHours(), CMOSGetMinutes(), CMOSGetSeconds());
+    return *buffer;
+}
+
+int RTCHandlerIRQ(registers_t* registers) {
+
+    CMOSReadRTC();
+
+    /* Throw away whatever is in register C. */
+    outb(CMOS_ADDRESS_PORT, CMOS_REGISTER_STATUSC);
+    inb(CMOS_DATA_PORT);
+
+    PICSendEOI(IRQ_RTC);
+
+    return 1;
+}
+
+void SetupRTC() {
+    /* Mask this interrupt first. */
+    PICSetMask(IRQ_RTC);
+
+    PICDisableInterrupts();
+    /* Select register B and disable NMI. */
+    outb(CMOS_ADDRESS_PORT, 0x8B);
+    /* Save the previous value of register B. */
+    uint8_t previous_value = inb(CMOS_DATA_PORT);
+    /* Select register B and diable NMI (reading resets the index). */
+    outb(CMOS_ADDRESS_PORT, 0x8B);
+    /* Write the previous value ORed with 0x40. This turns on bit 6 of register B. */
+    outb(CMOS_DATA_PORT, previous_value | 0x40);
+    PICResumeInterrupts();
+
+    PICInstallIRQHandler(IRQ_RTC, RTCHandlerIRQ);
+
+    /* Finally enable the interrupt. */
+    PICClearMask(IRQ_RTC);
 }

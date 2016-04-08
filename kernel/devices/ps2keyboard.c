@@ -7,6 +7,7 @@
 #include <common.h>
 #include <libc/stdint.h>
 #include <libc/stdio.h>
+#include <libc/stdbool.h>
 
 #define DEBUG_KEYBOARD 1
 
@@ -21,8 +22,12 @@ uint8_t right_control_state = 0;
 uint8_t left_alt_state = 0;
 uint8_t right_alt_state = 0;
 
-char current_key = 0;
-char current_extended_key = 0;
+uint8_t current_key = 0;
+uint8_t current_extended_key = 0;
+
+bool current_key_held = false;
+
+uint8_t last_scan_code;
 
 char US_QWERTY_1[128] = {
 0,                 /* Escape */
@@ -186,41 +191,40 @@ void PS2KeyboardSetLED(uint8_t caps_lock, uint8_t num_lock, uint8_t scroll_lock)
     PS2SendData(byte_to_send);
 }
 
-char PS2KeyboardGetKey() {
+uint8_t PS2KeyboardGetKey() {
     return current_key;
 }
 
-char PS2KeyboardGetExtendedKey() {
+uint8_t PS2KeyboardGetExtendedKey() {
     return current_extended_key;
 }
 
-void PS2KeyboardTranslateScancode(uint8_t scan_code) {
-
-}
-
-/* Handler for IRQ1 */
-void PS2KeyboardHandler(registers_t registers) {
-    printf("Got a keyboard interrupt!\n");
-
+int PS2KeyboardHandler(registers_t* registers) {
     uint8_t keyboard_scan_code;
 
     /* We do not need to probe the status bit on an IRQ. */
     keyboard_scan_code = PS2ReadData();
 
+    if(last_scan_code == keyboard_scan_code) {
+        current_key_held = true;
+    } else {
+        current_key_held = false;
+    }
+
     /* If bit 7 is set, key was just released. */
     if(keyboard_scan_code & 0x80) {
         /* Handle a shift release. */
-        if(US_QWERTY_1[(keyboard_scan_code^0x80) - 1] == 127) {
+        if(US_QWERTY_1[(keyboard_scan_code ^ 0x80) - 1] == 127) {
             left_shift_state = 0;
             right_shift_state = 0;
         }
         /* Handle a control release. */
-        if(US_QWERTY_1[(keyboard_scan_code^0x80) - 1] == 128) {
+        if(US_QWERTY_1[(keyboard_scan_code ^ 0x80) - 1] == 128) {
             left_control_state = 0;
             right_control_state = 0;
         }
         /* Handle an alt release. */
-        if(US_QWERTY_1[(keyboard_scan_code^0x80) - 1] == 129) {
+        if(US_QWERTY_1[(keyboard_scan_code ^ 0x80) - 1] == 129) {
             left_alt_state = 0;
             right_alt_state = 0;
         }
@@ -242,43 +246,61 @@ void PS2KeyboardHandler(registers_t registers) {
             PS2WaitOutputBuffer();
             keyboard_scan_code = PS2ReadData();
         }
+    } else {
+        /* Handle a shift press. */
+        if(US_QWERTY_1[keyboard_scan_code - 1] == 127) {
+            left_shift_state = 1;
+            right_shift_state = 1;
+        }
+        /* Handle a control press. */
+        if(US_QWERTY_1[keyboard_scan_code - 1] == 128) {
+            left_control_state = 1;
+            right_control_state = 1;
+        }
+        /* Handle an alt press. */
+        if(US_QWERTY_1[keyboard_scan_code - 1] == 129) {
+            left_alt_state = 1;
+            right_alt_state = 1;
+        }
+        /* Handle an escape press. */
+        if(keyboard_scan_code == 1) {
+            current_key = 0xFF;
+            current_extended_key = 0x99;
+        }
+        /* Handle a newline code. */
+        if(US_QWERTY_1[keyboard_scan_code - 1] == '\n') {
+            current_key = '\n';
+        }
     }
 
-    /* Handle a shift press. */
-    if(US_QWERTY_1[keyboard_scan_code - 1] == 127) {
-        left_shift_state = 1;
-        right_shift_state = 1;
+    if(US_QWERTY_1[(keyboard_scan_code) - 1] <= 122 && US_QWERTY_1[(keyboard_scan_code) - 1] >= 97) {
+        if(left_shift_state || right_shift_state || caps_lock_state) {
+            //printf("%c", US_QWERTY_1[(keyboard_scan_code) - 1]);
+            current_key = US_QWERTY_1[(keyboard_scan_code) - 1] - 32;
+        } else {
+            //printf("%c", US_QWERTY_1[(keyboard_scan_code) - 1] - 32);
+            current_key = US_QWERTY_1[(keyboard_scan_code) - 1];
+        }
     }
 
-    /* Handle a control press. */
-    if(US_QWERTY_1[keyboard_scan_code - 1] == 128) {
-        left_control_state = 1;
-        right_control_state = 1;
-    }
+    printf("%c", current_key);
 
-    /* Handle an alt press. */
-    if(US_QWERTY_1[keyboard_scan_code-1] == 129) {
-        left_alt_state = 1;
-        right_alt_state = 1;
-    }
+    //printf("%c %d ", US_QWERTY_1[(keyboard_scan_code) - 1],  US_QWERTY_1[(keyboard_scan_code) - 1]);
 
-    /* Handle an escape press. */
-    if(keyboard_scan_code == 1) {
-        current_key = 0xFF;
-        current_extended_key = 0x99;
-    }
-
-    /* Handle a newline code. */
-    if(US_QWERTY_1[keyboard_scan_code - 1] == '\n') {
-        current_key = '\n';
-    }
+    last_scan_code = keyboard_scan_code;
 
     /* Send EOI */
+    PICSendEOI(IRQ_KEYBOARD);
 
+    return 1;
 }
 
 void SetupPS2Keyboard() {
     uint8_t response_byte;
+
+    /* Disable interrupts. */
+    PICSetMask(IRQ_KEYBOARD);
+    PICDisableInterrupts();
 
     /* Disable scanning. */
     PS2WaitInputBuffer();
@@ -383,6 +405,10 @@ void SetupPS2Keyboard() {
     /* Set num-lock on. */
     PS2KeyboardSetLED(0, 1, 0);
 
-    /* Setup the Interrupt Handler. */
-    ISRInstallHandler(1, &PS2KeyboardHandler);
+    /* Setup the IRQ handler. */
+    PICInstallIRQHandler(IRQ_KEYBOARD, PS2KeyboardHandler);
+
+    /* And finally re-enable interrupts. */
+    PICResumeInterrupts();
+    PICClearMask(IRQ_KEYBOARD);
 }

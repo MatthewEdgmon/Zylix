@@ -10,7 +10,7 @@
 #include <devices/ps2.h>
 #include <devices/ps2keyboard.h>
 
-#include <monitor.h>
+#include <menu/monitor.h>
 #include <terminal.h>
 #include <vga.h>
 
@@ -65,7 +65,7 @@ int RAMMonitorMain() {
             printf("0x%X: ", current_address);
             /* Print the data in white. */
             TerminalSetColor(TerminalMakeColor(COLOR_WHITE, COLOR_BLACK));
-            printf("0x%X ", current_address);
+            printf("0x%X ", *current_address);
             /* And finally a newline. */
             printf("\n");
         }
@@ -77,7 +77,7 @@ int RAMMonitorMain() {
         printf("0x%X: ", current_address);
         /* Print the data in white. */
         TerminalSetColor(TerminalMakeColor(COLOR_WHITE, COLOR_BLACK));
-        printf("0x%X ", current_address);
+        printf("0x%X ", *current_address);
         /* And finally a newline. */
         printf("\n");
 
@@ -89,7 +89,7 @@ int RAMMonitorMain() {
             printf("0x%X: ", current_address);
             /* Print the data in white. */
             TerminalSetColor(TerminalMakeColor(COLOR_WHITE, COLOR_BLACK));
-            printf("0x%X ", current_address);
+            printf("0x%X ", *current_address);
             /* And finally a newline. */
             printf("\n");
         }

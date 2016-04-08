@@ -6,6 +6,7 @@
 #include <common.h>
 #include <libc/stdbool.h>
 #include <libc/stdint.h>
+#include <libc/stdio.h>
 
 /* We assume the first device is a keyboard, and the second is a mouse. */
 uint8_t ps2_device1_type = 0x00;
