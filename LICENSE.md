@@ -1,5 +1,5 @@
 # Zylix License
-Unless otherwise listed, all Zylix original code is licensed under the Public License version 3. Zylix may depend on 3rd party software and development tools. Licenses for their use and distribution shall be listed below.
+Unless otherwise listed, all Zylix original code is licensed under the GNU Public License version 3. Zylix may depend on 3rd party software and development tools. Licenses for their use and distribution shall be listed below.
 
 ## Kernel
 The Zylix kernel is licensed under the GNU Public License version 3.
