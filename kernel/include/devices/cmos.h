@@ -1,7 +1,7 @@
 #ifndef __CMOS_H__
 #define __CMOS_H__
 
-#include <libc/stdint.h>
+#include <stdint.h>
 
 int CMOSIsUpdateInProgress();
 int CMOSIsBatteryDead();

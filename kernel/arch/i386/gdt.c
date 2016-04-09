@@ -1,8 +1,8 @@
 /**
  * Global Descriptor Tables
  */
-#include <libc/stdint.h>
-#include <libc/string.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "gdt.h"
 #include "pic.h"

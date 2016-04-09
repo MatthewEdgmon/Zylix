@@ -5,9 +5,9 @@
  *
  */
 
-#include <libc/stdint.h>
-#include <libc/stddef.h>
-#include <libc/stdio.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
 
 #include <arch/io.h>
 #include <arch/interrupts.h>

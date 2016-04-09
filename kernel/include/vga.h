@@ -1,14 +1,13 @@
 #ifndef __VGA_H__
 #define __VGA_H__
 
-#include <libc/stddef.h>
-#include <libc/stdint.h>
+#include <stddef.h>
+#include <stdint.h>
 
 /**
  * VGA text mode colors.
  */
-enum vga_color
-{
+enum vga_color {
 	COLOR_BLACK = 0,
 	COLOR_BLUE = 1,
 	COLOR_GREEN = 2,

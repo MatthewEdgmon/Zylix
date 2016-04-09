@@ -1,7 +1,8 @@
-#include <arch/interrupts.h>
-#include <arch/io.h>
+#include <stdio.h>
 
-#include <libc/stdio.h>
+#include <arch/interrupts.h>
+#include <arch/registers.h>
+#include <arch/io.h>
 
 #include "pic.h"
 
@@ -17,6 +18,14 @@
 #define PIT_MASK			 0xFF
 
 static uint64_t tick = 0;
+
+/* Plays a sound on the PC speaker with the setup frequency. */
+void PITSpeakerPlaySound() {
+	uint8_t temp = inb(0x61);
+    if(temp != (temp | 3)) {
+        outb(0x61, temp | 3);
+    }
+}
 
 /* Setup the PIT with a specific frequency in Hz. */
 void PITSetupTimer(uint32_t frequency) {

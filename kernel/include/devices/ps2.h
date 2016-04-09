@@ -1,7 +1,7 @@
 #ifndef __KEYBOARD_H__
 #define __KEYBOARD_H__
 
-#include <libc/stdint.h>
+#include <stdint.h>
 
 /* Ports associated with the PS/2 Controller. */
 #define PS2_DATA_PORT                  0x60

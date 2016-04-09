@@ -13,6 +13,4 @@
 #define DAY         (24 * HOUR)
 #define YEAR        (365 * DAY)
 
-#define HALT()      __asm__ __volatile__ ("hlt");
-
 #endif /* __COMMON_H__ */

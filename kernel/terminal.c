@@ -1,9 +1,10 @@
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+
 #include <terminal.h>
 
-#include <libc/stdarg.h>
-#include <libc/stdbool.h>
-#include <libc/stdint.h>
-#include <libc/string.h>
 #include <vga.h>
 
 bool        terminal_caught_escape;

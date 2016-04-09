@@ -4,7 +4,7 @@
 #ifndef __ELF_LOADER_H__
 #define __ELF_LOADER_H__
 
-#include <libc/stdint.h>
+#include <stdint.h>
 
 /**
  * The definitions here are source from the
@@ -15,11 +15,11 @@
 /**
  * ELF Datatypes.
  */
-typedef uint32_t Elf32_Word;           /* 4 bytes, 4 aligned, unsigned large integer. */
-typedef uint32_t Elf32_Addr;           /* 4 bytes, 4 aligned, unsigned program address. */
-typedef uint32_t Elf32_Off;            /* 4 bytes, 4 aligned, unsigned file offset. */
-typedef uint32_t Elf32_Sword;          /* 4 bytes, 4 aligned, signed large integer. */
-typedef uint16_t Elf32_Half;           /* 2 bytes, 2 aligned, unsigned medium integer. */
+typedef uint32_t elf32_word;           /* 4 bytes, 4 aligned, unsigned large integer. */
+typedef uint32_t elf32_addr;           /* 4 bytes, 4 aligned, unsigned program address. */
+typedef uint32_t elf32_off;            /* 4 bytes, 4 aligned, unsigned file offset. */
+typedef uint32_t elf32_sword;          /* 4 bytes, 4 aligned, signed large integer. */
+typedef uint16_t elf32_half;           /* 2 bytes, 2 aligned, unsigned medium integer. */
 
 #define EI_NIDENT   16
 
@@ -28,33 +28,35 @@ typedef uint16_t Elf32_Half;           /* 2 bytes, 2 aligned, unsigned medium in
  */
 typedef struct {
     unsigned char e_ident[EI_NIDENT];  /* Identify this as an ELF file. */
-    Elf32_Half    e_type;              /* Object file type. */
-    Elf32_Half    e_machine;           /* Architecture the file runs on. */
-    Elf32_Word    e_version;           /* Object file version. */
-    Elf32_Addr    e_entry;             /* Address where control is transfered to. 0 if not executable. */
-    Elf32_Off     e_phoff;             /* Program Header Table's file offset in bytes. 0 if none. */
-    Elf32_Off     e_shoff;             /* Section Header Table's file offset in bytes. 0 if none. */
-    Elf32_Word    e_flags;             /* Processor specific flags. */
-    Elf32_Half    e_ehsize;            /* ELF header size in bytes. */
-    Elf32_Half    e_phentsize;         /* Size in bytes of one entry in the file's program header table, all are same size. */
-    Elf32_Half    e_phnum;             /* Number of entries in the program header table. */
-    Elf32_Half    e_shentsize;         /* Size in bytes of one entry in the file's section header table, all are same size. */
-    Elf32_Half    e_shnum;             /* Number of entries in the section header table. */
-    Elf32_Half    e_shstrndx;          /* Section Header Table index of the entry associated with the section name string table. */
-} Elf32_Ehdr;
+    elf32_half    e_type;              /* Object file type. */
+    elf32_half    e_machine;           /* Architecture the file runs on. */
+    elf32_word    e_version;           /* Object file version. */
+    elf32_addr    e_entry;             /* Address where control is transfered to. 0 if not executable. */
+    elf32_off     e_phoff;             /* Program Header Table's file offset in bytes. 0 if none. */
+    elf32_off     e_shoff;             /* Section Header Table's file offset in bytes. 0 if none. */
+    elf32_word    e_flags;             /* Processor specific flags. */
+    elf32_half    e_ehsize;            /* ELF header size in bytes. */
+    elf32_half    e_phentsize;         /* Size in bytes of one entry in the file's program header table, all are same size. */
+    elf32_half    e_phnum;             /* Number of entries in the program header table. */
+    elf32_half    e_shentsize;         /* Size in bytes of one entry in the file's section header table, all are same size. */
+    elf32_half    e_shnum;             /* Number of entries in the section header table. */
+    elf32_half    e_shstrndx;          /* Section Header Table index of the entry associated with the section name string table. */
+} elf32_ehdr;
 
 /**
  * e_ident index.
  */
-#define EI_MAG0      0                 /* File identification. */
-#define EI_MAG1      1                 /* File identification. */
-#define EI_MAG2      2                 /* File identification. */
-#define EI_MAG3      3                 /* File identification. */
-#define EI_CLASS     4                 /* File class. */
-#define EI_DATA      5                 /* Data encoding. */
-#define EI_VERSION   6                 /* File version. */
-#define EI_PAD       7                 /* Start of padding bytes. */
-#define EI_NIDENT    16                /* Size of e_ident[] */
+#define EI_MAG0       0                /* File identification. */
+#define EI_MAG1       1                /* File identification. */
+#define EI_MAG2       2                /* File identification. */
+#define EI_MAG3       3                /* File identification. */
+#define EI_CLASS      4                /* File class. */
+#define EI_DATA       5                /* Data encoding. */
+#define EI_VERSION    6                /* File version. */
+#define EI_OSABI      7                /* OS Specific. */
+#define EI_ABIVERSION 8                /* OS Specific. */
+#define EI_PAD        9                /* Start of padding bytes. */
+#define EI_NIDENT     16               /* Size of e_ident[] */
 
 /**
  * e_ident values.
@@ -63,8 +65,8 @@ typedef struct {
 #define ELFMAG1      'E'               /* Identification magic value. */
 #define ELFMAG2      'L'               /* Identification magic value. */
 #define ELFMAG3      'F'               /* Identification magic value. */
-#define ELFCLASSNONE 0                 /* Invalid class. */   
-#define ELFCLASS32   1                 /* 32-bit object file. */      
+#define ELFCLASSNONE 0                 /* Invalid class. */
+#define ELFCLASS32   1                 /* 32-bit object file. */
 #define ELFCLASS64   2                 /* 64-bit object file. */
 #define ELFDATANONE  0                 /* Invalid encoding. */
 #define ELFDATA2LSB  1                 /* Least significant bit encoding. I.e. 0x01020304 = 04 03 02 01 */
@@ -114,17 +116,17 @@ typedef struct {
  * ELF Section Header
  */
 typedef struct {
-    Elf32_Word    sh_name;
-    Elf32_Word    sh_type;             /* Categorizes the section's contents and semantics. */
-    Elf32_Word    sh_flags;
-    Elf32_Addr    sh_addr;             /* If the section will appear in memory, this is the address the first byte resides. */
-    Elf32_Off     sh_offset;
-    Elf32_Word    sh_size;
-    Elf32_Word    sh_link;
-    Elf32_Word    sh_info;
-    Elf32_Word    sh_addralign;
-    Elf32_Word    sh_entsize;          /* If this section has a table of fixed size entries, size of bytes in each entry. 0 if none. */
-} Elf32_Shdr;
+    elf32_word    sh_name;
+    elf32_word    sh_type;             /* Categorizes the section's contents and semantics. */
+    elf32_word    sh_flags;
+    elf32_addr    sh_addr;             /* If the section will appear in memory, this is the address the first byte resides. */
+    elf32_off     sh_offset;
+    elf32_word    sh_size;
+    elf32_word    sh_link;
+    elf32_word    sh_info;
+    elf32_word    sh_addralign;
+    elf32_word    sh_entsize;          /* If this section has a table of fixed size entries, size of bytes in each entry. 0 if none. */
+} elf32_shdr;
 
 /**
  * sh_type values.
@@ -150,13 +152,13 @@ typedef struct {
  * Symbol Table
  */
 typedef struct {
-    Elf32_Word st_name;                /* This member holds and index into the object file's symbol string table. */
-    Elf32_Addr st_value;               /* This member gives the value of the associated symbol. May be an address, absolute value, etc. */
-    Elf32_Word st_size;                /* Size in bytes of different associated tpyes. May be 0 for none or unknown. */
+    elf32_word st_name;                /* This member holds and index into the object file's symbol string table. */
+    elf32_addr st_value;               /* This member gives the value of the associated symbol. May be an address, absolute value, etc. */
+    elf32_word st_size;                /* Size in bytes of different associated tpyes. May be 0 for none or unknown. */
     unsigned char st_info;             /* This member specifies the symbol's type and binding attributes. */
     unsigned char st_other;            /* This member currently holds 0 and has no defined meaning. */
-    Elf32_Half st_shndx;               /* Every symbol table is defined in relation to some section. This holds the relevent section header table index. Some have special meanings. */
-} Elf32_Sym;
+    elf32_half st_shndx;               /* Every symbol table is defined in relation to some section. This holds the relevent section header table index. Some have special meanings. */
+} elf32_sym;
 
 /**
  * Symbol Table binding and type manipulation and definitions.
@@ -187,36 +189,36 @@ typedef struct {
  * Relocation Table.
  */
 typedef struct {
-    Elf32_Addr  r_offset;              /* This member gives the location at which to apply the relocation action. */
-    Elf32_Word  r_info;                /* This member gives both the relocation type and symbol table index to be relocated. */
-} Elf32_Rel;
+    elf32_addr  r_offset;              /* This member gives the location at which to apply the relocation action. */
+    elf32_word  r_info;                /* This member gives both the relocation type and symbol table index to be relocated. */
+} elf32_rel;
 
 /**
  * Relocation Table with addends.
  */
 typedef struct {
-    Elf32_Addr  r_offset;              /* This member gives the location at which to apply the relocation action. */
-    Elf32_Word  r_info;                /* This member gives both the relocation type and symbol table index to be relocated. */
-    Elf32_Sword r_addend;              /* This member specifies a constant addend used to compute the value to be stored in the relocatable field. */
-} Elf32_Rela;
+    elf32_addr  r_offset;              /* This member gives the location at which to apply the relocation action. */
+    elf32_word  r_info;                /* This member gives both the relocation type and symbol table index to be relocated. */
+    elf32_sword r_addend;              /* This member specifies a constant addend used to compute the value to be stored in the relocatable field. */
+} elf32_rela;
 
 #define ELF32_R_SYM(i)     ((i) >> 8)
-#define ELF32_R_TYE(i)     ((unsigned char)(i)) 
+#define ELF32_R_TYE(i)     ((unsigned char)(i))
 #define ELF32_R_INFO(s, t) (((s) << 8) + (unsigned char)(t))
 
 /**
  * ELF Program Header.
  */
 typedef struct {
-    Elf32_Word    p_type;              /* How to interpret the array element's information. */
-    Elf32_Off     p_offset;            /* The offset from the beginning of the file where the first byte of the segment resides. */
-    Elf32_Addr    p_vaddr;             /* The virtual address at which the first byte of the segment resides. */
-    Elf32_Addr    p_paddr;             /* The segment's physical address. */
-    Elf32_Word    p_filesz;            /* Number of bytes in the file image of the segment. May be zero. */
-    Elf32_Word    p_memsz;             /* Number of bytes in the memory image of the segment. May be zero. */
-    Elf32_Word    p_flags;             /* Flags relevent to the segment. */
-    Elf32_Word    p_align;             /* The value to which the segments are aligned in memory and file. 0 or 1 mean none. */
-} Elf32_Phdr;
+    elf32_word    p_type;              /* How to interpret the array element's information. */
+    elf32_off     p_offset;            /* The offset from the beginning of the file where the first byte of the segment resides. */
+    elf32_addr    p_vaddr;             /* The virtual address at which the first byte of the segment resides. */
+    elf32_addr    p_paddr;             /* The segment's physical address. */
+    elf32_word    p_filesz;            /* Number of bytes in the file image of the segment. May be zero. */
+    elf32_word    p_memsz;             /* Number of bytes in the memory image of the segment. May be zero. */
+    elf32_word    p_flags;             /* Flags relevent to the segment. */
+    elf32_word    p_align;             /* The value to which the segments are aligned in memory and file. 0 or 1 mean none. */
+} elf32_phdr;
 
 /**
  * p_type values.

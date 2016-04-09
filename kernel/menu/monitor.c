@@ -2,10 +2,10 @@
  * First real program for the OS, a RAM monitor!
  */
 
-#include <libc/stddef.h>
-#include <libc/stdio.h>
-#include <libc/stdint.h>
-#include <libc/string.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
 
 #include <devices/ps2.h>
 #include <devices/ps2keyboard.h>

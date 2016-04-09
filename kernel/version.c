@@ -1,4 +1,4 @@
-#include <libc/stdint.h>
+#include <stdint.h>
 
 char* _kernel_version_format = "%d.%d.%d-%s";
 

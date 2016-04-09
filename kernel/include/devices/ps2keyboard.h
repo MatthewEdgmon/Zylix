@@ -1,6 +1,9 @@
 #ifndef __PS2KEYBOARD_H__
 #define __PS2KEYBOARD_H__
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #include <arch/interrupts.h>
 
 #include <devices/ps2.h>
@@ -33,7 +36,7 @@
 
 typedef struct {
     /* If the keyboard physically exists, non-zero. */
-    uint8_t available;
+    bool available;
     /* Which PS/2 port this keyboard is plugged into. */
     uint8_t ps2_port;
 
@@ -42,8 +45,8 @@ typedef struct {
 } keyboard_state_t;
 
 void PS2KeyboardSetLED(uint8_t caps_lock, uint8_t num_lock, uint8_t scroll_lock);
-char PS2KeyboardGetKey();
-char PS2KeyboardGetExtendedKey();
+uint8_t PS2KeyboardGetKey();
+uint8_t PS2KeyboardGetExtendedKey();
 void SetupPS2Keyboard();
 
 int PS2KeyboardHandler(registers_t* registers);

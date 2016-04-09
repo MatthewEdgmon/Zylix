@@ -1,10 +1,8 @@
-#include <libc/stddef.h>
-#include <libc/stdint.h>
-#include <libc/stdio.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
 
 #include <arch/interrupts.h>
-
-#include <module.h>
 
 #include "i386.h"
 #include "isr.h"

@@ -1,6 +1,6 @@
-#include <libc/stdint.h>
-#include <libc/stdio.h>
-#include <libc/string.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 #include <multiboot.h>
 

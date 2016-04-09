@@ -1,12 +1,16 @@
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+
+#include <arch/io.h>
+#include <arch/interrupts.h>
+#include <arch/registers.h>
+
 #include <devices/ps2.h>
 #include <devices/ps2keyboard.h>
 #include <devices/ps2mouse.h>
 
-#include <arch/io.h>
 #include <common.h>
-#include <libc/stdbool.h>
-#include <libc/stdint.h>
-#include <libc/stdio.h>
 
 /* We assume the first device is a keyboard, and the second is a mouse. */
 uint8_t ps2_device1_type = 0x00;
@@ -73,6 +77,9 @@ void SetupA20() {
     PS2ReadData();
     PS2ReadData();
 
+    /* Disable interrupts. */
+    PICDisableInterrupts();
+
     /* Disable both PS/2 ports. */
     PS2WaitInputBuffer();
     PS2SendCommand(PS2_COMMAND_DISABLE_PORT1);
@@ -108,6 +115,9 @@ void SetupA20() {
 
     PS2WaitInputBuffer();
     PS2SendCommand(PS2_COMMAND_ENABLE_PORT2);
+
+    /* And finally re-enable interrupts. */
+    PICResumeInterrupts();
 
     return;
 }

@@ -1,7 +1,7 @@
 #ifndef __IDT_H__
 #define __IDT_H__
 
-#include <libc/stdint.h>
+#include <stdint.h>
 
 typedef void (*idt_gate_t)(void);
 

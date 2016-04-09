@@ -1,5 +1,5 @@
-#include <libc/stdint.h>
-#include <libc/stdio.h>
+#include <stdint.h>
+#include <stdio.h>
 
 #include "i386.h"
 #include "idt.h"

@@ -5,7 +5,7 @@
  * Collection of variables, defines, and functions not visible globally, only for this arch.
  */
 
-#include <libc/stdint.h>
+#include <stdint.h>
 
 // 99 in base 10
 #define SYSCALL_VECTOR 0x63

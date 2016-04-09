@@ -1,71 +1,7 @@
-#
-# Makefile for Zylix
-#
-
-## This makefile is pretty ugly. It currently holds up compilation of both
-## the kernel and userspace utilities. It will be remade when we port GCC to Zylix.
-
-# Point to your local i686 elf cross compiler.
-CROSS_DIR = /home/matth_000/cross/bin
-
-# Build using our cross compiler.
-CC  = $(CROSS_DIR)/i686-elf-gcc
-LD  = $(CROSS_DIR)/i686-elf-ld
-NM  = $(CROSS_DIR)/i686-elf-nm
-CXX = $(CROSS_DIR)/i686-elf-g++
-AS  = $(CROSS_DIR)/i686-elf-as
-
-KERNEL_VERSION_MAJOR = 0
-KERNEL_VERSION_MINOR = 0
-KERNEL_VERSION_PATCH = 0
-
-# Flags used to build the kernel.
-KERNEL_CFLAGS  = -O2 -std=c99
-KERNEL_CFLAGS += -finline-functions -ffreestanding
-KERNEL_CFLAGS += -Wall -Wextra -Wno-unused-function -Wno-unused-parameter
-KERNEL_CFLAGS += -pedantic -fno-omit-frame-pointer
-KERNEL_CFLAGS += -DKERNEL_LIBC_USE_ASSEMBLY
-KERNEL_LDFLAGS = -shared -Bsymbolic -z defs
-KERNEL_LIBS    = -nostdlib -lgcc
-
-# Kernel headers.
-KERNEL_INCLUDE_DIR = ./kernel/include
-KERNEL_HEADERS = $(shell find kernel/include/ -type f -name '*.h')
-
-# Kernel object files.
-KERNEL_OBJS  = $(patsubst %.c,%.o,$(wildcard kernel/devices/*.c))
-KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/filesystems/*.c))
-KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/libc/*/*.c))
-KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/memory/*.c))
-KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/menu/*.c))
-KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard kernel/*.c))
-
-# Change TARGET_ARCH to match the platform you're targeting.
-TARGET_ARCH  = i386
-ARCH_DIR     = kernel/arch/$(TARGET_ARCH)
-
-# Kernel architecture specific files
-include        $(ARCH_DIR)/make.config
-CRTI_OBJ     = $(ARCH_DIR)/crti.o
-CRTN_OBJ     = $(ARCH_DIR)/crtn.o
-CRTBEGIN_OBJ = $(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
-CRTEND_OBJ   = $(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtend.o)
-
-# Add flags supplied by our arch.
-KERNEL_CFLAGS  += $(KERNEL_ARCH_CFLAGS)
-KERNEL_LDFLAGS += $(KERNEL_ARCH_LDFLAGS)
-
-# Order in which objects are linked.
-KERNEL_OBJ_LINK_LIST = ${CRTI_OBJ} \
-                       ${CRTBEGIN_OBJ} \
-                       ${KERNEL_ARCH_OBJS} \
-                       ${KERNEL_OBJS} \
-                       ${CRTEND_OBJ} \
-                       ${CRTN_OBJ}
 
 # Emulator and arguments to pass to it.
 EMU = qemu-system-i386
-EMU_ARGS  = -kernel zykernel
+EMU_ARGS  = -kernel ./sysroot/boot/zykernel
 # Arguments for storage and memory
 EMU_ARGS += -m 1024 -hda $(HD_IMAGE_NAME)
 # Arguments for keyboard mouse and language
@@ -92,135 +28,108 @@ ERRORSS = >>/.build-errors || tools/output/mk-error
 BEGRM = tools/output/mk-beg-rm
 ENDRM = tools/output/mk-end-rm
 
-# Capture build error to a log.
-ERRORS = 2>>./.build-errors
+all: build install
 
-.PHONY: all system zykernel ctags userspace
-.SECONDARY:
-.SUFFIXES:
+################################################################################
+#                                  Build                                       #
+################################################################################
 
-all: system ctags install
-system: zykernel userspace
+build: build-libc build-kernel build-userspace
 
-###############################################################################
-#                                   Kernel                                    #
-###############################################################################
+build-libc:
+	@cd libc && $(MAKE) --no-print-directory
 
-zykernel: ${CRTI_OBJ} ${CRTN_OBJ} ${KERNEL_ARCH_OBJS} ${KERNEL_OBJS}
-	@${BEG} "LD" "zykernel"
-	@${CC} -T $(ARCH_DIR)/linker.ld -o $@ ${KERNEL_CFLAGS} ${KERNEL_OBJ_LINK_LIST} ${KERNEL_LDFLAGS} ${KERNEL_LIBS} ${ERRORS}
-	@${END} "LD" "zykernel"
-	@${INFO} "--" "Finished building kernel."
+build-kernel:
+	@cd kernel && $(MAKE) --no-print-directory
 
-kernel/%.o: kernel/%.c ${HEADERS}
-	@${BEG} "CC" "$<"
-	@${CC} ${KERNEL_CFLAGS} -g -I./kernel/include -c -o $@ $< ${ERRORS}
-	@${END} "CC" "$<"
+build-userspace:
+	@cd userspace && $(MAKE) --no-print-directory
 
-kernel/%.o: kernel/%.s
-	@${BEG} "CC" "$<"
-	@${AS} -c $< -o $@ ${ERRORS}
-	@${END} "CC" "$<"
+################################################################################
+#                                  Ctags                                       #
+################################################################################
 
-install-kernel: zykernel
-	@${BEG} "CP" "Copying kernel to sysroot."
-	@rm -f $(HD_IMAGE_DIR)/boot/zykernel
-	@cp zykernel $(HD_IMAGE_DIR)/boot
-	@${END} "CP" "Copied kernel to sysroot."
+ctags: ctags-libc ctags-kernel ctags-userspace
 
-install-kernel-headers: zykernel
-	@${BEG} "CP" "Copying kernel headers to sysroot."
-	@rm -r -f $(HD_IMAGE_DIR)/usr/include/zykernel
-	@cp -RT kernel/include $(HD_IMAGE_DIR)/usr/include/zykernel
-	@${END} "CP" "Copied kernel headers to sysroot."
+ctags-libc:
+	@cd libc && $(MAKE) ctags --no-print-directory
 
-###############################################################################
-#                                  Userspace                                  #
-###############################################################################
+ctags-kernel:
+	@cd kernel && $(MAKE) ctags --no-print-directory
 
-userspace:
-	@${BEG} "USER" "Building userspace binaries."
-	@${END} "USER" "Userspace binaries built."
-	@${INFO} "--" "Finished building userspace."
+ctags-userspace:
+	@cd userspace && $(MAKE) ctags --no-print-directory
 
-###############################################################################
-#                                  Toolchain                                  #
-###############################################################################
+################################################################################
+#                                 Install                                      #
+################################################################################
 
-toolchain:
-	@${BEG} "TOOL" "Generating Zylix toolchain."
-	@touch .toolchain-built
-	@${END} "TOOL"
+install: install-libc install-kernel install-userspace
 
-###############################################################################
-#                                  Emulation                                  #
-###############################################################################
+install-libc: build-libc
+	@cd libc && $(MAKE) install --no-print-directory
 
-run: zykernel zylix.img
-	@${BEG} "EMU" "Running ${EMU}"
-	@$(EMU) $(EMU_ARGS)
-	@${END} "EMU" "Emulation ended."
+install-kernel: build-kernel
+	@cd kernel && $(MAKE) install --no-print-directory
 
-###############################################################################
-#                                  Disk Image                                 #
-###############################################################################
+install-userspace: build-userspace
+	@cd userspace && $(MAKE) install --no-print-directory
 
-zylix.img: install-kernel install-kernel-headers
-	@${BEG} "HDD" "Building emulation hard disk image."
-	@$(GENEXT2FS) -d $(HD_IMAGE_DIR) -D tools/devtable -b $(HD_IMAGE_SIZE) -N 4096 $(HD_IMAGE_NAME)
-	@${END} "HDD" "Finished building emulation image."
-	@${INFO} "--" "Hard disk image for Zylix is available."
+################################################################################
+#                                  Clean                                       #
+################################################################################
 
-###############################################################################
-#                                    CTags                                    #
-###############################################################################
+clean: clean-libc clean-kernel clean-userspace clean-image clean-trace
 
-ctags: zykernel
-	@${BEG} "CTAG" "Generating CTags..."
-	@ctags -R zykernel
-	@${END} "CTAG" "Done generating CTags."
-
-###############################################################################
-#                                    Install                                  #
-###############################################################################
-
-install: install-kernel install-kernel-headers
-
-###############################################################################
-#                                   Clean-Up                                  #
-###############################################################################
-
-clean: clean-arch-objects clean-objects clean-kernel clean-tags clean-image clean-build-errors
-	@${INFO} "--" "Cleaning complete."
-
-clean-arch-objects:
-	@${BEGRM} "RM" "Cleaning kernel arch-specific objects..."
-	@rm -f ${KERNEL_ARCH_OBJS} ${CRTI_OBJ} ${CRTN_OBJ}
-	@${ENDRM} "RM" "Cleaned kernel arch-specific objects."
-
-clean-objects:
-	@${BEGRM} "RM" "Cleaning kernel objects..."
-	@rm -f ${KERNEL_OBJS} kernel/symbols.s kernel/symbols.o
-	@${ENDRM} "RM" "Cleaned kernel objects."
+clean-libc:
+	@cd libc && $(MAKE) --no-print-directory clean
 
 clean-kernel:
-	@${BEGRM} "RM" "Cleaning kernel binary..."
-	@rm -f zykernel
-	@${ENDRM} "RM" "Cleaned kernel binary."
+	@cd kernel && $(MAKE) --no-print-directory clean
 
-clean-tags:
-	@${BEGRM} "RM" "Cleaning CTags..."
-	@rm -f tags
-	@${ENDRM} "RM" "Cleaned CTags."
+clean-userspace:
+	@cd userspace && $(MAKE) --no-print-directory clean
 
 clean-image:
 	@${BEGRM} "RM" "Cleaning emulation hard disk image..."
 	@rm -f zylix.img
 	@rm -f $(HD_IMAGE_DIR)/boot/zykernel
+	@rm -r -f $(HD_IMAGE_DIR)/usr/lib/libc
+	@rm -r -f $(HD_IMAGE_DIR)/usr/include/libc
 	@rm -r -f $(HD_IMAGE_DIR)/usr/include/zykernel
 	@${ENDRM} "RM" "Cleaned emulation hard disk image."
 
-clean-build-errors:
-	@${BEGRM} "RM" "Cleaning build error log..."
-	@rm -f .build-errors
-	@${ENDRM} "RM" "Cleaned build error log."
+clean-trace:
+	@${BEGRM} "RM" "Cleaning trace files..."
+	@rm -f trace-*
+	@${ENDRM} "RM" "Cleaned trace files."
+
+################################################################################
+#                                 Errors                                       #
+################################################################################
+
+errors: errors-libc errors-kernel errors-userspace
+
+errors-libc:
+	@cd libc && cat .build-errors
+
+errors-kernel:
+	@cd kernel && cat .build-errors
+
+errors-userspace:
+	@cd userspace && cat .build-errors
+
+################################################################################
+#                                Emulation                                     #
+################################################################################
+
+zylix.img: install
+	@${BEG} "HDD" "Building emulation hard disk image."
+	@$(GENEXT2FS) -d $(HD_IMAGE_DIR) -D tools/devtable -b $(HD_IMAGE_SIZE) -N 4096 $(HD_IMAGE_NAME)
+	@${END} "HDD" "Finished building emulation image."
+	@${INFO} "--" "Hard disk image for Zylix is available."
+
+run: zylix.img
+	@${BEG} "EMU" "Running ${EMU}"
+	@$(EMU) $(EMU_ARGS)
+	@${END} "EMU" "Emulation ended."

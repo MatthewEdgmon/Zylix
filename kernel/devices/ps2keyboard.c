@@ -1,15 +1,13 @@
+#include <stdint.h>
+#include <stdio.h>
+
 #include <arch/io.h>
 #include <arch/interrupts.h>
 
 #include <devices/ps2.h>
 #include <devices/ps2keyboard.h>
 
-#include <common.h>
-#include <libc/stdint.h>
-#include <libc/stdio.h>
-#include <libc/stdbool.h>
-
-#define DEBUG_KEYBOARD 1
+#define DEBUG_SCANCODES
 
 uint8_t number_lock_state = 0;
 uint8_t caps_lock_state = 0;
@@ -25,9 +23,7 @@ uint8_t right_alt_state = 0;
 uint8_t current_key = 0;
 uint8_t current_extended_key = 0;
 
-bool current_key_held = false;
-
-uint8_t last_scan_code;
+uint8_t current_key_held = 0;
 
 char US_QWERTY_1[128] = {
 0,                 /* Escape */
@@ -205,12 +201,6 @@ int PS2KeyboardHandler(registers_t* registers) {
     /* We do not need to probe the status bit on an IRQ. */
     keyboard_scan_code = PS2ReadData();
 
-    if(last_scan_code == keyboard_scan_code) {
-        current_key_held = true;
-    } else {
-        current_key_held = false;
-    }
-
     /* If bit 7 is set, key was just released. */
     if(keyboard_scan_code & 0x80) {
         /* Handle a shift release. */
@@ -271,23 +261,32 @@ int PS2KeyboardHandler(registers_t* registers) {
         if(US_QWERTY_1[keyboard_scan_code - 1] == '\n') {
             current_key = '\n';
         }
-    }
 
-    if(US_QWERTY_1[(keyboard_scan_code) - 1] <= 122 && US_QWERTY_1[(keyboard_scan_code) - 1] >= 97) {
-        if(left_shift_state || right_shift_state || caps_lock_state) {
-            //printf("%c", US_QWERTY_1[(keyboard_scan_code) - 1]);
-            current_key = US_QWERTY_1[(keyboard_scan_code) - 1] - 32;
-        } else {
-            //printf("%c", US_QWERTY_1[(keyboard_scan_code) - 1] - 32);
-            current_key = US_QWERTY_1[(keyboard_scan_code) - 1];
+        /* Handle space. */
+        if(keyboard_scan_code == 57) {
+            printf(" ");
         }
+
+        /* Handle backspace. */
+        if(keyboard_scan_code == 14) {
+            printf("\b");
+        }
+
+        if(US_QWERTY_1[(keyboard_scan_code) - 1] <= 122 && US_QWERTY_1[(keyboard_scan_code) - 1] >= 97) {
+            if(left_shift_state || right_shift_state || caps_lock_state) {
+                current_key = US_QWERTY_sh[(keyboard_scan_code) - 1];
+            } else {
+                current_key = US_QWERTY_1[(keyboard_scan_code) - 1];
+            }
+
+            printf("%c", current_key);
+        }
+
+#ifdef ADEBUG_SCANCODES
+        printf("[%d] %c", keyboard_scan_code);
+#endif
+
     }
-
-    printf("%c", current_key);
-
-    //printf("%c %d ", US_QWERTY_1[(keyboard_scan_code) - 1],  US_QWERTY_1[(keyboard_scan_code) - 1]);
-
-    last_scan_code = keyboard_scan_code;
 
     /* Send EOI */
     PICSendEOI(IRQ_KEYBOARD);

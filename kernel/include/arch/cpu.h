@@ -1,7 +1,7 @@
 #ifndef __CPU_H__
 #define __CPU_H__
 
-#include <libc/stdint.h>
+#include <stdint.h>
 
 uint64_t rdtsc();
 

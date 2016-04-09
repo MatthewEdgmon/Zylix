@@ -81,7 +81,8 @@ typedef struct {
 	uint32_t type;
 } __attribute__ ((packed)) mboot_memmap_t;
 
-void DumpMultiboot(struct multiboot* multiboot_ptr);
+extern struct multiboot* copy_multiboot(struct multiboot *mboot_ptr);
+extern void DumpMultiboot(struct multiboot* multiboot_ptr);
 extern char* ramdisk;
 extern struct multiboot* mboot_ptr;
 

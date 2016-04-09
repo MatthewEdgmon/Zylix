@@ -1,7 +1,7 @@
 #ifndef __PIC_H__
 #define __PIC_H__
 
-#include <libc/stdint.h>
+#include <stdint.h>
 
 #include <arch/interrupts.h>
 

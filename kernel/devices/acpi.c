@@ -1,8 +1,9 @@
+#include <stdint.h>
+#include <string.h>
+
 #include <devices/acpi.h>
 
 #include <arch/io.h>
-#include <libc/stdint.h>
-#include <libc/string.h>
 
 uint64_t xsdt_address = 0x0000000000000000;
 
@@ -25,5 +26,5 @@ void VerifyRSDP() {
 }
 
 void SetupACPI() {
-    outb(0, 0);
+
 }

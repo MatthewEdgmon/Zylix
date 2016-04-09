@@ -1,7 +1,7 @@
 #ifndef __CPU_INFO_H__
 #define __CPU_INFO_H__
 
-#include <libc/stdbool.h>
+#include <stdbool.h>
 
 char* GetCPUArchitecture();
 char* GetCPUVendor();

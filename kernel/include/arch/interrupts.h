@@ -1,8 +1,10 @@
 #ifndef __INTERRUPTS_H__
 #define __INTERRUPTS_H__
 
-#include <libc/stdint.h>
-#include <libc/stddef.h>
+#include <stdint.h>
+#include <stddef.h>
+
+#include <arch/registers.h>
 
 /* IRQ numbers. */
 #define IRQ_TIMER 0
@@ -19,14 +21,7 @@
 #define IRQ_PRIMARY_IDE 14
 #define IRQ_SECONDARY_IDE 15
 
-struct registers {
-	unsigned int GS, FS, ES, DS;
-	unsigned int EDI, ESI, EBP, ESP, EBX, EDX, ECX, EAX;
-	unsigned int interrupt_number, error_code;
-	unsigned int EIP, CS, eflags, useresp, SS;
-};
-
-typedef struct registers registers_t;
+#define ISR_SYSCALL 99
 
 typedef void (*irq_handler_t) (struct registers *);
 typedef int (*irq_handler_chain_t) (struct registers *);

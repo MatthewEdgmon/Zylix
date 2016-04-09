@@ -1,7 +1,7 @@
 #ifndef __ACPI_H__
 #define __ACPI_H__
 
-#include <libc/stdint.h>
+#include <stdint.h>
 
 struct rsdp_descriptor {
     char signature[8];

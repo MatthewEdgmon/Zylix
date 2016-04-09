@@ -1,0 +1,2 @@
+
+LIBC = ../../../libc/libc.a

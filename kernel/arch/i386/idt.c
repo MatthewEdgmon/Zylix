@@ -1,5 +1,5 @@
-#include <libc/stdint.h>
-#include <libc/string.h>
+#include <stdint.h>
+#include <string.h>
 
 typedef struct {
     uint16_t       limit;   /* Defines the length of the IDT in bytes. */

@@ -1,11 +1,11 @@
 /**
  * Note: due to the hacky nature of the OS, CMOS /wiritng/ is not recomended. Could brick your motherboard.
  */
+#include <stdio.h>
+#include <stdint.h>
+
 #include <arch/io.h>
 #include <arch/interrupts.h>
-
-#include <libc/stdio.h>
-#include <libc/stdint.h>
 
 /* Changed every year, in order to support CMOS without century registers. */
 #define CMOS_CURRENT_YEAR         2016
