@@ -57,9 +57,7 @@ void PS2WaitOutputBuffer() {
 }
 
 void PS2WaitInputBuffer() {
-    uint8_t response;
     for(;;) {
-        response = PS2ReadStatus();
         /* Check if the input buffer flag is clear. */
         if(!BIT_CHECK(PS2ReadStatus(), 1)) {
             break;

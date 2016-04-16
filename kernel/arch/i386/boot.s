@@ -1,24 +1,33 @@
-.set MB_MAGIC,              0x1BADB002		     # 'Magic number' lets bootloader find the header.
-.set MB_FLAG_PAGE_ALIGN,    1 << 0			      # Align loaded modules on page boundaries.
-.set MB_FLAG_MEMORY_INFO,   1 << 1			  	  # Provide memory map.
-.set MB_FLAG_GRAPHICS,      1 << 2
-.set MB_FLAGS,              MB_FLAG_PAGE_ALIGN | MB_FLAG_MEMORY_INFO | MB_FLAG_GRAPHICS
-.set MB_CHECKSUM,           -(MB_MAGIC + MB_FLAGS) # checksum of above, to prove we are multiboot
+/* Adapted from http://www.gnu.org/software/grub/manual/multiboot/html_node/boot_002eS.html#boot_002eS */
+
+# Multiboot magic number.
+.set MULTIBOOT_HEADER_MAGIC,      0x1BADB002
+# Align loaded modules on page boundaries.
+.set MB_FLAG_PAGE_ALIGN,          1 << 0
+# Provde a memory map.
+.set MB_FLAG_MEMORY_INFO,         1 << 1
+# Please set up graphical mode for us.
+.set MB_FLAG_GRAPHICS,            1 << 2
+# Set the flags.
+.set MULTIBOOT_HEADER_FLAGS,      MB_FLAG_PAGE_ALIGN | MB_FLAG_MEMORY_INFO | MB_FLAG_GRAPHICS
+# Multiboot checksum.
+.set MULTIBOOT_HEADER_CHECKSUM,   -(MULTIBOOT_HEADER_MAGIC + MULTIBOOT_HEADER_FLAGS)
 
 .section .multiboot
 .align 4
 
 # Multiboot header lives here.
-.long MB_MAGIC
-.long MB_FLAGS
-.long MB_CHECKSUM
+.long MULTIBOOT_HEADER_MAGIC
+.long MULTIBOOT_HEADER_FLAGS
+.long MULTIBOOT_HEADER_CHECKSUM
+# ELF executable info.
 .long 0x00000000 /* header_addr */
 .long 0x00000000 /* load_addr */
 .long 0x00000000 /* load_end_addr */
 .long 0x00000000 /* bss_end_addr */
 .long 0x00000000 /* entry_addr */
 
-/* Request linear graphics mode */
+# Request linear graphics mode.
 .long 0x00000000
 .long 0
 .long 0
@@ -49,7 +58,7 @@ _start:
 	# Setup arguments for main.
     pushl %esp # Stack
     pushl %eax # Multiboot header magic.
-    pushl %ebx # Multiboot header pointer.
+    pushl %ebx # Multiboot information structure.
 
 	# Disable interrupts.
 	cli

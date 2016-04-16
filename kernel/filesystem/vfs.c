@@ -6,124 +6,79 @@
 #include <filesystem/vfs.h>
 #include <filesystem/dev.h>
 
-#include <memory/heap.h>
+#include <memory/kmalloc.h>
 
-uint32_t read_fs(fs_node_t* node, uint32_t offset, uint8_t* buffer) {
-    if(node->read_block != NULL) {
-        return node->read_block(node, offset, buffer);
-    } else {
-        return 0;
-    }
+FILE kernel_fopen(char* path, uint32_t offset) {
+
 }
 
-uint32_t write_fs(fs_node_t* node, uint32_t offset, uint8_t* buffer) {
-    if(node->write_block != NULL) {
-        return node->write_block(node, offset, buffer);
-    } else {
-        return 0;
-    }
+uint32_t kernel_fwrite(FILE file, uint32_t size, char* buffer) {
+
 }
 
-uint32_t open_fs(fs_node_t* node, uint32_t offset) {
-    if(node->open != NULL) {
-        return node->open(node, offset);
-    } else {
-        return 0;
-    }
+uint32_t kernel_fread(FILE file, uint32_t size, char* buffer) {
+
 }
 
-void close_fs(fs_node_t* node) {
-    if(node->close != NULL) {
-        node->close(node);
-    }
+uint32_t kernel_freadch(FILE file, char* c) {
+
 }
 
-struct dirent* readdir_fs(fs_node_t* node, uint32_t index) {
-    if((node->readdir != NULL) && ((node->flags & 7) == FS_DIRECTORY)) {
-		return node->readdir(node, index);
-    } else {
-		return (struct dirent*) NULL;
-    }
+void kernel_fflush(FILE file) {
+
 }
 
-/* Get a file from it's path. */
-fs_node_t* FSPath(fs_node_t* node, char* name) {
-    if(strcmp(name, "/") == 0) {
-        return node;
-    }
+uint32_t FSRead(fs_node_t* node, uint32_t offset, uint32_t size, uint8_t* buffer) {
 
-    /* Copy the string. */
-    char* name_copy = (char*) kmalloc(strlen(name) + 2);
-    strcpy(name_copy, name);
-
-    /* Format the string for parsing. */
-    for(uint8_t i = 0; i < strlen(name); i++) {
-        if(name[i] == '/') {
-            name[i] = 0;
-        }
-    }
-/*
-    do {
-        node = node->holds;
-
-        while(node != NULL) {
-            if(strcmp(node->name, name) == 0) {
-                break;
-            }
-            node = node->link;
-        }
-
-    } while((uint32_t) name < (uint32_t) end);
-*/
-    kfree(name_copy);
-    return node;
 }
 
-void VFSListDirectory(char* path) {
-    printf("Directory listing of ");
+/**
+ * Open a file system node.
+ */
+void FSOpen(fs_node_t* node, uint32_t flags) {
+
 }
 
-char* VFSGetBaseName(char* name) {
-    for(int i = strlen(name); i >= 0; i--) {
-        if(name[i] == '/') {
-            return &name[i + 1];
-        }
-    }
-    return name;
+/**
+ * Close a file system node.
+ */
+void FSClose(fs_node_t* node) {
+
+}
+
+/**
+ * Finds a file with name and returns a fs_node_t to it.
+ */
+fs_node_t* FSFindInDirectory(fs_node_t* directory_node, char* name) {
+	if(directory_node == NULL) {
+		printf("Tried to find in a non-existant directory.\n");
+		return NULL;
+	}
+}
+
+uint8_t FSCreateFile(char* name, uint16_t permissions) {
+
 }
 
 fs_node_t* VFSTouch(fs_node_t* node, char* name) {
-    fs_node_t* directory = VFSGetDirectory(node, name);
 
-    if(directory == NULL) {
-        printf("VFS tried to touch a file in an invalid path.");
-        return NULL;
-    }
+}
 
-    fs_node_t* file;
+fs_node_t* VFSListDirectory(char* path) {
 
-    file->link = directory->holds;
-    directory->holds = file;
-
-    return file;
 }
 
 fs_node_t* VFSGetDirectory(fs_node_t* node, char* name) {
-    return NULL;
+
 }
 
 fs_node_t* VFSMakeDirectory(fs_node_t* node, char* name) {
-    fs_node_t* directory = VFSGetDirectory(node, name);
 
-    if(directory == NULL) {
-        printf("VFS tried to make an invalid path.");
-        return NULL;
-    }
+}
 
-    fs_node_t* file;
+/**
+ * Create the root node, attach stdin/stdout/stderr.
+ */
+void SetupVFS() {
 
-    file->link = directory->holds;
-    directory->holds = file;
-
-    return file;
 }

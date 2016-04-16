@@ -6,6 +6,8 @@
 *.sublime-workspace
 .build-errors
 .toolchain-built
+.tags1
+grub.img
 zykernel
 zylix.img
 tags

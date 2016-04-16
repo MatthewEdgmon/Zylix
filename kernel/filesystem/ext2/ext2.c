@@ -1,4 +1,4 @@
-#include <filesystem/ext2.h>
+#include <filesystem/ext2/ext2.h>
 #include <filesystem/vfs.h>
 
 struct ext2_superblock* ext2GetSuperBlock(void* address) {

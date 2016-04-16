@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include <process.h>
+#include <scheduler.h>
 
 #include <elf.h>
 

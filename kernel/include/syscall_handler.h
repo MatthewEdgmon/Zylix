@@ -22,7 +22,8 @@
 #define SYSCALL_REBOOT    23
 #define SYSCALL_SYNC      24
 
-uint32_t fork();
+uint32_t syscall_exit();
+uint32_t syscall_fork();
 uint32_t getpid();
 char** get_env();
 

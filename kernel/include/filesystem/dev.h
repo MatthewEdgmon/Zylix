@@ -19,9 +19,9 @@ typedef struct dev {
     uint8_t   drive;
 } dev_t;
 
-void RegisterDevice(char* name, read_block_t read, write_block_t write);
+void VFSRegisterDevice(char* name, read_block_t read, write_block_t write);
 
-uint32_t dev_read(fs_node_t* dev, uint32_t offset, char* buffer);
-uint32_t dev_write(fs_node_t* dev, uint32_t offset, char* buffer);
+uint32_t VFSDeviceRead(fs_node_t* dev, uint32_t offset, char* buffer);
+uint32_t VFSDeviceWrite(fs_node_t* dev, uint32_t offset, char* buffer);
 
 #endif /* __DEV_H__ */

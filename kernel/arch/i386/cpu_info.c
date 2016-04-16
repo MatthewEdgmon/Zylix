@@ -114,28 +114,6 @@
 #define CPUID_REQUEST_BRAND_STRING_TWO		0x80000003		/* Returns part 2 of the processor brand string in EAX, EBX, ECX and EDX */
 #define CPUID_REQUEST_BRAND_STRING_THREE	0x80000004		/* Returns part 3 of the processor brand string in EAX, EBX, ECX and EDX */
 
-typedef struct {
-
-	/* What's the max value CPUID supports? */
-	long highest_request_level;
-
-	/* Information */
-	char vendor[13];
-	char brand[48];
-	char features[128];
-
-	/* Features */
-	bool features_FPU;
-	bool features_APIC;
-	bool features_MMX;
-	bool features_SSE;
-	bool features_SSE2;
-	bool features_SSE3;
-	bool features_IA64;
-	bool features_HYPERTHREADING;
-
-} cpu_info_t;
-
 cpu_info_t* cpu_info;
 
 /* C wrapper for CPUID */
@@ -155,7 +133,7 @@ static inline void cpuid(int request_code, unsigned long *eax, unsigned long *eb
  * We should call CPUID with EAX at 0 first, to get the highest
  * EAX parameter CPUID supports.
  */
-void StoreCPUInformation(void) {
+void StoreCPUInformation() {
 
 	unsigned long eax, ebx, ecx, edx;
 

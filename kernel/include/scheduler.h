@@ -1,5 +1,5 @@
-#ifndef __PROCESS_H__
-#define __PROCESS_H__
+#ifndef __SCHEDULER_H__
+#define __SCHEDULER_H__
 
 #include <stdint.h>
 
@@ -22,10 +22,10 @@ typedef struct process {
 
 } process_t;
 
-void ProcessKill(uint32_t pid);
+void SchedulerKillProcess(uint32_t pid);
+uint32_t SchedulerGetCurrentProcess();
+uint32_t SchedulerMakeEmptyProcess();
 
-uint32_t ProcessMakeEmpty();
+void SetupScheduler();
 
-void SetupMultiProcess();
-
-#endif /* __PROCESS_H__ */
+#endif /* __SCHEDULER_H__*/

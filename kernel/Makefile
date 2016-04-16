@@ -23,6 +23,7 @@ KERNEL_HEADERS = $(shell find include/ -type f -name '*.h')
 
 # Kernel object files.
 KERNEL_OBJS  = $(patsubst %.c,%.o,$(wildcard devices/*.c))
+KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard filesystem/*/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard filesystem/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard memory/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard menu/*.c))

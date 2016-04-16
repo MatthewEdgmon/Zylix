@@ -21,47 +21,47 @@
 #include <filesystem/stdin.h>
 #include <filesystem/null.h>
 
-#include <error.h>
+#include <common.h>
 #include <execute.h>
 #include <lock.h>
 #include <logo.h>
 #include <logging.h>
-#include <vga.h>
-#include <terminal.h>
-#include <process.h>
-#include <syscall_handler.h>
 #include <multiboot.h>
-
-#include <menu/menu.h>
+#include <panic.h>
+#include <scheduler.h>
+#include <syscall_handler.h>
+#include <terminal.h>
+#include <vga.h>
 
 uintptr_t initial_esp;
 
-int main(struct multiboot* multiboot_header, uint32_t multiboot_magic, uintptr_t esp) {
+int main(multiboot_info_t* multiboot_info, uint32_t multiboot_magic, uintptr_t esp) {
 
     initial_esp = esp;
 
     SetupTerminal();
+    TerminalSetColor(TerminalMakeColor(COLOR_WHITE, COLOR_BLACK));
 
     SetupCPU();
-
     SetupSyscalls();
+    SetupLocks();
+    SetupScheduler();
 
-    PrintLogo();
-
-    if(multiboot_magic != MULTIBOOT_EAX_MAGIC) {
-        printf("Didn't receive right multiboot magic! 0x%X\n", multiboot_magic);
-    } else {
-        printf("Got multiboot magic number: 0x%X\n", multiboot_magic);
+    if(multiboot_magic != MULTIBOOT_BOOTLOADER_MAGIC) {
+        printf("Didn't receive right multiboot magic: 0x%X\n", multiboot_magic);
+        return 1;
     }
 
-    printf("CPU Information:\n");
-    printf("    Arch: %s \n", GetCPUArchitecture());
-    printf("    Vendor: %s \n", GetCPUVendor());
-    printf("    Brand: %s \n", GetCPUBrand());
-    printf("    Features: %s \n", GetCPUFeatures());
-    printf("    Max Request: 0x%X \n", GetCPUMaxRequestLevel());
+    MultibootDumpInfo(multiboot_info);
 
-    printf("Setting up SMBIOS.\n");
+    printf("CPU Information:\n");
+    printf("    Arch: %s\n", GetCPUArchitecture());
+    printf("    Vendor: %s\n", GetCPUVendor());
+    printf("    Brand: %s\n", GetCPUBrand());
+    printf("    Features: %s\n", GetCPUFeatures());
+    printf("    Max Request: 0x%X\n", GetCPUMaxRequestLevel());
+
+    printf("Setting up SMBIOs.\n");
     SetupSMBIOS();
 
     printf("Setting up PS/2 controller and devices.\n");
@@ -78,9 +78,6 @@ int main(struct multiboot* multiboot_header, uint32_t multiboot_magic, uintptr_t
     CMOSReadRTC();
     printf("Current date and time: %d/%d/%d %d:%d:%d \n", CMOSGetMonth(), CMOSGetDay(), CMOSGetYear(),
                                                           CMOSGetHours(), CMOSGetMinutes(), CMOSGetSeconds());
-
-    printf("Enabling multiprocessing.\n");
-    SetupMultiProcess();
 
     int exit_status = 0;
 

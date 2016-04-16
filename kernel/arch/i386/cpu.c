@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <arch/cpu_info.h>
+
 #include "i386.h"
 #include "idt.h"
 #include "pic.h"

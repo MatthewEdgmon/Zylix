@@ -1,4 +1,3 @@
-
 # Emulator and arguments to pass to it.
 EMU = qemu-system-i386
 EMU_ARGS  = -kernel ./sysroot/boot/zykernel

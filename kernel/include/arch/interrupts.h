@@ -26,6 +26,14 @@
 typedef void (*irq_handler_t) (struct registers *);
 typedef int (*irq_handler_chain_t) (struct registers *);
 
+/**
+ * Using generic names will help cross-platform in the future.
+ */
+#define InterruptsDisable PICDisableInterrupts
+#define InterruptsEnable PICEnableInterrupts
+#define InterruptsResume PICResumeInterrupts
+#define InterruprsInstallHandler PICInstallIRQHandler
+
 #include "../../arch/i386/isr.h"
 #include "../../arch/i386/pic.h"
 

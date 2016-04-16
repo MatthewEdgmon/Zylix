@@ -39,8 +39,7 @@ void TerminalClear() {
 
     for(size_t y = 0; y < VGA_HEIGHT; y++) {
         for(size_t x = 0; x < VGA_WIDTH; x++) {
-            const size_t index = y * VGA_HEIGHT + x;
-            terminal_buffer[index] = TerminalMakeVGAEntry(' ', terminal_color);
+            TerminalMakeVGAEntryAt(' ', COLOR_BLACK, x, y);
         }
     }
 }
