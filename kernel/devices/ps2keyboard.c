@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -7,7 +8,9 @@
 #include <devices/ps2.h>
 #include <devices/ps2keyboard.h>
 
-#define DEBUG_SCANCODES
+#define INPUT_ARRAY_LENGTH 256
+int input_array_index = 0;
+char input_array[INPUT_ARRAY_LENGTH];
 
 uint8_t number_lock_state = 0;
 uint8_t caps_lock_state = 0;
@@ -265,14 +268,34 @@ int PS2KeyboardHandler(registers_t* registers) {
         /* Handle space. */
         if(keyboard_scan_code == 57) {
             printf(" ");
+            input_array_index++;
+            input_array[input_array_index] = ' ';
         }
 
         /* Handle backspace. */
         if(keyboard_scan_code == 14) {
-            printf("\b");
+            if(input_array_index > 0) {
+                printf("\b");
+                input_array[input_array_index] = '\0';
+                input_array_index--;
+            }
         }
 
-        if(US_QWERTY_1[(keyboard_scan_code) - 1] <= 122 && US_QWERTY_1[(keyboard_scan_code) - 1] >= 97) {
+        /* Handle return. */
+        if(keyboard_scan_code == 28) {
+            printf("\n");
+
+            /* Execute. */
+            Shell(input_array);
+
+            /* Empty out the buffer. */
+            input_array_index = 0;
+            for(int i = 0; i <= INPUT_ARRAY_LENGTH; i++) {
+                input_array[i] = '\0';
+            }
+        }
+
+        if(isalnum(US_QWERTY_1[(keyboard_scan_code) - 1]) && isalnum(US_QWERTY_1[(keyboard_scan_code) - 1])) {
             if(left_shift_state || right_shift_state || caps_lock_state) {
                 current_key = US_QWERTY_sh[(keyboard_scan_code) - 1];
             } else {
@@ -280,10 +303,24 @@ int PS2KeyboardHandler(registers_t* registers) {
             }
 
             printf("%c", current_key);
+            input_array[input_array_index] = current_key;
+            input_array_index++;
         }
 
-#ifdef ADEBUG_SCANCODES
-        printf("[%d] %c", keyboard_scan_code);
+        //if(US_QWERTY_1[(keyboard_scan_code) - 1] <= 122 && US_QWERTY_1[(keyboard_scan_code) - 1] >= 97) {
+        //    if(left_shift_state || right_shift_state || caps_lock_state) {
+        //        current_key = US_QWERTY_sh[(keyboard_scan_code) - 1];
+        //    } else {
+        //        current_key = US_QWERTY_1[(keyboard_scan_code) - 1];
+        //    }
+        //
+        //    printf("%c", current_key);
+        //    input_array[input_array_index] = current_key;
+        //    input_array_index++;
+        //}
+
+#ifdef DEBUG_SCANCODES
+        printf("[%c is %d] ", keyboard_scan_code, keyboard_scan_code);
 #endif
 
     }

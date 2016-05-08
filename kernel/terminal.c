@@ -71,9 +71,10 @@ void TerminalPrintCharacter(char character) {
         case '\b':
             /* C standard doesn't define behaivor for backspace at initial position. */
             /* I just ignore it. */
-            if(terminal_column != 0) {
+            if(terminal_column > 0) {
                 terminal_column--;
             }
+            TerminalMakeVGAEntryAt(' ', terminal_color, terminal_column, terminal_row);
             terminal_caught_escape = true;
             break;
         /* Formfeed? */

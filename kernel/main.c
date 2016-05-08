@@ -21,6 +21,8 @@
 #include <filesystem/stdin.h>
 #include <filesystem/null.h>
 
+#include <menu/shell.h>
+
 #include <common.h>
 #include <execute.h>
 #include <lock.h>
@@ -78,6 +80,8 @@ int main(multiboot_info_t* multiboot_info, uint32_t multiboot_magic, uintptr_t e
     CMOSReadRTC();
     printf("Current date and time: %d/%d/%d %d:%d:%d \n", CMOSGetMonth(), CMOSGetDay(), CMOSGetYear(),
                                                           CMOSGetHours(), CMOSGetMinutes(), CMOSGetSeconds());
+
+    SetupShell();
 
     int exit_status = 0;
 
