@@ -307,18 +307,6 @@ int PS2KeyboardHandler(registers_t* registers) {
             input_array_index++;
         }
 
-        //if(US_QWERTY_1[(keyboard_scan_code) - 1] <= 122 && US_QWERTY_1[(keyboard_scan_code) - 1] >= 97) {
-        //    if(left_shift_state || right_shift_state || caps_lock_state) {
-        //        current_key = US_QWERTY_sh[(keyboard_scan_code) - 1];
-        //    } else {
-        //        current_key = US_QWERTY_1[(keyboard_scan_code) - 1];
-        //    }
-        //
-        //    printf("%c", current_key);
-        //    input_array[input_array_index] = current_key;
-        //    input_array_index++;
-        //}
-
 #ifdef DEBUG_SCANCODES
         printf("[%c is %d] ", keyboard_scan_code, keyboard_scan_code);
 #endif

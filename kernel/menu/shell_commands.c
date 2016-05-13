@@ -1,3 +1,8 @@
+#include <stdint.h>
+#include <stdbool.h>
+
+#include <devices/cmos.h>
+
 #include <menu/shell.h>
 #include <menu/shell_commands.h>
 #include <menu/monitor.h>
@@ -31,23 +36,23 @@ void CommandLogo() {
 }
 
 void CommandLaunchCode() {
-    TerminalSetColor(TerminalMakeColor(COLOR_LIGHT_BLUE, COLOR_BLACK));
+    TerminalSetColor(TerminalMakeColor(COLOR_LIGHT_BLUE, COLOR_WHITE));
     TerminalPrintString("                  .oo.                  \n");
     TerminalPrintString("                `+s--s+`                \n");
-    TerminalPrintString("               .y/    /y.               \n");
+    TerminalPrintString("               .y/    \\y.               \n");
     TerminalPrintString("              .h:      :h.              \n");
-    TerminalPrintString("              so  `--`  os              \n");
+    TerminalPrintString("              so  \\--/  os              \n");
     TerminalPrintString("           :h-`h:      :h`-h:           \n");
-    TerminalPrintString("           .h. /h`    `h/ .h.           \n");
-    TerminalPrintString("            os`oho::::oho`so            \n");
+    TerminalPrintString("           .h. /h`    `h\\ .h.           \n");
+    TerminalPrintString("            os`oho####oho`so            \n");
     TerminalPrintString("            .hy+-h:yy:h-+yh.            \n");
     TerminalPrintString("             --  +s--s+  --             \n");
     TerminalPrintString("                 `y::y`                 \n");
-    TerminalPrintString("                  -hh-                  \n");
+    TerminalPrintString("                  \\hh/                  \n");
     TerminalPrintString("                   ++                   \n");
     TerminalPrintString("                                        \n");
     TerminalPrintString("                                        \n");
-    TerminalPrintString("              +sssssssssss.             \n");
+    TerminalPrintString("            +sssssssssssss+             \n");
     TerminalPrintString("                                        \n");
     TerminalSetColor(TerminalMakeColor(COLOR_WHITE, COLOR_BLACK));
 }
@@ -91,4 +96,23 @@ void CommandExplode() {
 
 void CommandBrowser() {
     BrowserMain();
+}
+
+void CommandFizzBuzz() {
+    for(int i = 1; i <= 100; i++) {
+        if(i % 3 == 0 && i % 5 == 0) {
+            printf("FizzBuzz ");
+        } else if(i % 3 == 0) {
+            printf("Fizz ");
+        } else if(i % 5 == 0) {
+            printf("Buzz ");
+        } else {
+            printf("%d ", i);
+        }
+
+        /* Every 10 numbers make a newline. */
+        if(i % 10 == 0) {
+            printf("\n");
+        }
+    }
 }

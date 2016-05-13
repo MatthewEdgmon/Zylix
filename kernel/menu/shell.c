@@ -87,5 +87,6 @@ void SetupShell() {
     AddShellCommand("panic", "Test kernel panic.", CommandPanic);
     AddShellCommand("explode", "Fun!", CommandExplode);
     AddShellCommand("browser", "File browser.", CommandBrowser);
+    AddShellCommand("fizzbuzz", "Print out FizzBuzz", CommandFizzBuzz);
     printf(">");
 }

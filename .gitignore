@@ -11,3 +11,4 @@ grub.img
 zykernel
 zylix.img
 tags
+sysroot/usr/include
