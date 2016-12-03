@@ -1,6 +1,9 @@
 #include <stdio.h>
 
 char* fgets(char* buffer, int size, FILE* file) {
+
+    /* lock file */
+
     for(int i = 0; i < size; i++) {
         int status = fgetc(file);
         if(status < 0) {
@@ -11,6 +14,8 @@ char* fgets(char* buffer, int size, FILE* file) {
             return buffer;
         }
     }
+
+    /* unlock file */
 
     return buffer;
 }

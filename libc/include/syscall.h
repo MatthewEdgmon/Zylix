@@ -18,6 +18,7 @@ extern "C" {
 #define SYSCALL_GETSTDIN  10
 #define SYSCALL_GETSTDOUT 11
 #define SYSCALL_GETSTDERR 12
+#define SYSCALL_FSTAT     18
 #define SYSCALL_LSEEK     19
 #define SYSCALL_GETPID    20
 #define SYSCALL_MOUNT     21

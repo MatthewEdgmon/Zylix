@@ -1,0 +1,85 @@
+#ifndef __ATA_H__
+#define __ATA_H__
+
+#include <stdint.h>
+
+#include <arch/interrupts.h>
+#include <arch/registers.h>
+
+#define ATA_SECTOR_SIZE 512
+
+#define ATA_PRIMARY    1
+#define ATA_SECONDARY  2
+#define ATA_TERTIARY   3
+#define ATA_QUATERNARY 4
+
+#define ATA_MASTER     1
+#define ATA_SLAVE      2
+
+#define ATA_CONTROL_BIT_NIEN 1
+#define ATA_CONTROL_BIT_SRST 2
+#define ATA_CONTROL_BIT_HOB  7
+
+#define ATA_STATUS_BIT_ERR 0
+#define ATA_STATUS_BIT_DRQ 3
+#define ATA_STATUS_BIT_SRV 4
+#define ATA_STATUS_BIT_DF  5
+#define ATA_STATUS_BIT_RDY 6
+#define ATA_STATUS_BIT_BSY 7
+
+#define ATA_PRIMARY_PORT_DATA               0x1F0
+#define ATA_PRIMARY_PORT_FEATURES_ERRORS    0x1F1
+#define ATA_PRIMARY_PORT_SECTOR_COUNT       0x1F2
+#define ATA_PRIMARY_PORT_LBA_LOW            0x1F3
+#define ATA_PRIMARY_PORT_LBA_MID            0x1F4
+#define ATA_PRIMARY_PORT_LBA_HIGH           0x1F5
+#define ATA_PRIMARY_PORT_DRIVE_HEAD         0x1F6
+#define ATA_PRIMARY_PORT_COMMAND            0x1F7
+#define ATA_PRIMARY_PORT_STATUS             0x1F7
+#define ATA_PRIMARY_CONTROL_REGISTER        0x3F6
+#define ATA_PRIMARY_ALTERNATE_STATUS        0x3F6
+
+#define ATA_SECONDARY_PORT_DATA             0x170
+#define ATA_SECONDARY_PORT_FEATURES_ERRORS  0x171
+#define ATA_SECONDARY_PORT_SECTOR_COUNT     0x172
+#define ATA_SECONDARY_PORT_LBA_LOW          0x173
+#define ATA_SECONDARY_PORT_LBA_MID          0x174
+#define ATA_SECONDARY_PORT_LBA_HIGH         0x175
+#define ATA_SECONDARY_PORT_DRIVE_HEAD       0x176
+#define ATA_SECONDARY_PORT_COMMAND          0x177
+#define ATA_SECONDARY_PORT_STATUS           0x177
+#define ATA_SECONDARY_CONTROL_REGISTER      0x376
+#define ATA_SECONDARY_ALTERNATE_STATUS      0x376
+
+#define ATA_TERTIARY_PORT_DATA              0x1E8
+#define ATA_TERTIARY_PORT_FEATURES_ERRORS   0x1E9
+#define ATA_TERTIARY_PORT_SECTOR_COUNT      0x1EA
+#define ATA_TERTIARY_PORT_LBA_LOW           0x1EB
+#define ATA_TERTIARY_PORT_LBA_MID           0x1EC
+#define ATA_TERTIARY_PORT_LBA_HIGH          0x1ED
+#define ATA_TERTIARY_PORT_DRIVE_HEAD        0x1EE
+#define ATA_TERTIARY_PORT_COMMAND           0x1EF
+#define ATA_TERTIARY_PORT_STATUS            0x1EF
+#define ATA_TERTIARY_ALTERNATE_STATUS       0x3E6
+#define ATA_TERTIARY_CONTROL_REGISTER       0x3E6
+
+#define ATA_QUATERNARY_PORT_DATA            0x168
+#define ATA_QUATERNARY_PORT_FEATURES_ERRORS 0x169
+#define ATA_QUATERNARY_PORT_SECTOR_COUNT    0x16A
+#define ATA_QUATERNARY_PORT_LBA_LOW         0x16B
+#define ATA_QUATERNARY_PORT_LBA_MID         0x16C
+#define ATA_QUATERNARY_PORT_LBA_HIGH        0x16D
+#define ATA_QUATERNARY_PORT_DRIVE_HEAD      0x16E
+#define ATA_QUATERNARY_PORT_COMMAND         0x16F
+#define ATA_QUATERNARY_PORT_STATUS          0x16F
+#define ATA_QUATERNARY_CONTROL_REGISTER     0x366
+#define ATA_QUATERNARY_ALTERNATE_STATUS     0x366
+
+uint8_t ATASoftwareReset(uint8_t bus);
+
+uint8_t ATAPrimaryInterruptHandler(registers_t* regs);
+uint8_t ATASecondaryInterruptHandler(registers_t* regs);
+
+void SetupATA();
+
+#endif /* __ATA_H__ */

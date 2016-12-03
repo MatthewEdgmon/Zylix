@@ -3,5 +3,5 @@
 #include <syscall.h>
 
 int fstat(int fd, struct stat* st) {
-    return syscall_2arg(SYSCALL_FSTAT, fd, uint32_t st);
+    return syscall_2arg(SYSCALL_FSTAT, fd, st);
 }

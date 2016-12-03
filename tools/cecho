@@ -1,5 +1,4 @@
 #!/bin/bash
-# cecho.sh - HydrOS build script colorizer
 # arguments:
 #	$1 Color (black red green yellow blue magenta cyan white)
 #   $2 Message

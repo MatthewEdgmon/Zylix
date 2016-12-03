@@ -1,23 +1,32 @@
-# Point to your local i686 elf cross compiler.
+# Point to your cross compiler.
 CROSS_DIR = /home/matth_000/cross/bin
+# Put the three digit number version of your cross compiler.
+CROSS_VER = 6.1.0
+
+# Change TARGET_ARCH to match the platform you're targeting.
+TARGET_ARCH  = i686
+ARCH_DIR     = arch/$(TARGET_ARCH)
+include        $(ARCH_DIR)/make.config
 
 # Build using our cross compiler.
-CC  = $(CROSS_DIR)/i686-elf-gcc
-LD  = $(CROSS_DIR)/i686-elf-ld
-NM  = $(CROSS_DIR)/i686-elf-nm
-CXX = $(CROSS_DIR)/i686-elf-g++
-AS  = $(CROSS_DIR)/i686-elf-as
+CC  = $(CROSS_DIR)/$(LIBRARY_ARCH_GCC_NAME)-gcc
+LD  = $(CROSS_DIR)/$(LIBRARY_ARCH_GCC_NAME)-ld
+NM  = $(CROSS_DIR)/$(LIBRARY_ARCH_GCC_NAME)-nm
+CXX = $(CROSS_DIR)/$(LIBRARY_ARCH_GCC_NAME)-g++
+AS  = $(CROSS_DIR)/$(LIBRARY_ARCH_GCC_NAME)-as
 
 # Flags used to build the library.
 LIBRARY_CFLAGS  = -O2 -std=c99
 LIBRARY_CFLAGS += -finline-functions -ffreestanding
+LIBRARY_CFLAGS += -fstack-protector-strong
+LIBRARY_CFLAGS += -fno-builtin
 LIBRARY_CFLAGS += -Wall -Wextra -Wno-unused-function -Wno-unused-parameter
 LIBRARY_CFLAGS += -pedantic -fno-omit-frame-pointer
 # Choose between userspace and kernel version.
 LIBRARY_CFLAGS += -DZYLIX_LIBC_KERNEL
 #LIBRARY_CFLAGS += -DZYLIX_LIBC_USERSPACE
 LIBRARY_CFLAGS += -DKERNEL_LIBC_USE_ASSEMBLY
-LIBRARY_CFLAGS = -shared -Bsymbolic -z defs
+LIBRARY_LDFLAGS = -shared -Bsymbolic -z defs
 
 # Library headers.
 LIBRARY_INCLUDE_DIR = ./include
@@ -26,11 +35,21 @@ LIBRARY_HEADERS = $(shell find include/ -type f -name '*.h')
 # Library object files.
 LIBRARY_OBJS  = $(patsubst %.c,%.o,$(wildcard *.c))
 LIBRARY_OBJS += $(patsubst %.c,%.o,$(wildcard ctype/*.c))
+LIBRARY_OBJS += $(patsubst %.c,%.o,$(wildcard math/*.c))
+LIBRARY_OBJS += $(patsubst %.c,%.o,$(wildcard stat/*.c))
 LIBRARY_OBJS += $(patsubst %.c,%.o,$(wildcard stdio/*.c))
 LIBRARY_OBJS += $(patsubst %.c,%.o,$(wildcard stdlib/*.c))
 LIBRARY_OBJS += $(patsubst %.c,%.o,$(wildcard string/*.c))
-LIBRARY_OBJS += $(patsubst %.c,%.o,$(wildcard syscall/*.c))
+LIBRARY_OBJS += $(patsubst %.c,%.o,$(wildcard time/*.c))
 LIBRARY_OBJS += $(patsubst %.c,%.o,$(wildcard unistd/*.c))
+
+# Add flags supplied by our arch.
+LIBRARY_CFLAGS  += $(LIBRARY_ARCH_CFLAGS)
+LIBRARY_LDFLAGS += $(LIBRARY_ARCH_LDFLAGS)
+
+# Order in which objects are linked.
+LIBRARY_OBJ_LINK_LIST = ${LIBRARY_ARCH_OBJS} \
+                        ${LIBRARY_OBJS}
 
 # Pretty output utilities.
 BEG = ../tools/output/mk-beg
@@ -46,7 +65,7 @@ ERRORS = 2>>./.build-errors
 
 # Where to put the library headers.
 SYSROOT = ../sysroot
-INSTALL = $(CROSS_DIR)/../lib/gcc/i686-elf/5.3.0
+INSTALL = $(CROSS_DIR)/../lib/gcc/$(LIBRARY_ARCH_GCC_NAME)/$(CROSS_VER)
 
 .PHONY: all libc.a ctags install clean
 .SECONDARY:
@@ -58,9 +77,9 @@ all: libc.a
 #                                  Build                                       #
 ################################################################################
 
-libc.a: ${LIBRARY_OBJS}
+libc.a: ${LIBRARY_ARCH_OBJS} ${LIBRARY_OBJS}
 	@${BEG} "AR" "libc.a"
-	@${AR} rcs libc.a ${LIBRARY_OBJS}
+	@${AR} rcs libc.a ${LIBRARY_OBJ_LINK_LIST}
 	@${END} "AR" "libc.a"
 	@${INFO} "--" "Finished building library."
 
@@ -73,15 +92,6 @@ libc.a: ${LIBRARY_OBJS}
 	@${BEG} "CC" "$<"
 	@${AS} -c $< -o $@ ${ERRORS}
 	@${END} "CC" "$<"
-
-################################################################################
-#                                  Ctags                                       #
-################################################################################
-
-ctags:
-	@${BEG} "CTAG" "CTags (libc)."
-	@ctags -R ./
-	@${END} "CTAG" "CTags (libc)."
 
 ################################################################################
 #                                 Install                                      #
@@ -107,8 +117,13 @@ install-sysroot:
 #                                  Clean                                       #
 ################################################################################
 
-clean: clean-objects clean-library clean-library-gcc clean-library-sysroot clean-tags clean-build-errors
+clean: clean-arch-objects clean-objects clean-library clean-library-gcc clean-library-sysroot clean-build-errors
 	@${INFO} "--" "Cleaning complete."
+
+clean-arch-objects:
+	@${BEGRM} "RM" "Cleaning library arch-specific objects..."
+	@rm -f ${LIBRARY_ARCH_OBJS}
+	@${ENDRM} "RM" "Cleaned library arch-specific objects."
 
 clean-objects:
 	@${BEGRM} "RM" "Cleaning library objects..."
@@ -129,11 +144,6 @@ clean-library-sysroot:
 	@${BEGRM} "RM" "Cleaning library from sysroot..."
 	@rm -f $(SYSROOT)/usr/lib/libc.a
 	@${ENDRM} "RM" "Cleaned library from sysroot."
-
-clean-tags:
-	@${BEGRM} "RM" "Cleaning CTags..."
-	@rm -f tags
-	@${ENDRM} "RM" "Cleaned CTags."
 
 clean-build-errors:
 	@${BEGRM} "RM" "Cleaning build error log..."

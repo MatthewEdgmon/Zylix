@@ -6,6 +6,8 @@
 
 #include <devices/ps2keyboard.h>
 
+#include <memory/liballoc.h>
+
 #include <panic.h>
 #include <syscall_handler.h>
 #include <terminal.h>
@@ -29,6 +31,8 @@ void SyscallHandler(registers_t* registers) {
             registers->EAX = write(registers->EBX, (char*) registers->ECX, (size_t) registers->EDX);
             return;
         case SYSCALL_MALLOC:
+            registers->EAX = malloc((size_t) registers->EBX);
+            return;
         case SYSCALL_FREE:
         case SYSCALL_GETSTDIN:
         case SYSCALL_GETSTDOUT:

@@ -5,7 +5,7 @@
 
 #include <terminal.h>
 
-#include <vga.h>
+#include <devices/vga.h>
 
 bool        terminal_caught_escape;
 size_t      terminal_row;
@@ -28,7 +28,7 @@ uint16_t TerminalMakeVGAEntry(char c, uint8_t color) {
 }
 
 void TerminalMakeVGAEntryAt(char c, uint8_t color, size_t x, size_t y) {
-    const size_t index = y * VGA_WIDTH + x;
+    const size_t index = y * VGAGetTextModeWidth() + x;
     terminal_buffer[index] = TerminalMakeVGAEntry(c, color);
 }
 
@@ -37,26 +37,25 @@ void TerminalClear() {
     terminal_column = 0;
     terminal_color = TerminalMakeColor(COLOR_LIGHT_GREY, COLOR_BLACK);
 
-    for(size_t y = 0; y < VGA_HEIGHT; y++) {
-        for(size_t x = 0; x < VGA_WIDTH; x++) {
+    for(size_t y = 0; y < VGAGetTextModeHeight(); y++) {
+        for(size_t x = 0; x < VGAGetTextModeWidth(); x++) {
             TerminalMakeVGAEntryAt(' ', COLOR_BLACK, x, y);
         }
     }
 }
 
 void TerminalScroll() {
-    if(terminal_row >= 25) {
-        int i;
+    if(terminal_row >= VGAGetTextModeHeight()) {
         /* Move the current buffer up by one line. */
-        for(i = 0*80; i < 24*80; i++) {
-            terminal_buffer[i] = terminal_buffer[i + 80];
+        for(size_t i = 0 * VGAGetTextModeWidth(); i < (VGAGetTextModeHeight() - 1) * VGAGetTextModeWidth(); i++) {
+            terminal_buffer[i] = terminal_buffer[i + VGAGetTextModeWidth()];
         }
         /* Make the new line blank. */
-        for(i = 24*80; i < 25*80; i++) {
+        for(size_t i = (VGAGetTextModeHeight() - 1) * VGAGetTextModeWidth(); i < VGAGetTextModeHeight() * VGAGetTextModeWidth(); i++) {
             terminal_buffer[i] = TerminalMakeVGAEntry(' ', COLOR_BLACK);
         }
         /* And finally set the current line to the second to last one. */
-        terminal_row = 24;
+        terminal_row = (VGAGetTextModeHeight() - 1);
     }
 }
 
@@ -71,9 +70,10 @@ void TerminalPrintCharacter(char character) {
         case '\b':
             /* C standard doesn't define behaivor for backspace at initial position. */
             /* I just ignore it. */
-            if(terminal_column != 0) {
+            if(terminal_column > 0) {
                 terminal_column--;
             }
+            TerminalMakeVGAEntryAt(' ', terminal_color, terminal_column, terminal_row);
             terminal_caught_escape = true;
             break;
         /* Formfeed? */
@@ -99,7 +99,7 @@ void TerminalPrintCharacter(char character) {
         /* Vertical tab. */
         case '\v':
             /* Move 6 lines vertically. */
-            for(int i = 0; i < 6; i++) {
+            for(size_t i = 0; i < 6; i++) {
                 terminal_row++;
                 TerminalScroll();
             }
@@ -135,7 +135,7 @@ void TerminalPrintCharacter(char character) {
     if(terminal_caught_escape)
         return;
 
-    if(++terminal_column == VGA_WIDTH && terminal_row == VGA_HEIGHT) {
+    if(++terminal_column == VGAGetTextModeWidth() && terminal_row == VGAGetTextModeHeight()) {
         TerminalScroll();
     }
 }
@@ -152,12 +152,13 @@ void TerminalPrintString(char* string) {
 void SetupTerminal() {
     terminal_row = 0;
     terminal_column = 0;
-    terminal_buffer = (uint16_t*) 0xB8000;
+    //terminal_buffer = (uint16_t*) 0xB8000;
+    terminal_buffer = (uint16_t*) (VGAGetFramebufferSegment() * 16);
     terminal_color = TerminalMakeColor(COLOR_LIGHT_GREY, COLOR_BLACK);
 
-    for(size_t y = 0; y < VGA_HEIGHT; y++) {
-        for(size_t x = 0; x < VGA_WIDTH; x++) {
-            const size_t index = y * VGA_HEIGHT + x;
+    for(size_t y = 0; y < VGAGetTextModeHeight(); y++) {
+        for(size_t x = 0; x < VGAGetTextModeWidth(); x++) {
+            const size_t index = y * VGAGetTextModeHeight() + x;
             terminal_buffer[index] = TerminalMakeVGAEntry(' ', terminal_color);
         }
     }

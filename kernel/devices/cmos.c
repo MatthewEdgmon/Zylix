@@ -89,7 +89,7 @@ void CMOSReadRTC() {
     /* Leaving interrupts enabled during a CMOS read could leave it broken. */
     PICDisableInterrupts();
 
-    uint16_t century;
+    uint16_t century = 0;
     uint16_t last_seconds;
     uint16_t last_minutes;
     uint16_t last_hours;

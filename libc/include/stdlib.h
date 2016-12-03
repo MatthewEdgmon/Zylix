@@ -11,19 +11,32 @@ extern "C" {
 #define NULL ((void*)0)
 #endif
 
+#define RAND_MAX (0x7FFFFFFF)
+
+static unsigned long int rand_seed = 1;
+
 typedef unsigned long size_t;
-
-void* malloc(size_t size);
-void  free(void* address);
-
-int atoi(const char* string);
-
-long strtol(char* string, char* pointer, int base);
 
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
 
-#define RAND_MAX (0x7FFFFFFF)
+int atoi(const char*);
+long atol(const char*);
+long long atoll(const char*);
+double atof(const char*);
+
+float strtof(const char*, char**);
+long strtol(char*, char*, int);
+
+int rand(void);
+void srand(unsigned);
+
+void* malloc(size_t);
+void* calloc(size_t);
+void* realloc(void*, size_t);
+void  free(void*);
+
+void abort(void);
 
 #ifdef __cplusplus
 } /* extern "C" */

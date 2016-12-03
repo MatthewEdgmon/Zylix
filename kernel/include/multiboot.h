@@ -35,21 +35,21 @@ typedef struct multiboot_header {
 	uint32_t width;
 	uint32_t height;
 	uint32_t depth;
-} __attribute__ ((packed)) multiboot_header_t;
+} __attribute__((packed)) multiboot_header_t;
 
 typedef struct multiboot_aout_symbol_table {
     uint32_t tabsize;
 	uint32_t strsize;
 	uint32_t addr;
-	uint32_t reserved
-} __attribute__ ((packed)) multiboot_aout_symbol_table_t;
+	uint32_t reserved;
+} __attribute__((packed)) multiboot_aout_symbol_table_t;
 
 typedef struct multiboot_elf_section_header_table {
 	uint32_t num;
 	uint32_t size;
 	uint32_t addr;
 	uint32_t shndx;
-} __attribute__ ((packed)) multiboot_elf_section_header_table_t;
+} __attribute__((packed)) multiboot_elf_section_header_table_t;
 
 typedef struct multiboot_info {
 	uintptr_t flags;
@@ -76,7 +76,7 @@ typedef struct multiboot_info {
 	uintptr_t vbe_interface_seg;
 	uintptr_t vbe_interface_off;
 	uintptr_t vbe_interface_len;
-} __attribute__ ((packed)) multiboot_info_t;
+} __attribute__((packed)) multiboot_info_t;
 
 typedef struct multiboot_vbe_info {
 	uint16_t attributes;
@@ -101,21 +101,21 @@ typedef struct multiboot_vbe_info {
 	uint32_t physbase;
 	uint32_t reserved1;
 	uint16_t reserved2;
-} __attribute__ ((packed)) multiboot_vbe_info_t;
+} __attribute__((packed)) multiboot_vbe_info_t;
 
 typedef struct multiboot_module {
 	uint32_t mod_start;		/* Address of the module. */
 	uint32_t mod_end;		/* Memory used goes from bytes 'mod_start' to 'mod_end-1' inclusive. */
 	uint32_t cmdline;		/* Module command line. */
 	uint32_t reserved;		/* Padding to take it to 16 bytes. */
-} __attribute__ ((packed)) multiboot_module_t;
+} __attribute__((packed)) multiboot_module_t;
 
 typedef struct multiboot_memory_map {
 	uint32_t size;
 	uint64_t base_addr;
 	uint64_t length;
 	uint32_t type;
-} __attribute__ ((packed)) multiboot_memory_map_t;
+} __attribute__((packed)) multiboot_memory_map_t;
 
 extern multiboot_info_t* MultibootCopy(multiboot_info_t* multiboot_info);
 extern void MultibootDumpInfo(multiboot_info_t* multiboot_info);

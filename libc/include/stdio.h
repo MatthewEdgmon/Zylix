@@ -1,8 +1,6 @@
 #ifndef __STDIO_H__
 #define __STDIO_H__
 
-#define EOF (-1)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,31 +39,27 @@ typedef int (*printf_func_ptr)(unsigned c, void** helper);
 
 int printf_format(const char* fmt, va_list va_args, printf_func_ptr func, void* ptr);
 
-/* File management. */
 FILE* fopen(const char* name, const char* mode);
 int fclose(FILE *f);
 
-/* File input. */
 int fgetc(FILE* f);
 int fgetchar(FILE* f);
 char* fgets(char* buffer, int size, FILE* f);
 
-/* File output. */
-int putc(FILE* f, char c);
 int fputc(FILE* f, char c);
 int fputchar(FILE* f, char c);
+int fprintf(FILE* f, const char* fmt, ...);
 int vfprintf(FILE* f, const char *fmt, va_list va_args);
 
-/* Terminal output. */
+int putc(FILE* f, char c);
+int putchar(char c);
 int puts(const char* string);
 int printf(const char* restrict fmt, ...);
 int vprintf(const char *fmt, va_list va_args);
 
-/* Terminal input. */
 int getc(FILE* stream);
 char* gets(char* string);
 
-/* Buffer output. */
 int sprintf(char *buffer, const char *fmt, ...);
 int vsprintf(char *buffer, const char *fmt, va_list args);
 int vsnprintf(char *buffer, const char *fmt, va_list args);

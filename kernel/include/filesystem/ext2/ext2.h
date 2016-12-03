@@ -28,7 +28,7 @@ enum EXT2_FILE_TYPE {
     EXT2_FILE_SYMLINK = 7
 };
 
-struct ext2_superblock {
+typedef struct ext2_superblock {
 	uint32_t inode_total;
 	uint32_t block_total;
 	uint32_t block_rev_total;
@@ -82,9 +82,9 @@ struct ext2_superblock {
 	uint32_t mount_opt;
 	uint32_t meta;
 	uint8_t unused4[760];
-};// __attribute__ ((packed));
+} __attribute__((__packed__)) ext2_superblock_t;
 
-struct ext2_inode {
+typedef struct ext2_inode {
     uint16_t type;
     uint16_t uid;
     uint32_t size;
@@ -92,9 +92,10 @@ struct ext2_inode {
     uint32_t ctime;     /* Creation time. */
     uint32_t dtime;
     uint16_t gid;
-};// ___attribute__ ((packed));
+} __attribute__((__packed__)) ext2_inode_t;
 
-struct ext2_superblock* ext2GetSuperBlock(void* address);
+ext2_superblock_t* ext2GetSuperBlock(uintptr_t address);
 
+int ext2ValidateSuperBlock(ext2_superblock_t* superblock);
 
 #endif /* __EXT2_H__ */

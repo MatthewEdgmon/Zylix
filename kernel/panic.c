@@ -3,10 +3,12 @@
 
 #include <arch/interrupts.h>
 #include <arch/registers.h>
+#include <arch/stop.h>
+
+#include <devices/vga.h>
 
 #include <panic.h>
 #include <terminal.h>
-#include <vga.h>
 
 void _KernelPanic(char* message, const char* file, int line, registers_t* registers) {
     InterruptsDisable();
@@ -28,8 +30,7 @@ void _KernelPanic(char* message, const char* file, int line, registers_t* regist
     }
     printf("\nStopping execution.\n");
     while(1) {
-        __asm__ __volatile__ ("cli");
-        __asm__ __volatile__ ("hlt");
+        stop_execution();
     }
 }
 
@@ -43,7 +44,6 @@ void _AssertFailure(const char* statement, const char* file, int line) {
     printf("     Line: %d\n", line);
     printf("\nStopping execution.\n");
     while(1) {
-        __asm__ __volatile__ ("cli");
-        __asm__ __volatile__ ("hlt");
+        stop_execution();
     }
 }

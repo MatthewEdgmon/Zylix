@@ -9,5 +9,7 @@
 .tags1
 grub.img
 zykernel
-zylix.img
+zylix-el-torito.iso
+zylix-hard-drive.img
 tags
+sysroot/usr/include

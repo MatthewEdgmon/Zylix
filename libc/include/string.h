@@ -13,12 +13,16 @@ extern "C" {
 
 #include <stddef.h>
 
+void* memcpy(void* dest, const void* src, size_t);
 void* memset(void* buffer_pointer, int value, size_t size);
 
 char* stpcpy(char * restrict d, const char * restrict s);
 int strcmp(const char * l, const char * r);
 char* strcpy(char * restrict dest, const char * restrict src);
 size_t strlen(const char* string);
+
+// TODO: Add in preprocessor macros for handling C extensions, liks POSIX strdup
+char* strdup(const char* s1);
 
 #ifdef __cplusplus
 } /* extern "C" */

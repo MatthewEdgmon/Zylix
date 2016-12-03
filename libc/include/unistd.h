@@ -7,10 +7,6 @@ extern "C" {
 
 #include <stdint.h>
 
-#define _POSIX_VERSION 200809L
-#define _POSIX2_VERSION 200809L
-#define _XOPEN_VERSION 700
-
 #ifdef __cplusplus
 #define NULL 0L
 #else
@@ -30,7 +26,17 @@ extern "C" {
 #define W_OK 2
 #define X_OK 1
 
-int fork();
+#define _POSIX_VERSION       200809L
+#define _POSIX2_VERSION      200809L
+
+#define _XOPEN_VERSION       700
+#define _XOPEN_UNIX          0
+
+int execv (const char*, char* const[]);
+int execve(const char*, char* const[], char* const[]);
+int execvp(const char*, char* const[]);
+
+int fork(void);
 
 #ifdef __cplusplus
 }

@@ -1,22 +1,32 @@
-# Emulator and arguments to pass to it.
-EMU = qemu-system-i386
-EMU_ARGS  = -kernel ./sysroot/boot/zykernel
-# Arguments for storage and memory
-EMU_ARGS += -m 1024 -hda $(HD_IMAGE_NAME)
-# Arguments for keyboard mouse and language
-EMU_ARGS += -k en-us -show-cursor
-# Arguments for video
-EMU_ARGS += -vga std
-# Arguments for network
-EMU_ARGS += -net nic,model=rtl8139 -net user
-# Arguments for clock
-EMU_ARGS += -rtc base=localtime
-
-# Hard disk image generator.
+# Emulation image generators
 GENEXT2FS = genext2fs
-HD_IMAGE_NAME = zylix.img
+GENISOIMAGE = genisoimage
+HD_IMAGE_NAME = zylix-hard-drive.img
 HD_IMAGE_DIR = sysroot
 HD_IMAGE_SIZE = 131072
+ISO_IMAGE_NAME = zylix-el-torito.iso
+ISO_IMAGE_DIR = sysroot
+ISO_IMAGE_LABEL = ZylixAlpha
+
+# Emulator and arguments to pass to it.
+EMU = $(VBOX)
+EMU_ARGS = $(VBOX_ARGS)
+
+QEMU = qemu-system-i386
+QEMU_ARGS  = -kernel ./sysroot/boot/zykernel
+# Arguments for storage and memory
+QEMU_ARGS += -m 1024 -hda $(HD_IMAGE_NAME)
+# Arguments for keyboard mouse and language
+QEMU_ARGS += -k en-us -show-cursor
+# Arguments for video
+QEMU_ARGS += -vga std
+# Arguments for network
+QEMU_ARGS += -net nic,model=rtl8139 -net user
+# Arguments for clock
+QEMU_ARGS += -rtc base=localtime
+
+VBOX = vboxmanage startvm "Zylix"
+VBOX_ARGS =
 
 # Pretty output utilities.
 BEG = tools/output/mk-beg
@@ -27,7 +37,7 @@ ERRORSS = >>/.build-errors || tools/output/mk-error
 BEGRM = tools/output/mk-beg-rm
 ENDRM = tools/output/mk-end-rm
 
-all: build install
+all: build install ctags
 
 ################################################################################
 #                                  Build                                       #
@@ -38,7 +48,7 @@ build: build-libc build-kernel build-userspace
 build-libc:
 	@cd libc && $(MAKE) --no-print-directory
 
-build-kernel:
+build-kernel: install-libc
 	@cd kernel && $(MAKE) --no-print-directory
 
 build-userspace:
@@ -48,16 +58,10 @@ build-userspace:
 #                                  Ctags                                       #
 ################################################################################
 
-ctags: ctags-libc ctags-kernel ctags-userspace
-
-ctags-libc:
-	@cd libc && $(MAKE) ctags --no-print-directory
-
-ctags-kernel:
-	@cd kernel && $(MAKE) ctags --no-print-directory
-
-ctags-userspace:
-	@cd userspace && $(MAKE) ctags --no-print-directory
+ctags:
+	@${BEG} "CTAG" "Generating ctags..."
+	@ctags --exclude=sysroot --exclude=tools --exclude=userspace --fields=+KSn -R .
+	@${END} "CTAG" "Generated ctags."
 
 ################################################################################
 #                                 Install                                      #
@@ -78,7 +82,7 @@ install-userspace: build-userspace
 #                                  Clean                                       #
 ################################################################################
 
-clean: clean-libc clean-kernel clean-userspace clean-image clean-trace
+clean: clean-libc clean-kernel clean-userspace clean-image clean-ctags clean-trace
 
 clean-libc:
 	@cd libc && $(MAKE) --no-print-directory clean
@@ -97,6 +101,11 @@ clean-image:
 	@rm -r -f $(HD_IMAGE_DIR)/usr/include/libc
 	@rm -r -f $(HD_IMAGE_DIR)/usr/include/zykernel
 	@${ENDRM} "RM" "Cleaned emulation hard disk image."
+
+clean-ctags:
+	@${BEGRM} "RM" "Cleaning ctags file..."
+	@rm -f tags
+	@${ENDRM} "RM" "Cleaned ctags file"
 
 clean-trace:
 	@${BEGRM} "RM" "Cleaning trace files..."
@@ -122,13 +131,19 @@ errors-userspace:
 #                                Emulation                                     #
 ################################################################################
 
-zylix.img: install
+zylix-hard-drive.img: install
 	@${BEG} "HDD" "Building emulation hard disk image."
 	@$(GENEXT2FS) -d $(HD_IMAGE_DIR) -D tools/devtable -b $(HD_IMAGE_SIZE) -N 4096 $(HD_IMAGE_NAME)
 	@${END} "HDD" "Finished building emulation image."
 	@${INFO} "--" "Hard disk image for Zylix is available."
 
-run: zylix.img
+zylix-el-torito.iso: install
+	@${BEG} "ISO" "Building an El Torito CD image."
+	@$(GENISOIMAGE) -input-charset utf8 -quiet -V $(ISO_IMAGE_NAME) -R -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $(ISO_IMAGE_NAME) $(ISO_IMAGE_DIR)
+	@${END} "ISO" "Finished building El Torito CD image."
+	@${INFO} "--" "ISO image for Zylix is available."
+
+run: $(HD_IMAGE_NAME) $(ISO_IMAGE_NAME)
 	@${BEG} "EMU" "Running ${EMU}"
 	@$(EMU) $(EMU_ARGS)
 	@${END} "EMU" "Emulation ended."

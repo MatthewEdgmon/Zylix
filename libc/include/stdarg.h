@@ -12,7 +12,7 @@ extern "C" {
 #define va_copy(d,s)    __builtin_va_copy(d,s)
 typedef __builtin_va_list va_list;
 #else
-#error You need a modern compiler.
+#error TODO: Implement non GNU built in va_arg list.
 #endif
 
 #ifdef __cplusplus

@@ -8,30 +8,38 @@
 #include <arch/cpu_info.h>
 
 #include <devices/acpi.h>
+#include <devices/ata.h>
 #include <devices/cmos.h>
+#include <devices/pci.h>
 #include <devices/ps2.h>
 #include <devices/ps2keyboard.h>
 #include <devices/ps2mouse.h>
-#include <devices/pci.h>
 #include <devices/smbios.h>
+#include <devices/vesa.h>
+#include <devices/vga.h>
 
 #include <filesystem/vfs.h>
-#include <filesystem/stdout.h>
-#include <filesystem/stderr.h>
-#include <filesystem/stdin.h>
-#include <filesystem/null.h>
+
+#include <memory/liballoc.h>
+
+#include <shell/shell.h>
+
+#include <structures/tree.h>
+#include <structures/list.h>
+
+#include <tasking/execute.h>
+#include <tasking/process.h>
+
+#include <menu/shell.h>
 
 #include <common.h>
-#include <execute.h>
 #include <lock.h>
 #include <logo.h>
 #include <logging.h>
 #include <multiboot.h>
 #include <panic.h>
-#include <scheduler.h>
 #include <syscall_handler.h>
 #include <terminal.h>
-#include <vga.h>
 
 uintptr_t initial_esp;
 
@@ -45,7 +53,6 @@ int main(multiboot_info_t* multiboot_info, uint32_t multiboot_magic, uintptr_t e
     SetupCPU();
     SetupSyscalls();
     SetupLocks();
-    SetupScheduler();
 
     if(multiboot_magic != MULTIBOOT_BOOTLOADER_MAGIC) {
         printf("Didn't receive right multiboot magic: 0x%X\n", multiboot_magic);
@@ -78,6 +85,17 @@ int main(multiboot_info_t* multiboot_info, uint32_t multiboot_magic, uintptr_t e
     CMOSReadRTC();
     printf("Current date and time: %d/%d/%d %d:%d:%d \n", CMOSGetMonth(), CMOSGetDay(), CMOSGetYear(),
                                                           CMOSGetHours(), CMOSGetMinutes(), CMOSGetSeconds());
+
+    printf("Setting up PCI devices.\n");
+    SetupPCI();
+
+    printf("Setting up ATA devices.\n");
+    SetupATA();
+
+    printf("Setting up Multi-Tasking.\n");
+    SetupProcessing();
+
+    SetupShell();
 
     int exit_status = 0;
 

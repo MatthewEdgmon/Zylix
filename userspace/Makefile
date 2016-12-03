@@ -46,8 +46,13 @@ all: .userspace-done
 	@${INFO} "--" "Finished building userspace."
 	@touch .userspace-done
 
-ctags: zykernel
+################################################################################
+#                                  Ctags                                       #
+################################################################################
+
+ctags:
 	@${BEG} "CTAG" "CTags (userspace)."
+	@ctags -R .
 	@${END} "CTAG" "CTags (userspace)."
 
 install:

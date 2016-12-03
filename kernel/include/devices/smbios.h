@@ -24,7 +24,7 @@
 #define SMBIOS_HEADER_FINAL            127
 
 typedef struct smbios_entry_point {
-    char    entry_point_string[4];      /* This "_SM_" */
+    char    entry_point_string[4];      /* This is "_SM_" */
     uint8_t checksum;                   /* This value added to all other values equals 0 via overflow. */
     uint8_t length;                     /* Length of the table, since spec 2.1 it's 0x1F */
     uint8_t major_version;
@@ -32,7 +32,7 @@ typedef struct smbios_entry_point {
     uint8_t max_structure_size;
     uint8_t entry_point_revision;
     char    formatted_area[5];
-    char    entry_point_string2[5];     /* This "_DMI_" */
+    char    entry_point_string2[5];     /* This is "_DMI_" */
     uint8_t checksum2;
     uint16_t table_length;
     uint32_t table_address;             /* This is the address of the table. */

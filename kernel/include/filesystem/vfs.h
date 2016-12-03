@@ -12,6 +12,7 @@ typedef struct fs_node {
 
     uint32_t uid;           /* The owning user. */
     uint32_t gid;           /* The owning group. */
+    uint32_t mask;          /* Permissions mask. */
     uint32_t size;          /* Size of the file, in bytes. */
 
     uint32_t access_time;   /* When was the file last accessed. */

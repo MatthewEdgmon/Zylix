@@ -1,19 +1,27 @@
-# Point to your local i686 elf cross compiler.
+# Point to your cross compiler.
 CROSS_DIR = /home/matth_000/cross/bin
 
+# Change TARGET_ARCH to match the platform you're targeting.
+TARGET_ARCH  = i686
+ARCH_DIR     = arch/$(TARGET_ARCH)
+include        $(ARCH_DIR)/make.config
+
 # Build using our cross compiler.
-CC  = $(CROSS_DIR)/i686-elf-gcc
-LD  = $(CROSS_DIR)/i686-elf-ld
-NM  = $(CROSS_DIR)/i686-elf-nm
-CXX = $(CROSS_DIR)/i686-elf-g++
-AS  = $(CROSS_DIR)/i686-elf-as
+CC  = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-gcc
+LD  = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-ld
+NM  = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-nm
+CXX = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-g++
+AS  = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-as
 
 # Flags used to build the kernel.
 KERNEL_CFLAGS  = -O2 -std=c99
 KERNEL_CFLAGS += -finline-functions -ffreestanding
+KERNEL_CFLAGS += -fstack-protector-strong
 KERNEL_CFLAGS += -Wall -Wextra -Wno-unused-function -Wno-unused-parameter
 KERNEL_CFLAGS += -pedantic -fno-omit-frame-pointer
+# Choose between userspace and kernel version.
 KERNEL_CFLAGS += -DZYLIX_LIBC_KERNEL
+#LIBRARY_CFLAGS += -DZYLIX_LIBC_USERSPACE
 KERNEL_LDFLAGS = -shared -Bsymbolic -z defs
 KERNEL_LIBS    = -nostdlib -lc -lgcc
 
@@ -26,15 +34,12 @@ KERNEL_OBJS  = $(patsubst %.c,%.o,$(wildcard devices/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard filesystem/*/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard filesystem/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard memory/*.c))
-KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard menu/*.c))
+KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard shell/*.c))
+KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard structures/*.c))
+KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard tasking/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard *.c))
 
-# Change TARGET_ARCH to match the platform you're targeting.
-TARGET_ARCH  = i386
-ARCH_DIR     = arch/$(TARGET_ARCH)
-
 # Kernel architecture specific files
-include        $(ARCH_DIR)/make.config
 CRTI_OBJ     = $(ARCH_DIR)/crti.o
 CRTN_OBJ     = $(ARCH_DIR)/crtn.o
 CRTBEGIN_OBJ = $(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
@@ -94,15 +99,6 @@ zykernel: ${CRTI_OBJ} ${CRTN_OBJ} ${KERNEL_ARCH_OBJS} ${KERNEL_OBJS}
 	@${END} "CC" "$<"
 
 ################################################################################
-#                                  Ctags                                       #
-################################################################################
-
-ctags:
-	@${BEG} "CTAG" "CTags (kernel)."
-	@ctags -R ./
-	@${END} "CTAG" "CTags (kernel)."
-
-################################################################################
 #                                 Install                                      #
 ################################################################################
 
@@ -124,7 +120,7 @@ install-kernel-headers: zykernel
 #                                  Clean                                       #
 ################################################################################
 
-clean: clean-arch-objects clean-objects clean-kernel clean-tags clean-build-errors
+clean: clean-arch-objects clean-objects clean-kernel clean-build-errors
 	@${INFO} "--" "Cleaning complete."
 
 clean-arch-objects:
@@ -141,11 +137,6 @@ clean-kernel:
 	@${BEGRM} "RM" "Cleaning kernel binary..."
 	@rm -f zykernel
 	@${ENDRM} "RM" "Cleaned kernel binary."
-
-clean-tags:
-	@${BEGRM} "RM" "Cleaning CTags..."
-	@rm -f tags
-	@${ENDRM} "RM" "Cleaned CTags."
 
 clean-build-errors:
 	@${BEGRM} "RM" "Cleaning build error log..."

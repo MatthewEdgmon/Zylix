@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <memory/kmalloc.h>
+#include <memory/liballoc.h>
 
 #include <common.h>
 #include <multiboot.h>
@@ -11,11 +11,11 @@
 char* ramdisk = NULL;
 multiboot_info_t* multiboot_info_ptr = NULL;
 
-//multiboot_info_t* MultibootCopy(multiboot_info_t* multiboot_info) {
-//    struct multiboot* new_info = (multiboot_info_t*) kmalloc(sizeof(struct multiboot_info));
-//    memcpy(new_info, multiboot_info, sizeof(struct multiboot_info));
-//    return new_info;
-//}
+multiboot_info_t* MultibootCopy(multiboot_info_t* multiboot_info) {
+    struct multiboot* new_info = (multiboot_info_t*) malloc(sizeof(struct multiboot_info));
+    memcpy(new_info, multiboot_info, sizeof(struct multiboot_info));
+    return new_info;
+}
 
 void MultibootDumpInfo(multiboot_info_t* multiboot_info) {
     printf("Multiboot Information:\n");

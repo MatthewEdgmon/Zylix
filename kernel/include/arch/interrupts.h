@@ -34,7 +34,8 @@ typedef int (*irq_handler_chain_t) (struct registers *);
 #define InterruptsResume PICResumeInterrupts
 #define InterruprsInstallHandler PICInstallIRQHandler
 
-#include "../../arch/i386/isr.h"
-#include "../../arch/i386/pic.h"
+#include "../../arch/i686/gdt.h"
+#include "../../arch/i686/isr.h"
+#include "../../arch/i686/pic.h"
 
 #endif /* __INTERRUPTS_H__ */
