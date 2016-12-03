@@ -108,6 +108,7 @@ install-gcc:
 
 install-sysroot:
 	@${BEG} "CP" "Copying libc to sysroot."
+	@mkdir -p $(SYSROOT)/usr/{lib,include/libc}
 	@rm -f $(SYSROOT)/usr/lib/libc.a
 	@cp libc.a $(SYSROOT)/usr/lib/libc.a
 	@cp -RT -f ./include $(SYSROOT)/usr/include/libc/
