@@ -17,7 +17,7 @@
 
 char* process_default_name = "[Unamed Process]";
 
-void GenerateProcessTree() {
+void GenerateProcessStructures() {
     process_tree = TreeCreate();
     process_list = ListCreate();
     process_queue = ListCreate();
@@ -44,17 +44,20 @@ void ProcessUserspaceJump(uintptr_t address, int argc, char** argv, uintptr_t st
 process_t* ProcessCreate() {
 	if(process_tree->root_node == NULL) {
 		printf("Tried to create a process with no root process in tree.\n");
-		printf("Process not created.\n");
 		return NULL;
 	}
 
 	process_t* new_process = calloc(sizeof(process_t), 1);
+
+    /* Insert new process as child of parent node. */
+
+    return new_process;
 }
 
 void SetupProcessing() {
     InterruptsDisable();
 
-    GenerateProcessTree();
+    GenerateProcessStructures();
 
     current_process = InitProcessCreate();
 

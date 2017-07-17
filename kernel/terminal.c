@@ -1,3 +1,22 @@
+/**
+ * terminal.c
+ *
+ * This file is part of Zylix.
+ *
+ * Zylix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zylix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -5,13 +24,13 @@
 
 #include <terminal.h>
 
-#include <devices/vga.h>
+#include <devices/video/vga.h>
 
-bool        terminal_caught_escape;
-size_t      terminal_row;
-size_t      terminal_column;
-uint8_t     terminal_color;
-uint16_t*   terminal_buffer;
+bool      terminal_caught_escape;
+size_t    terminal_row;
+size_t    terminal_column;
+uint8_t   terminal_color;
+uint16_t* terminal_buffer;
 
 uint8_t TerminalMakeColor(enum vga_color foreground, enum vga_color background) {
     return foreground | background << 4;
@@ -142,8 +161,9 @@ void TerminalPrintCharacter(char character) {
 
 void TerminalPrintString(char* string) {
     size_t stringlen = strlen(string);
-    for(size_t i = 0; i < stringlen; i++)
+    for(size_t i = 0; i < stringlen; i++) {
         TerminalPrintCharacter(string[i]);
+    }
 }
 
 /**

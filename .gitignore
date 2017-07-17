@@ -5,11 +5,32 @@
 *.sublime-project
 *.sublime-workspace
 .build-errors
-.toolchain-built
-.tags1
-grub.img
+sysroot/usr
+
+# C library
+libc.a
+
+# kernel
 zykernel
+
+# Emulation images
+grub.img
 zylix-el-torito.iso
 zylix-hard-drive.img
+
+# Logs
+bochs-log.txt
+
+# Ctags
 tags
-sysroot/usr/include
+.tags1
+
+# Toolchain
+.toolchain-built
+/tools/toolchain/build-gcc
+/tools/toolchain/build-binutils
+/tools/toolchain/download
+/tools/toolchain/local
+
+# Userspace
+.userspace-built

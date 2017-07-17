@@ -1,40 +1,27 @@
+/**
+ * cpu_infoh.h - Architecture independent CPU feature management.
+ *
+ * This file is part of Zylix.
+ *
+ * Zylix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zylix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef __CPU_INFO_H__
 #define __CPU_INFO_H__
 
 #include <stdbool.h>
 
-typedef struct {
-
-	/* What's the max value CPUID supports? */
-	long highest_request_level;
-
-	/* Information */
-	char vendor[13];
-	char brand[48];
-	char features[128];
-
-	/* Features */
-	bool features_FPU;
-	bool features_APIC;
-	bool features_MMX;
-	bool features_SSE;
-	bool features_SSE2;
-	bool features_SSE3;
-	bool features_IA64;
-	bool features_HYPERTHREADING;
-
-} cpu_info_t;
-
-char* GetCPUArchitecture();
-char* GetCPUVendor();
-char* GetCPUBrand();
-char* GetCPUFeatures();
-
-long GetCPUMaxRequestLevel();
-
-bool CheckCPUFeature(int feature_code);
-bool CheckCPUExtendedFeature(int feature_code);
-
-void StoreCPUInformation();
+#include "../../arch/i686/cpu_info_i686.h"
 
 #endif /* __CPU_INFO_H__ */

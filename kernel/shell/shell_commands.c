@@ -2,14 +2,18 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <arch/cpu_info.h>
+#include <arch/io.h>
+
+#include <devices/video/bga.h>
+#include <devices/video/lfb_terminal.h>
+#include <devices/video/vesa.h>
+#include <devices/video/vga.h>
 #include <devices/cmos.h>
-#include <devices/vesa.h>
-#include <devices/vga.h>
 
 #include <shell/shell_commands.h>
 #include <shell/shell.h>
 
-#include <logo.h>
 #include <panic.h>
 #include <terminal.h>
 #include <multiboot.h>
@@ -19,17 +23,37 @@ void CommandEcho() {
 }
 
 void CommandClear() {
-    TerminalClear();
+    if(LFBTerminalIsEnabled()) {
+        LFBTerminalClear();
+    } else {
+        TerminalClear();
+    }
 }
 
 void CommandLogo() {
-    PrintLogo();
+    TerminalSetColor(TerminalMakeColor(COLOR_LIGHT_GREEN, COLOR_BLACK));
+    printf("  ______       _  _       \n");
+    printf(" |___  /      | |(_)      \n");
+    printf("    / / _   _ | | _ __  __\n");
+    printf("   / / | | | || || |\\ \\/ /\n");
+    printf("  / /__| |_| || || | >  < \n");
+    printf(" /_____|\\__, ||_||_|/_/\\_\\\n");
+    printf("         __/ |            \n");
+    printf("        |___/             \n");
+    TerminalSetColor(TerminalMakeColor(COLOR_WHITE, COLOR_BLACK));
 }
 
 void CommandClock() {
-    CMOSReadRTC();
-    printf("Current date and time: %d/%d/%d %d:%d:%d \n", CMOSGetMonth(), CMOSGetDay(), CMOSGetYear(),
-                                                          CMOSGetHours(), CMOSGetMinutes(), CMOSGetSeconds());
+    printf("%d/%d/%04d %d:%02d:%02d\n", CMOSGetMonth(), CMOSGetDay(), CMOSGetYear(),
+                                        CMOSGetHours(), CMOSGetMinutes(), CMOSGetSeconds());
+}
+
+void CommandCPUInfo() {
+    DumpCPUInformation();
+}
+
+void CommandSMBIOSInfo() {
+    SMBIOSDumpInfo();
 }
 
 void CommandPanic() {
@@ -59,6 +83,45 @@ void CommandExplode() {
     }
 }
 
-void CommandStartVideo() {
-    SetupVGA();
+void CommandShutdown() {
+    for(const char *s = "Shutdown"; *s; ++s) {
+        outb(0x8900, *s);
+    }
+    outb(0xF4, 0x00);
+}
+
+void CommandBGAStart() {
+    SetupBGA();
+}
+
+void CommandVGADump() {
+    VGADumpRegisters();
+}
+
+void CommandVGAText40x25() {
+    VGASetTextMode(40, 25);
+}
+
+void CommandVGAText40x50() {
+    VGASetTextMode(40, 50);
+}
+
+void CommandVGAText80x25() {
+    VGASetTextMode(80, 25);
+}
+
+void CommandVGAText80x50() {
+    VGASetTextMode(80, 50);
+}
+
+void CommandVGAText90x30() {
+    VGASetTextMode(90, 30);
+}
+
+void CommandVGAText90x60() {
+    VGASetTextMode(90, 60);
+}
+
+void CommandVGAGraphics640x480x16() {
+    VGASetGraphicsMode(640, 480, 16);
 }

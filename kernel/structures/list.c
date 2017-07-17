@@ -1,5 +1,25 @@
+/**
+ * list.c - Linked list implementation.
+ *
+ * This file is part of Zylix.
+ *
+ * Zylix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zylix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #include <structures/list.h>
@@ -80,29 +100,63 @@ void ListDestroyAllNodes(list_t* list) {
 }
 
 /**
- * Puts a node at index.
+ * Puts a node at index, descending from the head. Current node at index
  */
 void ListInsertNode(list_t* list, list_node_t* node, size_t index) {
 
+    /* User just wants to set a new head node. */
+    if(index == 0) {
+        ListAppendNode(list, node);
+    }
+
+    if(index >= list->length) {
+        printf("[LIST] Tried to insert node at index %d, but list is only of size %d.\n", index, list->length);
+        return;
+    }
+
+    /* Create a working node. */
+    list_node_t* current = list->head;
+
+    for(size_t i = 0; i < index; i++) {
+        /* Check if there is a next node. */
+        if(current->next == NULL) {
+            printf("[LIST] Tried to insert node at index %d, but following list found NULL node.\n", index);
+            return;
+        }
+
+        /* Set the current working node to the next node in the list. */
+        current = current->next;
+
+    }
 }
 
 /**
- * Creates new node with value at index.
+ * Creates new node with value at index, descending from the head.
  */
 void ListInsertValue(list_t* list, void* value, size_t index) {
+    list_node_t* new_node;
+    new_node->value = value;
 
+    /* Use an existing function to do the hard work. */
+    ListInsertNode(list, new_node, index);
 }
 
 /**
  * Adds a node to the end of the list.
  */
 void ListAppendNode(list_t* list, list_node_t* node) {
-    if(node->prev || node->next) {
-        printf("Tried to append a node to a list but it already belongs to one.\n");
+    /* Check if this node already belongs to a list, if not, this list is it's owner. */
+    if(node->owner != NULL) {
+        printf("[LIST] Tried to append a node to a list but it already belongs to one.\n");
+        return;
+    } else {
+        node->owner = list;
     }
+
     node->owner = list;
-    // If the list is empty, this is the new head.
-    if(!list->length) {
+
+    /* If the list is empty, this is the new head. */
+    if(list->length == 0) {
         node->prev = NULL;
         node->next = NULL;
         list->head = node;
@@ -121,11 +175,15 @@ void ListAppendNode(list_t* list, list_node_t* node) {
  * Adds a node to the start of a list.
  */
 void ListPrependNode(list_t* list, list_node_t* node) {
-    if(node->prev || node->next) {
-        printf("Tried to append a node to a list but it already belongs to one.\n");
+    /* Check if this node already belongs to a list, if not, this list is it's owner. */
+    if(node->owner != NULL) {
+        printf("[LIST] Tried to prepend a node to a list but it already belongs to one.\n");
+        return;
+    } else {
+        node->owner = list;
     }
-    node->owner = list;
-    // If the list is empty, this is the new head.
+
+    /* If the list is empty, this is the new head. */
     if(!list->length) {
         node->prev = NULL;
         node->next = NULL;
@@ -147,21 +205,7 @@ void ListPrependNode(list_t* list, list_node_t* node) {
 void ListAppendValue(list_t* list, void* value) {
     list_node_t* new_node = malloc(sizeof(list_node_t));
     new_node->value = value;
-    new_node->owner = list;
-    // If the list is empty, this is the new head.
-    if(!list->length) {
-        new_node->prev = NULL;
-        new_node->next = NULL;
-        list->head = new_node;
-        list->tail = new_node;
-        list->length++;
-    } else {
-        new_node->prev = list->tail;
-        new_node->next = NULL;
-        list->tail->next = new_node;
-        list->tail = new_node;
-        list->length++;
-    }
+    ListAppendNode(list, new_node);
 }
 
 /**
@@ -170,21 +214,7 @@ void ListAppendValue(list_t* list, void* value) {
 void ListPrependValue(list_t* list, void* value) {
     list_node_t* new_node = malloc(sizeof(list_node_t));
     new_node->value = value;
-    new_node->owner = list;
-    // If the list is empty, this is the new head.
-    if(!list->length) {
-        new_node->prev = NULL;
-        new_node->next = NULL;
-        list->head = new_node;
-        list->tail = new_node;
-        list->length++;
-    } else {
-        new_node->prev = NULL;
-        new_node->next = list->head;
-        list->head->prev = new_node;
-        list->head = new_node;
-        list->length++;
-    }
+    ListPrependNode(list, new_node);
 }
 
 /**
@@ -215,27 +245,54 @@ int ListSearchIndex(list_t* list, void* value) {
 }
 
 /**
- * Moves the souce list to the end of the destination list, source is not saved.
+ * Creates a new list from two different lists, the "source" list is put on the
+ * end of the "destination" list. Neither list's original structure is saved.
  */
-void ListMerge(list_t* source, list_t* destination) {
-    // First set the owner for each node to the new list.
+list_t* ListMerge(list_t* source, list_t* destination) {
+    list_t* merged_list = ListCreate();
+
+    /* The length of the list is now both lengths added. */
+    merged_list->length = destination->length + source->length;
+
+    merged_list->head = destination->head;
+    merged_list->tail = source->tail;
+
+    foreach(node, destination) {
+        node->owner = merged_list;
+
+        /**
+         * Once we reach the last node of destination, set it's next node to the
+         * head node of source.
+         */
+        if(node->next == NULL) {
+            node->next = source->head;
+        }
+    }
+
     foreach(node, source) {
-        node->owner = destination;
+        /* Tell the first node of source it's new prev is the tail of destination. */
+        if(node->prev == NULL) {
+            node->prev = destination->tail;
+        }
+
+        node->owner = merged_list;
     }
-    // Then set the head node of the source list as the tail node of the target.
-    if(source->head) {
-        source->head = destination->tail;
-    }
-    // The length of the list is now both lengths added.
-    destination->length += source->length;
-    // Your services are no longer required.
-    free(source);
+
+    /* The source lists are not saved. */
+    ListDestroy(source);
+    ListDestroy(destination);
+
+    return merged_list;
 }
 
 void ListOutputStructure(list_t* list) {
-    printf("Printing List Structure. %d Elements.\n", list->length);
+    printf("\nPrinting List Structure. %d Elements.\n", list->length);
     foreach(node, list) {
-        printf(" %d ->", node->value);
+        if(node == list->tail) {
+            printf(" %d", node->value);
+        } else {
+            printf(" %d ->", node->value);
+        }
     }
     printf("\n");
 }

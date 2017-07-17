@@ -8,7 +8,7 @@ ISO_IMAGE_NAME = zylix-el-torito.iso
 ISO_IMAGE_DIR = sysroot
 ISO_IMAGE_LABEL = ZylixAlpha
 
-# Emulator and arguments to pass to it.
+# Set your default emulator here.
 EMU = $(VBOX)
 EMU_ARGS = $(VBOX_ARGS)
 
@@ -24,9 +24,14 @@ QEMU_ARGS += -vga std
 QEMU_ARGS += -net nic,model=rtl8139 -net user
 # Arguments for clock
 QEMU_ARGS += -rtc base=localtime
+# QEMU quick shutdown
+QEMU_ARGS += -device isa-debug-exit,iobase=0xf4,iosize=0x04
 
 VBOX = vboxmanage startvm "Zylix"
 VBOX_ARGS =
+
+BOCHS = bochs
+BOCHS_ARGS = -q -f bochsrc.bxrc
 
 # Pretty output utilities.
 BEG = tools/output/mk-beg
@@ -37,7 +42,7 @@ ERRORSS = >>/.build-errors || tools/output/mk-error
 BEGRM = tools/output/mk-beg-rm
 ENDRM = tools/output/mk-end-rm
 
-all: build install ctags
+all: .toolchain-built build install ctags
 
 ################################################################################
 #                                  Build                                       #
@@ -60,7 +65,7 @@ build-userspace:
 
 ctags:
 	@${BEG} "CTAG" "Generating ctags..."
-	@ctags --exclude=sysroot --exclude=tools --exclude=userspace --fields=+KSn -R .
+	@ctags --exclude=boot --exclude=libc --exclude=sysroot --exclude=tools --exclude=userspace --fields=+KSn -R .
 	@${END} "CTAG" "Generated ctags."
 
 ################################################################################
@@ -146,4 +151,19 @@ zylix-el-torito.iso: install
 run: $(HD_IMAGE_NAME) $(ISO_IMAGE_NAME)
 	@${BEG} "EMU" "Running ${EMU}"
 	@$(EMU) $(EMU_ARGS)
+	@${END} "EMU" "Emulation ended."
+
+qemu: $(HD_IMAGE_NAME) $(ISO_IMAGE_NAME)
+	@${BEG} "EMU" "Running ${QEMU}"
+	@$(QEMU) $(QEMU_ARGS)
+	@${END} "EMU" "Emulation ended."
+
+bochs: $(HD_IMAGE_NAME) $(ISO_IMAGE_NAME)
+	@${BEG} "EMU" "Running ${BOCHS}"
+	@$(BOCHS) $(BOCHS_ARGS)
+	@${END} "EMU" "Emulation ended."
+
+vbox: $(HD_IMAGE_NAME) $(ISO_IMAGE_NAME)
+	@${BEG} "EMU" "Running ${VBOX}"
+	@$(VBOX) $(VBOX_ARGS)
 	@${END} "EMU" "Emulation ended."

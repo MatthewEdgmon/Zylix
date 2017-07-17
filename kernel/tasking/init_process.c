@@ -9,7 +9,7 @@
 #include <tasking/init_process.h>
 
 process_t* InitProcessCreate() {
-    if(process_tree->root_node == NULL) {
+    if(!process_tree->root_node == NULL) {
 		printf("Tried to recreate the init process.\n");
 		return NULL;
 	}

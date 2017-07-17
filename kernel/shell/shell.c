@@ -77,10 +77,21 @@ void SetupShell() {
     AddShellCommand("help", "Lists available commands.", CommandHelp);
     AddShellCommand("echo", "Prints what comes after the command.", CommandEcho);
     AddShellCommand("clear", "Clears the screen.", CommandClear);
+    AddShellCommand("cpu_info", "Dumps information about your CPU.", CommandCPUInfo);
+    AddShellCommand("smbios_info", "Dumps information about the SMBIOS.", CommandSMBIOSInfo);
     AddShellCommand("logo", "Prints the Zylix logo.", CommandLogo);
     AddShellCommand("clock", "Prints the date and time.", CommandClock);
     AddShellCommand("panic", "Test kernel panic.", CommandPanic);
     AddShellCommand("explode", "Fun!", CommandExplode);
-    AddShellCommand("vga_text", "Starts VESA/VGA driver.", CommandStartVideo);
+    AddShellCommand("shutdown", "Shuts down the computer (emulator only).", CommandShutdown);
+    AddShellCommand("bga_start", "Attempts to start Bochs Graphics Adapter.", CommandBGAStart);
+    AddShellCommand("vga_dump", "Dumps the state of the VGA registers.", CommandVGADump);
+    AddShellCommand("vga_40_25", "Starts VESA/VGA 40x25 text mode.", CommandVGAText40x25);
+    AddShellCommand("vga_40_50", "Starts VESA/VGA 40x50 text mode.", CommandVGAText40x50);
+    AddShellCommand("vga_80_25", "Starts VESA/VGA 80x25 text mode.", CommandVGAText80x25);
+    AddShellCommand("vga_80_50", "Starts VESA/VGA 80x50 text mode.", CommandVGAText80x50);
+    AddShellCommand("vga_90_30", "Starts VESA/VGA 90x30 text mode.", CommandVGAText90x30);
+    AddShellCommand("vga_90_60", "Starts VESA/VGA 90x60 text mode.", CommandVGAText90x60);
+    AddShellCommand("vga_640_480", "Starts VESA/VGA 640x480x16 graphics mode.", CommandVGAGraphics640x480x16);
     printf(">");
 }

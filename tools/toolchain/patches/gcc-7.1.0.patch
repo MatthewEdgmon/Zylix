@@ -1,0 +1,303 @@
+diff -crB3 --new-file ./gcc-7.1.0/config.sub ./gcc-7.1.0-patched/config.sub
+*** ./gcc-7.1.0/config.sub	2017-07-16 05:47:06.585903800 -0400
+--- ./gcc-7.1.0-patched/config.sub	2017-07-16 04:06:44.777602800 -0400
+***************
+*** 1409,1415 ****
+  	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+  	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+  	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* \
+! 	      | -onefs* | -tirtos* | -phoenix* | -fuchsia* | -redox*)
+  	# Remember, each alternative MUST END IN *, to match a version number.
+  		;;
+  	-qnx*)
+--- 1409,1416 ----
+  	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+  	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+  	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* \
+! 	      | -onefs* | -tirtos* | -phoenix* | -fuchsia* | -redox* \
+! 		  | -zylix*)
+  	# Remember, each alternative MUST END IN *, to match a version number.
+  		;;
+  	-qnx*)
+diff -crB3 --new-file ./gcc-7.1.0/config.sub.rej ./gcc-7.1.0-patched/config.sub.rej
+*** ./gcc-7.1.0/config.sub.rej	2017-07-16 05:48:00.303245300 -0400
+--- ./gcc-7.1.0-patched/config.sub.rej	1969-12-31 19:00:00.000000000 -0500
+***************
+*** 1,24 ****
+- *** gcc-7.1.0-patched/config.sub	2017-07-16 04:06:44.777602800 -0400
+- --- gcc-7.1.0/config.sub	2016-12-29 06:04:53.000000000 -0500
+- ***************
+- *** 1408,1417 ****
+-   	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+-   	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+-   	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-   	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* \
+- ! 	      | -onefs* | -tirtos* | -phoenix* | -fuchsia* | -redox* \
+- ! 		  | -zylix*)
+-   	# Remember, each alternative MUST END IN *, to match a version number.
+-   		;;
+-   	-qnx*)
+-   		case $basic_machine in
+- --- 1408,1416 ----
+-   	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+-   	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+-   	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-   	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* \
+- ! 	      | -onefs* | -tirtos* | -phoenix* | -fuchsia* | -redox*)
+-   	# Remember, each alternative MUST END IN *, to match a version number.
+-   		;;
+-   	-qnx*)
+-   		case $basic_machine in
+--- 0 ----
+diff -crB3 --new-file ./gcc-7.1.0/fixincludes/mkfixinc.sh ./gcc-7.1.0-patched/fixincludes/mkfixinc.sh
+*** ./gcc-7.1.0/fixincludes/mkfixinc.sh	2017-07-16 05:47:06.592909100 -0400
+--- ./gcc-7.1.0-patched/fixincludes/mkfixinc.sh	2017-07-16 04:07:53.602233300 -0400
+***************
+*** 11,16 ****
+--- 11,17 ----
+  
+  # Check for special fix rules for particular targets
+  case $machine in
++ 	*-zylix* | \
+      i?86-*-cygwin* | \
+      i?86-*-mingw32* | \
+      x86_64-*-mingw32* | \
+diff -crB3 --new-file ./gcc-7.1.0/gcc/config/zylix.h ./gcc-7.1.0-patched/gcc/config/zylix.h
+*** ./gcc-7.1.0/gcc/config/zylix.h	1969-12-31 19:00:00.000000000 -0500
+--- ./gcc-7.1.0-patched/gcc/config/zylix.h	2017-07-16 04:29:24.646319500 -0400
+***************
+*** 0 ****
+--- 1,25 ----
++ #undef STARTFILE_SPEC
++ #define STARTFILE_SPEC "crt0.o%s crti.o%s crtbegin.o%s"
++ 
++ #undef ENDFILE_SPEC
++ #define ENDFILE_SPEC "crtend.o%s crtn.o%s"
++ 
++ #undef  LIB_SPEC
++ #define LIB_SPEC "-lc"
++ 
++ #undef  OBJECT_FORMAT_ELF
++ #define OBJECT_FORMAT_ELF
++ 
++ /* Don't put "extern "C { }" aroudn headers. */
++ #undef  NO_IMPLICIT_EXTERN_C
++ #define NO_IMPLICIT_EXTERN_C 1
++ 
++ #undef TARGET_OS_CPP_BUILTINS
++ #define TARGET_OS_CPP_BUILTINS()        \
++   do {                                  \
++     builtin_define_std("zylix");        \
++     builtin_define_std("unix");         \
++     builtin_assert    ("system=zylix"); \
++     builtin_assert    ("system=unix");  \
++ 	builtin_assert    ("system=posix"); \
++   } while (0);
+diff -crB3 --new-file ./gcc-7.1.0/gcc/config.gcc ./gcc-7.1.0-patched/gcc/config.gcc
+*** ./gcc-7.1.0/gcc/config.gcc	2017-07-16 05:47:06.601917300 -0400
+--- ./gcc-7.1.0-patched/gcc/config.gcc	2017-07-16 04:27:31.831556200 -0400
+***************
+*** 174,180 ****
+  #			the --with-sysroot configure option or the
+  #			--sysroot command line option is used this
+  #			will be relative to the sysroot.
+! # target_type_format_char 
+  # 			The default character to be used for formatting
+  #			the attribute in a
+  #			.type symbol_name, ${t_t_f_c}<property>
+--- 174,180 ----
+  #			the --with-sysroot configure option or the
+  #			--sysroot command line option is used this
+  #			will be relative to the sysroot.
+! # target_type_format_char
+  # 			The default character to be used for formatting
+  #			the attribute in a
+  #			.type symbol_name, ${t_t_f_c}<property>
+***************
+*** 910,915 ****
+--- 910,920 ----
+      *) echo 'Unknown thread configuration for VxWorks'; exit 1 ;;
+    esac
+    ;;
++ *-*-zylix*)
++   gas=yes
++   gnu_ld=yes
++   default_use_cxa_atexit=yes
++   ;;
+  *-*-elf|arc*-*-elf*)
+    # Assume that newlib is being used and so __cxa_atexit is provided.
+    default_use_cxa_atexit=yes
+***************
+*** 1795,1800 ****
+--- 1800,1811 ----
+  	tmake_file="${tmake_file} i386/t-x86_64-elf"
+  	tm_file="${tm_file} i386/unix.h i386/att.h elfos.h newlib-stdint.h i386/i386elf.h i386/x86-64.h fuchsia.h"
+  	;;
++ i[34567]86-*-zylix*)
++     tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h glibc-stdint.h i386/i386elf.h zylix.h"
++     ;;
++ x86_64-*-zylix*)
++     tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h glibc-stdint.h i386/i386elf.h i386/x86-64.h zylix.h"
++     ;;
+  ia64*-*-elf*)
+  	tm_file="${tm_file} dbxelf.h elfos.h newlib-stdint.h ia64/sysv4.h ia64/elf.h"
+  	tmake_file="ia64/t-ia64"
+***************
+*** 3384,3390 ****
+           with_cpu=8548
+        else
+           with_cpu=8540
+!       fi       
+        ;;
+      sparc*-*-*)
+        case ${target} in
+--- 3395,3401 ----
+           with_cpu=8548
+        else
+           with_cpu=8540
+!       fi
+        ;;
+      sparc*-*-*)
+        case ${target} in
+diff -crB3 --new-file ./gcc-7.1.0/libgcc/config.host ./gcc-7.1.0-patched/libgcc/config.host
+*** ./gcc-7.1.0/libgcc/config.host	2017-07-16 05:47:06.610926200 -0400
+--- ./gcc-7.1.0-patched/libgcc/config.host	2017-07-16 04:13:25.255922000 -0400
+***************
+*** 99,105 ****
+  	;;
+  avr-*-*)
+  	cpu_type=avr
+! 	;;    
+  bfin*-*)
+  	cpu_type=bfin
+  	;;
+--- 99,105 ----
+  	;;
+  avr-*-*)
+  	cpu_type=avr
+! 	;;
+  bfin*-*)
+  	cpu_type=bfin
+  	;;
+***************
+*** 656,661 ****
+--- 656,669 ----
+  	;;
+  i[4567]86-wrs-vxworks|i[4567]86-wrs-vxworksae)
+  	;;
++ i[34567]86-*-zylix*)
++ 	extra_parts="$extra_parts crti.o crtbegin.o crtend.o crtn.o"
++ 	tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
++ 	;;
++ x86_64-*-zylix*)
++ 	extra_parts="$extra_parts crti.o crtbegin.o crtend.o crtn.o"
++ 	tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
++ 	;;
+  i[34567]86-*-cygwin*)
+  	extra_parts="crtbegin.o crtbeginS.o crtend.o crtfastmath.o"
+  	if test x$enable_vtable_verify = xyes; then
+***************
+*** 798,804 ****
+  lm32-*-uclinux*)
+          extra_parts="$extra_parts crtbegin.o crtendS.o crtbeginT.o"
+          tmake_file="lm32/t-lm32 lm32/t-uclinux t-libgcc-pic t-softfp-sfdf t-softfp"
+! 	;;	
+  m32r-*-elf*)
+  	tmake_file="$tmake_file m32r/t-m32r t-fdpbit"
+  	extra_parts="$extra_parts crtinit.o crtfini.o"
+--- 806,812 ----
+  lm32-*-uclinux*)
+          extra_parts="$extra_parts crtbegin.o crtendS.o crtbeginT.o"
+          tmake_file="lm32/t-lm32 lm32/t-uclinux t-libgcc-pic t-softfp-sfdf t-softfp"
+! 	;;
+  m32r-*-elf*)
+  	tmake_file="$tmake_file m32r/t-m32r t-fdpbit"
+  	extra_parts="$extra_parts crtinit.o crtfini.o"
+diff -crB3 --new-file ./gcc-7.1.0/libstdc++-v3/crossconfig.m4 ./gcc-7.1.0-patched/libstdc++-v3/crossconfig.m4
+*** ./gcc-7.1.0/libstdc++-v3/crossconfig.m4	2017-07-16 05:47:06.618935600 -0400
+--- ./gcc-7.1.0-patched/libstdc++-v3/crossconfig.m4	2017-07-16 04:14:42.827093900 -0400
+***************
+*** 93,99 ****
+  
+    *-freebsd*)
+      SECTION_FLAGS='-ffunction-sections -fdata-sections'
+!     AC_SUBST(SECTION_FLAGS) 
+      GLIBCXX_CHECK_LINKER_FEATURES
+      AC_DEFINE(HAVE_SETENV)
+      AC_DEFINE(HAVE_FINITEF)
+--- 93,99 ----
+  
+    *-freebsd*)
+      SECTION_FLAGS='-ffunction-sections -fdata-sections'
+!     AC_SUBST(SECTION_FLAGS)
+      GLIBCXX_CHECK_LINKER_FEATURES
+      AC_DEFINE(HAVE_SETENV)
+      AC_DEFINE(HAVE_FINITEF)
+***************
+*** 200,206 ****
+      ;;
+    *-netbsd*)
+      SECTION_FLAGS='-ffunction-sections -fdata-sections'
+!     AC_SUBST(SECTION_FLAGS) 
+      GLIBCXX_CHECK_LINKER_FEATURES
+      AC_DEFINE(HAVE_FINITEF)
+      AC_DEFINE(HAVE_FINITE)
+--- 200,206 ----
+      ;;
+    *-netbsd*)
+      SECTION_FLAGS='-ffunction-sections -fdata-sections'
+!     AC_SUBST(SECTION_FLAGS)
+      GLIBCXX_CHECK_LINKER_FEATURES
+      AC_DEFINE(HAVE_FINITEF)
+      AC_DEFINE(HAVE_FINITE)
+***************
+*** 218,224 ****
+      ;;
+    *-qnx6.1* | *-qnx6.2*)
+      SECTION_FLAGS='-ffunction-sections -fdata-sections'
+!     AC_SUBST(SECTION_FLAGS) 
+      GLIBCXX_CHECK_LINKER_FEATURES
+      AC_DEFINE(HAVE_COSF)
+      AC_DEFINE(HAVE_COSL)
+--- 218,224 ----
+      ;;
+    *-qnx6.1* | *-qnx6.2*)
+      SECTION_FLAGS='-ffunction-sections -fdata-sections'
+!     AC_SUBST(SECTION_FLAGS)
+      GLIBCXX_CHECK_LINKER_FEATURES
+      AC_DEFINE(HAVE_COSF)
+      AC_DEFINE(HAVE_COSL)
+***************
+*** 245,252 ****
+      AC_DEFINE(HAVE_FINITE)
+      AC_DEFINE(HAVE_FPCLASS)
+      # All of the dependencies for wide character support are here, so
+!     # turn it on. 
+!     AC_DEFINE(_GLIBCXX_USE_WCHAR_T) 
+      # These two C99 functions are present only in Solaris >= 10
+      AC_DEFINE(HAVE_STRTOF)
+      AC_DEFINE(HAVE_STRTOLD)
+--- 245,252 ----
+      AC_DEFINE(HAVE_FINITE)
+      AC_DEFINE(HAVE_FPCLASS)
+      # All of the dependencies for wide character support are here, so
+!     # turn it on.
+!     AC_DEFINE(_GLIBCXX_USE_WCHAR_T)
+      # These two C99 functions are present only in Solaris >= 10
+      AC_DEFINE(HAVE_STRTOF)
+      AC_DEFINE(HAVE_STRTOLD)
+***************
+*** 282,287 ****
+--- 282,293 ----
+      GLIBCXX_CHECK_MATH_SUPPORT
+      GLIBCXX_CHECK_STDLIB_SUPPORT
+      ;;
++   *-zylix*)
++     GLIBCXX_CHECK_COMPILER_FEATURES
++     GLIBCXX_CHECK_LINKER_FEATURES
++     GLIBCXX_CHECK_MATH_SUPPORT
++     GLIBCXX_CHECK_STDLIB_SUPPORT
++ 	;;
+    *-vxworks)
+      AC_DEFINE(HAVE_ACOSF)
+      AC_DEFINE(HAVE_ASINF)

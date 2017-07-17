@@ -9,7 +9,7 @@ Don't capitalize file names, and separate words in the name with underscores. Pl
 Don't put editor mode lines or other editor specific code in files, some people have their own code formatting preferences, and yours shouldn't supersede them. Configure your editor globally or just deal with it.
 
 ## C Coding Style
-The Zylix coding stlye is quite different from the normal C style you'll find in the standard library. As a quick reference:
+The Zylix coding style is quite different from the normal C style you'll find in the standard library. As a quick reference:
 * Use spaces instead of tabs.
 * Code is formatted to appear correct at tab size 4.
 * Always put a return statement, even if the function is ```void```.

@@ -10,9 +10,20 @@ void CommandEcho();
 void CommandClear();
 void CommandLogo();
 void CommandClock();
+void CommandCPUInfo();
+void CommandSMBIOSInfo();
 void CommandPanic();
 void CommandExplode();
 void CommandBrowser();
-void CommandStartVideo();
+void CommandShutdown();
+void CommandBGAStart();
+void CommandVGADump();
+void CommandVGAText40x25();
+void CommandVGAText40x50();
+void CommandVGAText80x25();
+void CommandVGAText80x50();
+void CommandVGAText90x30();
+void CommandVGAText90x60();
+void CommandVGAGraphics640x480x16();
 
 #endif /* __SHELL_COMMANDS_H__ */

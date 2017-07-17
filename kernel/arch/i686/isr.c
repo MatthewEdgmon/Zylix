@@ -1,3 +1,22 @@
+/**
+ * isr.c - i686 Interrupt Service Routines
+ *
+ * This file is part of Zylix.
+ *
+ * Zylix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zylix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -15,42 +34,39 @@
 #define ISR_COUNT 32
 
 /* Our ISRs */
-extern void  isr0();
-extern void  isr1();
-extern void  isr2();
-extern void  isr3();
-extern void  isr4();
-extern void  isr5();
-extern void  isr6();
-extern void  isr7();
-extern void  isr8();
-extern void  isr9();
-extern void isr10();
-extern void isr11();
-extern void isr12();
-extern void isr13();
-extern void isr14();
-extern void isr15();
-extern void isr16();
-extern void isr17();
-extern void isr18();
-extern void isr19();
-extern void isr20();
-extern void isr21();
-extern void isr22();
-extern void isr23();
-extern void isr24();
-extern void isr25();
-extern void isr26();
-extern void isr27();
-extern void isr28();
-extern void isr29();
-extern void isr30();
-extern void isr31();
-//extern void isr32();
-//extern void isr33();
-//extern void isr_syscall();
-extern void isr99();
+extern void  isr0();    /* Divison by zero. */
+extern void  isr1();    /* Debug. */
+extern void  isr2();    /* Non-Maskable Interrupt. */
+extern void  isr3();    /* Breakpoint. */
+extern void  isr4();    /* Detected Overflow. */
+extern void  isr5();    /* Out-of-bounds. */
+extern void  isr6();    /* Invalid Opcode. */
+extern void  isr7();    /* No Coprocessor. */
+extern void  isr8();    /* Double fault. */
+extern void  isr9();    /* Coprocessor Segment Overrun. */
+extern void isr10();    /* Bad TSS. */
+extern void isr11();    /* Segment not present. */
+extern void isr12();    /* Stack fault. */
+extern void isr13();    /* General Protection Fault. */
+extern void isr14();    /* Page Fault. */
+extern void isr15();    /* Unkown interrupt. */
+extern void isr16();    /* Coprocessor fault. */
+extern void isr17();    /* Alignment Check. */
+extern void isr18();    /* Machine Check. */
+extern void isr19();    /* Reserved. */
+extern void isr20();    /* Reserved. */
+extern void isr21();    /* Reserved. */
+extern void isr22();    /* Reserved. */
+extern void isr23();    /* Reserved. */
+extern void isr24();    /* Reserved. */
+extern void isr25();    /* Reserved. */
+extern void isr26();    /* Reserved. */
+extern void isr27();    /* Reserved. */
+extern void isr28();    /* Reserved. */
+extern void isr29();    /* Reserved. */
+extern void isr30();    /* Reserved. */
+extern void isr31();    /* Reserved. */
+extern void isr99();    /* System call. */
 
 static const char *exception_messages[32] = {
     "Division by zero",
@@ -105,7 +121,7 @@ void ISRUninstallHandler(size_t isrs) {
 void ISRFaultHandler(struct registers *regs) {
 	irq_handler_t handler = isr_routines[regs->interrupt_number];
 	if(handler) {
-        printf("Handling ISR #%d\n", regs->interrupt_number);
+        printf("Handling ISR [%d] %s \n", regs->interrupt_number, exception_messages[regs->interrupt_number]);
 		handler(regs);
 	} else {
 		printf("Unhandled exception: [%d] %s \n", regs->interrupt_number, exception_messages[regs->interrupt_number]);

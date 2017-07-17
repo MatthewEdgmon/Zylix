@@ -1,5 +1,23 @@
-# Point to your cross compiler.
-CROSS_DIR = /home/matth_000/cross/bin
+##
+# Zylix kernel makefile
+#
+# This file is part of Zylix.
+#
+# Zylix is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Zylix is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
+
+CROSS_DIR = ../tools/toolchain/local/bin
+CROSS_VER = 7.1.0
 
 # Change TARGET_ARCH to match the platform you're targeting.
 TARGET_ARCH  = i686
@@ -16,21 +34,20 @@ AS  = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-as
 # Flags used to build the kernel.
 KERNEL_CFLAGS  = -O2 -std=c99
 KERNEL_CFLAGS += -finline-functions -ffreestanding
-KERNEL_CFLAGS += -fstack-protector-strong
+# TODO: Build support for libssp in gcc
+#KERNEL_CFLAGS += -fstack-protector-strong
 KERNEL_CFLAGS += -Wall -Wextra -Wno-unused-function -Wno-unused-parameter
 KERNEL_CFLAGS += -pedantic -fno-omit-frame-pointer
-# Choose between userspace and kernel version.
-KERNEL_CFLAGS += -DZYLIX_LIBC_KERNEL
-#LIBRARY_CFLAGS += -DZYLIX_LIBC_USERSPACE
-KERNEL_LDFLAGS = -shared -Bsymbolic -z defs
-KERNEL_LIBS    = -nostdlib -lc -lgcc
+KERNEL_LDFLAGS = -z defs
+KERNEL_LIBS    = -lc -lgcc
 
 # Kernel headers.
 KERNEL_INCLUDE_DIR = ./include
 KERNEL_HEADERS = $(shell find include/ -type f -name '*.h')
 
 # Kernel object files.
-KERNEL_OBJS  = $(patsubst %.c,%.o,$(wildcard devices/*.c))
+KERNEL_OBJS  = $(patsubst %.c,%.o,$(wildcard devices/*/*.c))
+KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard devices/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard filesystem/*/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard filesystem/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard memory/*.c))
@@ -39,23 +56,13 @@ KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard structures/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard tasking/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard *.c))
 
-# Kernel architecture specific files
-CRTI_OBJ     = $(ARCH_DIR)/crti.o
-CRTN_OBJ     = $(ARCH_DIR)/crtn.o
-CRTBEGIN_OBJ = $(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
-CRTEND_OBJ   = $(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtend.o)
-
 # Add flags supplied by our arch.
 KERNEL_CFLAGS  += $(KERNEL_ARCH_CFLAGS)
 KERNEL_LDFLAGS += $(KERNEL_ARCH_LDFLAGS)
 
 # Order in which objects are linked.
-KERNEL_OBJ_LINK_LIST = ${CRTI_OBJ} \
-                       ${CRTBEGIN_OBJ} \
-                       ${KERNEL_ARCH_OBJS} \
+KERNEL_OBJ_LINK_LIST = ${KERNEL_ARCH_OBJS} \
                        ${KERNEL_OBJS} \
-                       ${CRTEND_OBJ} \
-                       ${CRTN_OBJ}
 
 # Pretty output utilities.
 BEG = ../tools/output/mk-beg
@@ -82,7 +89,7 @@ all: zykernel
 #                                  Build                                       #
 ################################################################################
 
-zykernel: ${CRTI_OBJ} ${CRTN_OBJ} ${KERNEL_ARCH_OBJS} ${KERNEL_OBJS}
+zykernel: ${KERNEL_ARCH_OBJS} ${KERNEL_OBJS}
 	@${BEG} "LD" "zykernel"
 	@${CC} -T $(ARCH_DIR)/linker.ld -o $@ ${KERNEL_CFLAGS} ${KERNEL_OBJ_LINK_LIST} ${KERNEL_LDFLAGS} ${KERNEL_LIBS} ${ERRORS}
 	@${END} "LD" "zykernel"
@@ -125,7 +132,7 @@ clean: clean-arch-objects clean-objects clean-kernel clean-build-errors
 
 clean-arch-objects:
 	@${BEGRM} "RM" "Cleaning kernel arch-specific objects..."
-	@rm -f ${KERNEL_ARCH_OBJS} ${CRTI_OBJ} ${CRTN_OBJ}
+	@rm -f ${KERNEL_ARCH_OBJS}
 	@${ENDRM} "RM" "Cleaned kernel arch-specific objects."
 
 clean-objects:

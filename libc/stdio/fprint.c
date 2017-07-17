@@ -2,6 +2,6 @@
 #include <string.h>
 #include <unistd.h>
 
-int fprint(FILE* file, char* string) {
-    return write((int) file, string, strlen(string));
+int fprint(FILE* f, char* string) {
+    return write((int) f, string, strlen(string));
 }

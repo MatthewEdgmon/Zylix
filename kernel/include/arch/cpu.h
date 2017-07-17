@@ -8,4 +8,6 @@ uint64_t rdtsc();
 void SetupCPU();
 void SetupFPU();
 
+#include "../../arch/i686/i686.h"
+
 #endif /* __CPU_H__ */

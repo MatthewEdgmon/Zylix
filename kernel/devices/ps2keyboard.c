@@ -1,3 +1,22 @@
+/**
+ * ps2keyboard.c - PS/2 keybaord routines and interrupt handler.
+ *
+ * This file is part of Zylix.
+ *
+ * Zylix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zylix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -375,11 +394,11 @@ void SetupPS2Keyboard() {
                         printf("Device in PS/2 port 1 is an MF2 keyboard.\n");
                         break;
                     default:
-                        printf("WARNING! Unknown device type in PS/2 port 1!\n");
+                        printf("Unknown device type in PS/2 port 1: 0x%X\n", response_byte);
                 }
                 break;
             default:
-                printf("WARNING! Unknown device type in PS/2 port 1!\n");
+                printf("Unknown device type in PS/2 port 1: 0x%X\n", response_byte);
                 break;
         }
 

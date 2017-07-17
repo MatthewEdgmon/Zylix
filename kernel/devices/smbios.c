@@ -1,3 +1,22 @@
+/**
+ * smbios.c - SMBIOS (System Management BIOS) information reader.
+ *
+ * This file is part of Zylix.
+ *
+ * Zylix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zylix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <stdint.h>
 #include <stdio.h>
 
@@ -26,7 +45,7 @@ void SMBIOSLocateEntryPoint() {
     uint8_t* memory = (uint8_t*) SMBIOS_SEARCH_START;//0xF0000;
     uint8_t length;
     uint8_t checksum;
-    
+
     while((uint16_t*) memory < (uint16_t*) SMBIOS_SEARCH_END) {
         if(memory[0] == '_' && memory[1] == 'S' && memory[2] == 'M' && memory[3] == '_') {
             /* Found the identifier string, get the length. */
@@ -98,6 +117,10 @@ void SMBIOSParseHeader(smbios_header_t* header) {
 
     printf("Type: %d\n", header_address[0]);
 
+}
+
+void SMBIOSDumpInfo() {
+    
 }
 
 void SetupSMBIOS() {

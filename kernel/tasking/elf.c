@@ -24,6 +24,7 @@ int ELFValidateHeader(void* data) {
 }
 
 process_t* ELFLoad(void* elf) {
+
     if(ELFValidateHeader(elf)) {
         printf("Tried to load an invalid ELF file.\n");
         return (process_t*) NULL;

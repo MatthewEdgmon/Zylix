@@ -21,8 +21,6 @@
 #define IRQ_PRIMARY_IDE 14
 #define IRQ_SECONDARY_IDE 15
 
-#define ISR_SYSCALL 99
-
 typedef void (*irq_handler_t) (struct registers *);
 typedef int (*irq_handler_chain_t) (struct registers *);
 
@@ -32,7 +30,7 @@ typedef int (*irq_handler_chain_t) (struct registers *);
 #define InterruptsDisable PICDisableInterrupts
 #define InterruptsEnable PICEnableInterrupts
 #define InterruptsResume PICResumeInterrupts
-#define InterruprsInstallHandler PICInstallIRQHandler
+#define InterruptsInstallHandler PICInstallIRQHandler
 
 #include "../../arch/i686/gdt.h"
 #include "../../arch/i686/isr.h"

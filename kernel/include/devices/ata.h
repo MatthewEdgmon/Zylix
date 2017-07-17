@@ -27,6 +27,19 @@
 #define ATA_STATUS_BIT_RDY 6
 #define ATA_STATUS_BIT_BSY 7
 
+#define ATA_DEVICE_UNKNOWN 0
+#define ATA_DEVICE_PATAPI  1
+#define ATA_DEVICE_SATAPI  2
+#define ATA_DEVICE_PATA    3
+#define ATA_DEVICE_SATA    4
+
+#define ATA_SELECT_MASTER 0xA0
+#define ATA_SELECT_SLAVE  0xB0
+
+#define ATA_COMMAND_READ_SECTORS_EXT  0x24
+#define ATA_COMMAND_WRITE_SECTORS_EXT 0x34
+#define ATA_COMMAND_IDENTIFY          0xEC
+
 #define ATA_PRIMARY_PORT_DATA               0x1F0
 #define ATA_PRIMARY_PORT_FEATURES_ERRORS    0x1F1
 #define ATA_PRIMARY_PORT_SECTOR_COUNT       0x1F2
@@ -76,9 +89,12 @@
 #define ATA_QUATERNARY_ALTERNATE_STATUS     0x366
 
 uint8_t ATASoftwareReset(uint8_t bus);
+uint8_t ATADetectDevice(uint8_t bus_number, uint8_t device_number);
 
 uint8_t ATAPrimaryInterruptHandler(registers_t* regs);
 uint8_t ATASecondaryInterruptHandler(registers_t* regs);
+
+void ATATestRead();
 
 void SetupATA();
 

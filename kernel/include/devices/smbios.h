@@ -53,6 +53,8 @@ void SMBIOSLocateEntryPoint();
 void SMBIOSParseEntryPointTable();
 void SMBIOSParseHeader(smbios_header_t* header);
 
+void SMBIOSDumpInfo();
+
 void SetupSMBIOS();
 
 #endif /* __SMBIOS_H__ */

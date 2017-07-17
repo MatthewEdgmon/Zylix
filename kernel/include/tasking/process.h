@@ -77,7 +77,7 @@ process_t* root_process;
 process_t* current_process;
 process_t* idle_process;
 
-void GenerateProcessTree();
+void GenerateProcessStructures();
 
 static void ProcessKernelIdleFunction();
 process_t* ProcessCreateIdleProcess();

@@ -3,9 +3,11 @@
 
 #include <stdint.h>
 
-#include <devices/vga.h>
+#include <devices/video/vga.h>
 
 uint8_t TerminalMakeColor(enum vga_color foreground, enum vga_color background);
+
+void LFBTerminalSetBPP(uint32_t bbp);
 
 void TerminalClear();
 void TerminalSetColor(uint8_t color);
