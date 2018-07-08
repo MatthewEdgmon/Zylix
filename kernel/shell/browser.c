@@ -1,5 +1,5 @@
 /**
- * terminal.h - x86 text terminal emulation.
+ * browser.c - Built-in file explorer.
  *
  * This file is part of Zylix.
  *
@@ -17,22 +17,20 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TERMINAL_H__
-#define __TERMINAL_H__
-
+#include <stddef.h>
+#include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
-#include <devices/video/vga.h>
+#include <arch/io.h>
+#include <arch/interrupts.h>
 
-uint8_t TerminalMakeColor(enum vga_color foreground, enum vga_color background);
+#include <devices/ps2keyboard.h>
 
-void LFBTerminalSetBPP(uint32_t bbp);
+#include <menu/monitor.h>
+#include <terminal.h>
+#include <vga.h>
 
-void TerminalClear();
-void TerminalSetColor(uint8_t color);
-void TerminalNewLine();
-void TerminalPrintCharacter(char character);
-void TerminalPrintString(char* string);
-void SetupTerminal();
-
-#endif /* __TERMINAL_H__ */
+void BrowserMain() {
+    printf("Test.\n");
+}

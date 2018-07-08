@@ -9,9 +9,12 @@ void error(char* message) {
     printf("msh error: %s\n", message);
 }
 
-int main(char* argv[], int argc) {
+int main(int argc, char* argv) {
     while(true) {
-        error("Hello from Matt's Shell!");
+        printf("msh-0.01\n")
     }
+
+    printf("/home/matthew/ ~>")
+
     return 0;
 }

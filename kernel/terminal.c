@@ -1,5 +1,5 @@
 /**
- * terminal.c
+ * terminal.c - x86 text terminal emulation.
  *
  * This file is part of Zylix.
  *

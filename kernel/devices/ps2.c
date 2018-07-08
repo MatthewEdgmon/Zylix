@@ -1,5 +1,5 @@
 /**
- * ps2.c - Routines for setup of PS/2 devices.
+ * ps2.c - Setup and handling of IBM PS/2 devices (keyboard/mouse).
  *
  * This file is part of Zylix.
  *

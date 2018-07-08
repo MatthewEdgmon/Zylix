@@ -261,6 +261,12 @@ void PCIDetectFunction(uint32_t device) {
     }
 }
 
+void PCIDebugDumpAll() {
+    for(size_t i = 0; i < pci_device_count; i++) {
+        PCIDebugDumpDeviceInfo(pci_devices[i]);
+    }
+}
+
 void PCIDebugDumpDeviceInfo(uint32_t device) {
     uint8_t bus = PCIGetDeviceBus(device);
     uint8_t slot = PCIGetDeviceSlot(device);

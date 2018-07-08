@@ -78,6 +78,7 @@ void PCIDetectBus(uint8_t bus);
 void PCIDetectDevice(uint8_t bus, uint8_t slot);
 void PCIDetectFunction(uint32_t device);
 
+void PCIDebugDumpAll();
 void PCIDebugDumpDeviceInfo(uint32_t device);
 void PCIDebugDumpDeviceInfoGrid(uint32_t device);
 

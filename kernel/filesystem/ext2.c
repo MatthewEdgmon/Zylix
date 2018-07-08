@@ -1,5 +1,5 @@
 /**
- * terminal.h - x86 text terminal emulation.
+ * ext2.c - EXT2 filesystem support.
  *
  * This file is part of Zylix.
  *
@@ -17,22 +17,26 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TERMINAL_H__
-#define __TERMINAL_H__
-
 #include <stdint.h>
+#include <stdio.h>
 
-#include <devices/video/vga.h>
+#include <filesystem/ext2.h>
+#include <filesystem/vfs.h>
 
-uint8_t TerminalMakeColor(enum vga_color foreground, enum vga_color background);
+ext2_superblock_t* ext2GetSuperBlock(uintptr_t address) {
+    ext2_superblock_t* superblock = address + EXT2_SUPERBLOCK_OFFSET;
 
-void LFBTerminalSetBPP(uint32_t bbp);
+    if(ext2ValidateSuperBlock(superblock)) {
+        return NULL;
+    }
 
-void TerminalClear();
-void TerminalSetColor(uint8_t color);
-void TerminalNewLine();
-void TerminalPrintCharacter(char character);
-void TerminalPrintString(char* string);
-void SetupTerminal();
+    return superblock;
+}
 
-#endif /* __TERMINAL_H__ */
+int ext2ValidateSuperBlock(ext2_superblock_t* superblock) {
+	if(superblock->magic == EXT2_MAGIC) {
+		return 0;
+	} else {
+		return 1;
+    }
+}

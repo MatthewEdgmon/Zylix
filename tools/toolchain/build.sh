@@ -20,11 +20,14 @@ function main() {
         clean
     fi
 
+    command_check wget
 	command_check tar
 	command_check find
 	command_check patch
 	command_check make
     command_check gcc
+    command_check genisoimage
+    command_check genext2fs
 
     echo "Building toolchain in $PREFIX targeting $TARGET at sysroot $SYSROOT"
 
@@ -41,6 +44,7 @@ function main() {
         apply_patch $BINUTILS
     popd > /dev/null
 
+    directory_check local
     directory_check build-binutils
     pushd build-binutils > /dev/null
         ../download/$BINUTILS/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot=$SYSROOT --disable-werror --disable-nls --disable-libssp

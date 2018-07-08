@@ -1,6 +1,22 @@
 /**
- * A kernel shell. This is not a userspace shell, all commands are run in kernel mode.
+ * shell.c - Built-in kernel shell.
+ *
+ * This file is part of Zylix.
+ *
+ * Zylix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zylix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -84,6 +100,12 @@ void SetupShell() {
     AddShellCommand("panic", "Test kernel panic.", CommandPanic);
     AddShellCommand("explode", "Fun!", CommandExplode);
     AddShellCommand("shutdown", "Shuts down the computer (emulator only).", CommandShutdown);
+    AddShellCommand("ata_setup_pio", "Setup the ATA PIO mode driver.", CommandATASetupPIO);
+    AddShellCommand("ata_reset_pio", "Reset the ATA PIO mode driver.", CommandATAResetPIO);
+    AddShellCommand("ata_test_pio", "Perform a test read using the ATA PIO mode driver.", CommandATATestPIO);
+    AddShellCommand("ata_setup_dma", "Setup the ATA DMA mode driver.", CommandATASetupDMA);
+    AddShellCommand("ata_reset_dma", "Reset the ATA DMA mode driver.", CommandATAResetDMA);
+    AddShellCommand("ata_test_dma", "Perform a test read using the ATA DMA mode driver.", CommandATATestDMA);
     AddShellCommand("bga_start", "Attempts to start Bochs Graphics Adapter.", CommandBGAStart);
     AddShellCommand("vga_dump", "Dumps the state of the VGA registers.", CommandVGADump);
     AddShellCommand("vga_40_25", "Starts VESA/VGA 40x25 text mode.", CommandVGAText40x25);

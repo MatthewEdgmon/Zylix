@@ -1,3 +1,7 @@
+/**
+ * smbios.h - Support definitions and structures for SMBIOS.
+ */
+
 #ifndef __SMBIOS_H__
 #define __SMBIOS_H__
 

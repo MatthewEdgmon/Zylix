@@ -11,6 +11,8 @@ The Zylix libc is licensed under the GNU Lesser General Public License version 3
 ```
 GNU Unifont 10.0.04 has been adapted for use in LFB terminal output (kernel/devices/video/bitmap_font.c). It is licensed under the GNU GPL 2.0. See the file LICENSE.GPL2.md for the full text of the license.
 
+ACPICA version 20180209 has been used for handling ACPI. The GNU GPL 2.0 License has been chosen under it's dual licensed status. See the file LICENSE.GPL2.md for the full text of the license.
+
 The GNU Compiler Collection (GCC 7.1.0) is used for the Zylix toolchain. It is licensed under the GNU GPL 3.0. See the file LICENSE.GPL3.md for the full text of the license.
 The GNU Binary utilities (binutils 2.28) is used for the Zylix toolchain. It is licensed under the GNU GPL 3.0. See the file LICENSE.GPL3.md for the full text of the license.
 The GNU Grand Unified Bootloader (grub legacy 1.99) is used for booting Zylix (sysroot/boot/grub/stage2_eltorito). It is licensed under the GNU GPL 3.0. See the file LICENSE.GPL3.md for the full text of the license.

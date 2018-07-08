@@ -58,7 +58,7 @@ void SyscallHandler(registers_t* registers) {
             //registers->EAX = ManagerAllocate((size_t) registers->EBX);
             return;
         case SYSCALL_FREE:
-            //registers->EAX = free((uintptr_t) registers->EBX);
+            free((uintptr_t) registers->EBX);
             //registers->EAX = ManagerFree((uintptr_t) registers->EBX);
             return;
         case SYSCALL_GETSTDIN:
@@ -93,6 +93,7 @@ uint32_t syscall_exit(registers_t* registers) {
 
 uint32_t syscall_fork(registers_t* registers) {
     // TODO: Actually fork the process.
+    printf("Attempted to fork a process.\n");
     return 0;
 }
 

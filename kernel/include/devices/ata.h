@@ -1,3 +1,22 @@
+/**
+ * ata.h - Support code for ATA drives used for all modes.
+ *
+ * This file is part of Zylix.
+ *
+ * Zylix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zylix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef __ATA_H__
 #define __ATA_H__
 
@@ -87,15 +106,5 @@
 #define ATA_QUATERNARY_PORT_STATUS          0x16F
 #define ATA_QUATERNARY_CONTROL_REGISTER     0x366
 #define ATA_QUATERNARY_ALTERNATE_STATUS     0x366
-
-uint8_t ATASoftwareReset(uint8_t bus);
-uint8_t ATADetectDevice(uint8_t bus_number, uint8_t device_number);
-
-uint8_t ATAPrimaryInterruptHandler(registers_t* regs);
-uint8_t ATASecondaryInterruptHandler(registers_t* regs);
-
-void ATATestRead();
-
-void SetupATA();
 
 #endif /* __ATA_H__ */

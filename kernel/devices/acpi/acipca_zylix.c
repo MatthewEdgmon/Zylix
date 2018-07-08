@@ -1,5 +1,5 @@
 /**
- * version.h - Kernel versioning information.
+ * acpica_zylix.c - Glue layer for ACPICA services.
  *
  * This file is part of Zylix.
  *
@@ -17,21 +17,12 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __VERSION_H__
-#define __VERSION_H__
+#include <stdio.h>
 
-extern char* __kernel_version_format;
+#include <devices/acpi/acpica_zylix.h>
 
-extern char* __kernel_name;
-extern char* __kernel_code_name;
+void SetupACPI() {
 
-extern int   __kernel_version_major;
-extern int   __kernel_version_minor;
-extern int   __kernel_version_lower;
+    printf("Starting ACPI sub-system...\n");
 
-extern char* __kernel_build_date;
-extern char* __kernel_build_time;
-
-extern char* __kernel_compiler_version;
-
-#endif /* __VERSION_H__ */
+}

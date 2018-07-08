@@ -1,5 +1,5 @@
 /**
- * ps2mouse.h - PS/2 mouse driver.
+ * ps2mouse.h - Setup and handling of PS/2 mouses.
  *
  * This file is part of Zylix.
  *

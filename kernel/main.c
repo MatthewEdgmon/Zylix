@@ -26,7 +26,7 @@
 #include <arch/cpu.h>
 #include <arch/cpu_info.h>
 
-#include <devices/acpi/acpi.h>
+#include <devices/acpi/acpica_zylix.h>
 #include <devices/video/bga.h>
 #include <devices/video/bitmap_font.h>
 #include <devices/video/lfb_terminal.h>
@@ -34,6 +34,8 @@
 #include <devices/video/vga.h>
 #include <devices/video/voodoo3.h>
 #include <devices/ata.h>
+#include <devices/ata_pio.h>
+#include <devices/ata_dma.h>
 #include <devices/cmos.h>
 #include <devices/floppy.h>
 #include <devices/pci.h>
@@ -124,12 +126,9 @@ int main(multiboot_info_t* multiboot_info, uint32_t multiboot_magic, uintptr_t e
 
     SetupFloppy();
 
-    SetupATA();
-    //ATAReadTest();
-
-    printf("Testing...\n");
-
     SetupProcessing();
+
+    SetupATA_DMA();
 
     SetupShell();
 

@@ -1,5 +1,5 @@
 /**
- * version.h - Kernel versioning information.
+ * ata_pio.h - Generic ATA PIO mode driver.
  *
  * This file is part of Zylix.
  *
@@ -17,21 +17,17 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __VERSION_H__
-#define __VERSION_H__
+#ifndef __ATA_PIO_H__
+#define __ATA_PIO_H__
 
-extern char* __kernel_version_format;
+uint8_t ATA_PIO_SoftwareReset(uint8_t bus);
+uint8_t ATA_PIO_DetectDevice(uint8_t bus_number, uint8_t device_number);
 
-extern char* __kernel_name;
-extern char* __kernel_code_name;
+uint8_t ATA_PIO_PrimaryInterruptHandler(registers_t* regs);
+uint8_t ATA_PIO_SecondaryInterruptHandler(registers_t* regs);
 
-extern int   __kernel_version_major;
-extern int   __kernel_version_minor;
-extern int   __kernel_version_lower;
+void ATA_PIO_TestRead();
 
-extern char* __kernel_build_date;
-extern char* __kernel_build_time;
+void SetupATA_PIO();
 
-extern char* __kernel_compiler_version;
-
-#endif /* __VERSION_H__ */
+#endif /* __ATA_PIO_H__ */

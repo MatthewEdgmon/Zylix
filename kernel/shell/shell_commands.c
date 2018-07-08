@@ -1,3 +1,22 @@
+/**
+ * shell_commands.c - Built-in shell commands are implemented here.
+ *
+ * This file is part of Zylix.
+ *
+ * Zylix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zylix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -5,6 +24,9 @@
 #include <arch/cpu_info.h>
 #include <arch/io.h>
 
+#include <devices/ata.h>
+#include <devices/ata_pio.h>
+#include <devices/ata_dma.h>
 #include <devices/video/bga.h>
 #include <devices/video/lfb_terminal.h>
 #include <devices/video/vesa.h>
@@ -88,6 +110,30 @@ void CommandShutdown() {
         outb(0x8900, *s);
     }
     outb(0xF4, 0x00);
+}
+
+void CommandATASetupPIO() {
+    SetupATA_PIO();
+}
+
+void CommandATAResetPIO() {
+    ATA_PIO_SoftwareReset(ATA_PRIMARY);
+}
+
+void CommandATATestPIO() {
+    ATA_PIO_TestRead();
+}
+
+void CommandATASetupDMA() {
+    SetupATA_DMA();
+}
+
+void CommandATAResetDMA() {
+    ATA_DMA_SoftwareReset();
+}
+
+void CommandATATestDMA() {
+    ATA_DMA_TestRead();
 }
 
 void CommandBGAStart() {
