@@ -26,10 +26,10 @@
 #include <arch/interrupts.h>
 
 #include <devices/ps2keyboard.h>
+#include <devices/video/vga.h>
 
-#include <menu/monitor.h>
+#include <shell/monitor.h>
 #include <terminal.h>
-#include <vga.h>
 
 void BrowserMain() {
     printf("Test.\n");

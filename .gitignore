@@ -4,7 +4,7 @@
 *.mod
 *.sublime-project
 *.sublime-workspace
-.build-errors
+.build-log
 sysroot/usr
 
 # C library

@@ -2,6 +2,11 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# Multi-threaded build
+MAKEFLAGS="-j8 --output-sync"
+# Single-threaded build
+#MAKEFLAGS=
+
 # BUILD CONFIGURATION OPTIONS
 # Toolchain versions, this should match the filname of the tarball minus extension
 GCC=gcc-7.1.0
@@ -14,9 +19,10 @@ SYSROOT=$DIR/../../sysroot
 
 function main() {
 
-    if [ -f ../../.toolchain-built ]; then
+    if [ -f $DIR/../../.toolchain-built ]; then
         echo "Toolchain already built, will rebuild in 10 seconds."
         for i in {10..1};do echo -n "$i." && sleep 1; done
+        echo
         clean
     fi
 
@@ -31,12 +37,28 @@ function main() {
 
     echo "Building toolchain in $PREFIX targeting $TARGET at sysroot $SYSROOT"
 
-	echo "Copying C library headers to sysroot."
-	directory_check ../../sysroot/usr/include
-	(cd ../../libc/include && find . -name '*.h' -print | tar --create --files-from -) | (cd $DIR/../../sysroot/usr/include/ && tar xvfp -)
+    echo "Preparing system root."
+	mkdir -p $DIR/../../sysroot/bin
+	mkdir -p $DIR/../../sysroot/boot
+	mkdir -p $DIR/../../sysroot/dev
+	mkdir -p $DIR/../../sysroot/etc
+	mkdir -p $DIR/../../sysroot/home/Zylix
+	mkdir -p $DIR/../../sysroot/lib
+	mkdir -p $DIR/../../sysroot/media
+	mkdir -p $DIR/../../sysroot/mnt
+	mkdir -p $DIR/../../sysroot/opt
+	mkdir -p $DIR/../../sysroot/proc
+	mkdir -p $DIR/../../sysroot/root
+	mkdir -p $DIR/../../sysroot/tmp
+	mkdir -p $DIR/../../sysroot/usr
+	mkdir -p $DIR/../../sysroot/var
 
-    directory_check download
-    pushd download > /dev/null
+	echo "Copying C library headers to sysroot."
+	directory_check $DIR/../../sysroot/usr/include
+	(cd $DIR/../../libc/include && find . -name '*.h' -print | tar --create --files-from -) | (cd $DIR/../../sysroot/usr/include/ && tar xvfp -)
+
+    directory_check $DIR/download
+    pushd $DIR/download > /dev/null
         download_and_extract "ftp://ftp.gnu.org/gnu/gcc/$GCC/" $GCC ".tar.bz2"
         download_and_extract "ftp://ftp.gnu.org/gnu/binutils/" $BINUTILS ".tar.bz2"
 
@@ -44,22 +66,22 @@ function main() {
         apply_patch $BINUTILS
     popd > /dev/null
 
-    directory_check local
-    directory_check build-binutils
-    pushd build-binutils > /dev/null
-        ../download/$BINUTILS/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot=$SYSROOT --disable-werror --disable-nls --disable-libssp
-        make -j4
+    directory_check $DIR/local
+    directory_check $DIR/build-binutils
+    pushd $DIR/build-binutils > /dev/null
+        $DIR/download/$BINUTILS/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot=$SYSROOT --disable-werror --disable-nls --disable-libssp
+        make $MAKEFLAGS
         make install
     popd > /dev/null
 
-    directory_check build-gcc
-    pushd build-gcc > /dev/null
-        ../download/$GCC/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot=$SYSROOT --enable-languages=c,c++ --disable-nls --disable-libssp
-        make -j4 all-gcc all-target-libgcc
+    directory_check $DIR/build-gcc
+    pushd $DIR/build-gcc > /dev/null
+        $DIR/download/$GCC/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot=$SYSROOT --enable-languages=c,c++ --disable-nls --disable-libssp
+        make $MAKEFLAGS all-gcc all-target-libgcc
         make install-gcc install-target-libgcc
     popd > /dev/null
 
-    touch ../../.toolchain-built
+    touch $DIR/../../.toolchain-built
 }
 
 function directory_check() {
@@ -98,11 +120,13 @@ function apply_patch() {
 }
 
 function clean() {
-    rm -rf build-gcc
-    rm -rf build-binutils
-    rm -rf download/gcc-*
-    rm -rf download/binutils-*
-    rm -f ../../.toolchain-built
+    rm -rf $DIR/local
+    rm -rf $DIR/build-gcc
+    rm -rf $DIR/build-binutils
+    rm -rf $DIR/download/gcc-*
+    rm -rf $DIR/download/binutils-*
+    rm -f  $DIR/../../.toolchain-built
+    rm -rf $SYSROOT/usr/include
 }
 
 main "$@"

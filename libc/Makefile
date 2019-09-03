@@ -77,21 +77,15 @@ LIBRARY_LDFLAGS += $(LIBRARY_ARCH_LDFLAGS)
 LIBRARY_OBJ_LINK_LIST = ${LIBRARY_ARCH_OBJS} \
                         ${LIBRARY_OBJS}
 
-# Pretty output utilities.
-BEG = ../tools/output/mk-beg
-END = ../tools/output/mk-end
-INFO = ../tools/output/mk-info
-ERRORS = 2>>/.build-errors || ../tools/output/mk-error
-ERRORSS = >>/.build-errors || ../tools/output/mk-error
-BEGRM = ../tools/output/mk-beg-rm
-ENDRM = ../tools/output/mk-end-rm
-
-# Capture build error to a log.
-ERRORS = 2>>./.build-errors
+# Capture build events to a log.
+ERRORS = &>>./.build-log
 
 # Where to put the library headers.
 SYSROOT = ../sysroot
 INSTALL = $(CROSS_DIR)/../lib/gcc/$(LIBRARY_ARCH_GCC_NAME)/$(CROSS_VER)
+
+# Text output colors.
+include ../tools/pretty-print.inc
 
 .PHONY: all libc.a ctags install clean
 .SECONDARY:
@@ -104,20 +98,18 @@ all: libc.a
 ################################################################################
 
 libc.a: ${CRTI_OBJ} ${CRTN_OBJ} ${LIBRARY_ARCH_OBJS} ${LIBRARY_OBJS}
-	@${BEG} "AR" "libc.a"
 	@${AR} rcs libc.a ${LIBRARY_OBJ_LINK_LIST}
-	@${END} "AR" "libc.a"
-	@${INFO} "--" "Finished building library."
+	@echo "Finished building libc."
 
 %.o: %.c ${HEADERS}
-	@${BEG} "CC" "$<"
+	@printf "Compiling ${COLOR_LIGHT_BLUE}$< ${COLOR_OFF}..."
 	@${CC} ${LIBRARY_CFLAGS} -g -I./include -c -o $@ $< ${ERRORS}
-	@${END} "CC" "$<"
+	@printf "${STATUS_OK}"
 
 %.o: %.s
-	@${BEG} "CC" "$<"
+	@printf "Compiling ${COLOR_LIGHT_BLUE}$< ${COLOR_OFF}..."
 	@${AS} -c $< -o $@ ${ERRORS}
-	@${END} "CC" "$<"
+	@printf "${STATUS_OK}"
 
 ################################################################################
 #                                 Install                                      #
@@ -127,58 +119,50 @@ install: install-gcc install-sysroot
 
 # NOTE: Copying crt objects might not be a good idea here....
 install-gcc:
-	@${BEG} "CP" "Copying libc to gcc."
+	@echo "Copying libc to compiler directories..."
 	@rm -f $(INSTALL)/libc.a
 	@cp libc.a $(INSTALL)/libc.a
 	@cp -RT -f ./include $(INSTALL)/include
 	@cp $(ARCH_DIR)/crt0.o $(INSTALL)/crt0.o
 	@cp $(ARCH_DIR)/crti.o $(INSTALL)/crti.o
 	@cp $(ARCH_DIR)/crtn.o $(INSTALL)/crtn.o
-	@${END} "CP" "Done copying libc to gcc."
 
 install-sysroot:
-	@${BEG} "CP" "Copying libc to sysroot."
+	@echo "Copying libc to sysroot..."
 	@mkdir -p $(SYSROOT)/usr/{lib,include/libc}
 	@rm -f $(SYSROOT)/usr/lib/libc.a
 	@cp libc.a $(SYSROOT)/usr/lib/libc.a
 	@cp -RT -f ./include $(SYSROOT)/usr/include/libc/
-	@${END} "CP" "Done copying libc to sysroot."
 
 ################################################################################
 #                                  Clean                                       #
 ################################################################################
 
 clean: clean-arch-objects clean-objects clean-library clean-library-gcc clean-library-sysroot clean-build-errors
-	@${INFO} "--" "Cleaning complete."
+	@echo "Cleaning libc complete."
 
 clean-arch-objects:
-	@${BEGRM} "RM" "Cleaning library arch-specific objects..."
+	@echo "Cleaning libc arch-specific objects..."
 	@rm -f ${LIBRARY_ARCH_OBJS}
-	@${ENDRM} "RM" "Cleaned library arch-specific objects."
 
 clean-objects:
-	@${BEGRM} "RM" "Cleaning library objects..."
+	@echo "Cleaning libc objects..."
 	@rm -f ${LIBRARY_OBJS}
-	@${ENDRM} "RM" "Cleaned library objects."
 
 clean-library:
-	@${BEGRM} "RM" "Cleaning library..."
+	@echo "Cleaning libc..."
 	@rm -f libc.a
-	@${ENDRM} "RM" "Cleaned library."
 
 clean-library-gcc:
-	@${BEGRM} "RM" "Cleaning library from gcc..."
+	@echo "Cleaning libc from gcc..."
 	@rm -f $(INSTALL)/crt0.o
 	@rm -f $(INSTALL)/libc.a
-	@${ENDRM} "RM" "Cleaned library from gcc."
 
 clean-library-sysroot:
-	@${BEGRM} "RM" "Cleaning library from sysroot..."
+	@echo "Cleaning libc from sysroot..."
 	@rm -f $(SYSROOT)/usr/lib/libc.a
-	@${ENDRM} "RM" "Cleaned library from sysroot."
 
 clean-build-errors:
-	@${BEGRM} "RM" "Cleaning build error log..."
-	@rm -f .build-errors
+	@echo "Cleaning libc build error log..."
+	@rm -f .build-log
 	@rm -f trace-*
-	@${ENDRM} "RM" "Cleaned build error log."

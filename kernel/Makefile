@@ -64,20 +64,14 @@ KERNEL_LDFLAGS += $(KERNEL_ARCH_LDFLAGS)
 KERNEL_OBJ_LINK_LIST = ${KERNEL_ARCH_OBJS} \
                        ${KERNEL_OBJS} \
 
-# Pretty output utilities.
-BEG = ../tools/output/mk-beg
-END = ../tools/output/mk-end
-INFO = ../tools/output/mk-info
-ERRORS = 2>>/.build-errors || ../tools/output/mk-error
-ERRORSS = >>/.build-errors || ../tools/output/mk-error
-BEGRM = ../tools/output/mk-beg-rm
-ENDRM = ../tools/output/mk-end-rm
-
-# Capture build error to a log.
-ERRORS = 2>>./.build-errors
+# Capture build events to a log.
+ERRORS = &>>./.build-log
 
 # Where to put the finished kernel and headers.
 SYSROOT = ../sysroot
+
+# Text output colors.
+include ../tools/pretty-print.inc
 
 .PHONY: all zykernel ctags install clean
 .SECONDARY:
@@ -90,20 +84,18 @@ all: zykernel
 ################################################################################
 
 zykernel: ${KERNEL_ARCH_OBJS} ${KERNEL_OBJS}
-	@${BEG} "LD" "zykernel"
-	@${CC} -T $(ARCH_DIR)/linker.ld -o $@ ${KERNEL_CFLAGS} ${KERNEL_OBJ_LINK_LIST} ${KERNEL_LDFLAGS} ${KERNEL_LIBS} ${ERRORS}
-	@${END} "LD" "zykernel"
-	@${INFO} "--" "Finished building kernel."
+	@${CC} -T $(ARCH_DIR)/linker.ld -o $@ ${KERNEL_CFLAGS} ${KERNEL_OBJ_LINK_LIST} ${KERNEL_LDFLAGS} ${KERNEL_LIBS}
+	@echo "Finished building kernel."
 
 %.o: %.c ${HEADERS}
-	@${BEG} "CC" "$<"
+	@printf "Compiling ${COLOR_LIGHT_BLUE}$< ${COLOR_OFF}..."
 	@${CC} ${KERNEL_CFLAGS} -g -I./include -c -o $@ $< ${ERRORS}
-	@${END} "CC" "$<"
+	@printf "${STATUS_OK}"
 
 %.o: %.s
-	@${BEG} "CC" "$<"
+	@printf "Compiling ${COLOR_LIGHT_BLUE}$< ${COLOR_OFF}..."
 	@${AS} -c $< -o $@ ${ERRORS}
-	@${END} "CC" "$<"
+	@printf "${STATUS_OK}"
 
 ################################################################################
 #                                 Install                                      #
@@ -112,41 +104,35 @@ zykernel: ${KERNEL_ARCH_OBJS} ${KERNEL_OBJS}
 install: install-kernel install-kernel-headers
 
 install-kernel: zykernel
-	@${BEG} "CP" "Copying kernel to sysroot."
+	@echo "Copying kernel to sysroot."
 	@rm -f $(SYSROOT)/boot/zykernel
 	@cp zykernel $(SYSROOT)/boot
-	@${END} "CP" "Copied kernel to sysroot."
 
 install-kernel-headers: zykernel
-	@${BEG} "CP" "Copying kernel headers to sysroot."
+	@echo "Copying kernel headers to sysroot."
 	@rm -r -f $(SYSROOT)/usr/include/zykernel
 	@cp -RT ./include $(SYSROOT)/usr/include/zykernel
-	@${END} "CP" "Copied kernel headers to sysroot."
 
 ################################################################################
 #                                  Clean                                       #
 ################################################################################
 
 clean: clean-arch-objects clean-objects clean-kernel clean-build-errors
-	@${INFO} "--" "Cleaning complete."
+	@echo "Cleaning kernel complete."
 
 clean-arch-objects:
-	@${BEGRM} "RM" "Cleaning kernel arch-specific objects..."
+	@echo "Cleaning kernel arch-specific objects..."
 	@rm -f ${KERNEL_ARCH_OBJS}
-	@${ENDRM} "RM" "Cleaned kernel arch-specific objects."
 
 clean-objects:
-	@${BEGRM} "RM" "Cleaning kernel objects..."
+	@echo "Cleaning kernel objects..."
 	@rm -f ${KERNEL_OBJS}
-	@${ENDRM} "RM" "Cleaned kernel objects."
 
 clean-kernel:
-	@${BEGRM} "RM" "Cleaning kernel binary..."
+	@echo "Cleaning kernel binary..."
 	@rm -f zykernel
-	@${ENDRM} "RM" "Cleaned kernel binary."
 
 clean-build-errors:
-	@${BEGRM} "RM" "Cleaning build error log..."
-	@rm -f .build-errors
+	@echo "Cleaning kernel build error log..."
+	@rm -f .build-log
 	@rm -f trace-*
-	@${ENDRM} "RM" "Cleaned build error log."

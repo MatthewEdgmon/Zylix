@@ -34,5 +34,6 @@ void LFBTerminalPrintCharacter(char character);
 void LFBTerminalPrintString(char* string);
 void LFBTerminalPrintPixel(uint16_t pixel_x, uint16_t pixel_y, uint32_t value);
 uint32_t* LFBTerminalGetBitmap(char character);
+void SetupLFBTerminal(uint32_t* address, uint32_t size_x, uint32_t size_y);
 
 #endif /* __LFB_TERMINAL_H__ */

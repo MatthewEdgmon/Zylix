@@ -58,7 +58,7 @@
 #include <tasking/execute.h>
 #include <tasking/process.h>
 
-#include <menu/shell.h>
+#include <shell/shell.h>
 
 #include <common.h>
 #include <lock.h>
