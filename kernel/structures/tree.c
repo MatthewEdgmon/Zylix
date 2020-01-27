@@ -21,8 +21,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <structures/double_list.h>
 #include <structures/tree.h>
-#include <structures/list.h>
 
 /**
  * Create an empty tree structure with NO children.

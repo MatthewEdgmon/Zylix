@@ -1,5 +1,5 @@
 /**
- * manager.h - Memory manager.
+ * atapi.h - ATA Packet Interface devices.
  *
  * This file is part of Zylix.
  *
@@ -17,22 +17,11 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MANAGER_H__
-#define __MANAGER_H__
+#ifndef __ATAPI_H__
+#define __ATAPI_H__
 
-#include <stdint.h>
+#define ATAPI_SECTOR_SIZE 2048
 
-#include <multiboot.h>
+void SetupATAPI();
 
-#include <structures/double_list.h>
-
-double_list_t* memory_list;
-
-void* ManagerPageAllocate(uint16_t num_pages);
-int ManagerPageFree(void* address, uint16_t num_pages);
-
-void* ManagerPageMap(void* physical_address, void* virtual_address, uint32_t flags);
-
-void SetupMemoryManager(multiboot_info_t* multiboot_info);
-
-#endif /* __MANAGER_H__ */
+#endif /* __ATAPI_H__ */

@@ -27,7 +27,7 @@
 
 #include <memory/liballoc.h>
 
-#include <structures/list.h>
+#include <structures/double_list.h>
 #include <structures/tree.h>
 
 tree_t*     fs_tree = NULL; /* Mountpoint tree. */

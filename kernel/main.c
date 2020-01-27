@@ -27,17 +27,19 @@
 #include <arch/cpu_info.h>
 
 #include <devices/acpi/acpica_zylix.h>
+#include <devices/net/Am79C970A.h>
+#include <devices/storage/ata.h>
+#include <devices/storage/ata_pio.h>
+#include <devices/storage/ata_dma.h>
+#include <devices/storage/atapi.h>
+#include <devices/storage/floppy.h>
 #include <devices/video/bga.h>
 #include <devices/video/bitmap_font.h>
 #include <devices/video/lfb_terminal.h>
 #include <devices/video/vesa.h>
 #include <devices/video/vga.h>
 #include <devices/video/voodoo3.h>
-#include <devices/ata.h>
-#include <devices/ata_pio.h>
-#include <devices/ata_dma.h>
 #include <devices/cmos.h>
-#include <devices/floppy.h>
 #include <devices/pci.h>
 #include <devices/ps2.h>
 #include <devices/ps2keyboard.h>
@@ -52,11 +54,10 @@
 
 #include <shell/shell.h>
 
+#include <structures/double_list.h>
 #include <structures/tree.h>
-#include <structures/list.h>
 
-#include <tasking/execute.h>
-#include <tasking/process.h>
+#include <tasking/multitask.h>
 
 #include <shell/shell.h>
 
@@ -94,6 +95,8 @@ int main(multiboot_info_t* multiboot_info, uint32_t multiboot_magic, uintptr_t e
 
     DumpCPUInformation();
 
+    /* TODO: Modularize system setup. */
+
     SetupSMBIOS();
 
     SetupA20();
@@ -110,25 +113,34 @@ int main(multiboot_info_t* multiboot_info, uint32_t multiboot_magic, uintptr_t e
 
     SetupPCI();
 
+    /* Video devices. */
     uint32_t video_size_x = 1024;
     uint32_t video_size_y = 768;
     uint32_t video_bpp = 32;
 
-    /* TODO: Modularize */
-    SetupBGA();
-    SetupVBoxGuest();
-    SetupVoodoo3();
-
-    if(BGAIsEnabled()) {
+    if(SetupBGA() == 0) {
         BGASetVideoMode(video_size_x, video_size_y, video_bpp, 1, 1);
         SetupLFBTerminal(BGAGetLFBAddress(), BGAGetLFBWidth(), BGAGetLFBHeight());
+    } else {
+        printf("Bochs Graphics Adapter failed to initialize.\n");
     }
 
-    SetupFloppy();
+    //SetupVoodoo3();
 
-    SetupProcessing();
+    /* Storage devices. */
+    //SetupATA_DMA();
+    SetupATA_PIO();
+    //SetupATAPI();
+    //SetupFloppy();
 
-    SetupATA_DMA();
+    /* Network devices. */
+    SetupAm79C970A();
+
+    /* VM devices. */
+    SetupVBoxGuest();
+
+    /* Begin multi-tasking. */
+    SetupMultitask();
 
     SetupShell();
 

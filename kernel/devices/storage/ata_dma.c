@@ -24,8 +24,8 @@
 #include <arch/interrupts.h>
 #include <arch/registers.h>
 
-#include <devices/ata.h>
-#include <devices/ata_dma.h>
+#include <devices/storage/ata.h>
+#include <devices/storage/ata_dma.h>
 #include <devices/pci.h>
 
 #include <common.h>
@@ -54,7 +54,7 @@ void ATA_DMA_TestRead() {
     printf("No\n");
 }
 
-void SetupATA_DMA() {
+int SetupATA_DMA() {
 
     uint32_t disk_controller_device = PCIFind(0x8086, 0x2829);
 

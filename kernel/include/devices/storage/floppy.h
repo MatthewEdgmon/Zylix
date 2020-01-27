@@ -53,6 +53,10 @@
 #define FLOPPY_FIFO_COMMAND_READ_TRACK 2
 #define FLOPPY_FIFO_SPECIFY
 
+#define FLOPPY_MOTOR_OFF  0
+#define FLOPPY_MOTOR_ON   1
+#define FLOPPY_MOTOR_WAIT 2
+
 void SetupFloppy();
 
 #endif /* __FLOPPY_H__ */

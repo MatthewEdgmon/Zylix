@@ -97,7 +97,7 @@ void BGASetVideoMode(uint16_t width, uint16_t height, uint16_t bpp, uint8_t use_
     }
 }
 
-void SetupBGA() {
+int SetupBGA() {
 
     bga_pci_device = PCIFind(BGA_PCI_VENDOR_1, BGA_PCI_DEVICE_1);
 
@@ -107,37 +107,39 @@ void SetupBGA() {
 
     if(bga_pci_device == PCI_NO_DEVICE) {
         /* No device. */
-        return;
+        return 1;
     }
 
     uint32_t bga_version = BGAReadRegister(VBE_DISPI_INDEX_ID);
 
     switch(bga_version) {
         case 0xB0C0:
-            printf("Bochs Graphics Adapter is 0xB0C0\n");
+            printf("Bochs Graphics Adapter is version 1 (0xB0C0).\n");
             break;
         case 0xB0C1:
-            printf("Bochs Graphics Adapter is 0xB0C1\n");
+            printf("Bochs Graphics Adapter is version 2 (0xB0C1).\n");
             break;
         case 0xB0C2:
-            printf("Bochs Graphics Adapter is 0xB0C2\n");
+            printf("Bochs Graphics Adapter is version 3 (0xB0C2).\n");
             break;
         case 0xB0C3:
-            printf("Bochs Graphics Adapter is 0xB0C3\n");
+            printf("Bochs Graphics Adapter is version 4 (0xB0C3).\n");
             break;
         case 0xB0C4:
-            printf("Bochs Graphics Adapter is 0xB0C4\n");
+            printf("Bochs Graphics Adapter is version 5 (0xB0C4).\n");
             break;
         case 0xB0C5:
-            printf("Bochs Graphics Adapter is 0xB0C5 (latest)\n");
+            printf("Bochs Graphics Adapter is version 6 (0xB0C5).\n");
             break;
         default:
             printf("Bochs Graphics Adapter unknown version (0x%X), aborting.\n", bga_version);
-            return;
+            return 1;
             break;
     }
 
     lfb_address = (uint32_t*) PCIReadField(bga_pci_device, PCI_HEADER_BAR0, 4);
 
     bga_enabled = 1;
+
+    return 0;
 }

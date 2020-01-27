@@ -1,5 +1,5 @@
 /**
- * manager.h - Memory manager.
+ * ata_dma.c - Generic ATA DMA mode driver.
  *
  * This file is part of Zylix.
  *
@@ -17,22 +17,14 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MANAGER_H__
-#define __MANAGER_H__
+#ifndef __ATA_DMA_H__
+#define __ATA_DMA_H__
 
-#include <stdint.h>
 
-#include <multiboot.h>
 
-#include <structures/double_list.h>
+void ATA_DMA_SoftwareReset();
+void ATA_DMA_TestRead();
 
-double_list_t* memory_list;
+int SetupATA_DMA();
 
-void* ManagerPageAllocate(uint16_t num_pages);
-int ManagerPageFree(void* address, uint16_t num_pages);
-
-void* ManagerPageMap(void* physical_address, void* virtual_address, uint32_t flags);
-
-void SetupMemoryManager(multiboot_info_t* multiboot_info);
-
-#endif /* __MANAGER_H__ */
+#endif /* __ATA_DMA_H__ */

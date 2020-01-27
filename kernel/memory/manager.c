@@ -28,7 +28,7 @@
 
 #include <memory/manager.h>
 
-#include <structures/list.h>
+#include <structures/double_list.h>
 
 uint8_t use_pae = 0;
 
@@ -57,7 +57,10 @@ int ManagerPageFree(void* address, uint16_t num_pages) {
  * Takes a physical page and maps it to a returned virtual
  * address.
  */
-void* ManagerPageMap(uint32_t physical_page) {
+void* ManagerPageMap(void* physical_address, void* virtual_address, uint32_t flags) {
+
+    uint64_t page_directory_index = (uint64_t) virtual_address >> 22;
+    uint64_t page_table_index     = (uint64_t) virtual_address >> 12 & 0x03FF;
 
 }
 
@@ -73,7 +76,7 @@ void SetupMemoryManager(multiboot_info_t* multiboot_info) {
         use_pae = 1;
     }
 
-    memory_list = ListCreate();
+    memory_list = DoubleListCreate();
 
     if(!BIT_CHECK(multiboot_info->flags, 6)) {
         KernelPanic("Memory manager got no memory map!", NULL);

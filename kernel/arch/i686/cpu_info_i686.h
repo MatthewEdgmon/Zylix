@@ -227,7 +227,7 @@ typedef struct {
 	char processor_name2[17];
 	char processor_name3[17];
 	char serial[64];
-	char features[4096];
+	char features[8192];
 
 	/* Frequency */
 	uint32_t freq_denominator;

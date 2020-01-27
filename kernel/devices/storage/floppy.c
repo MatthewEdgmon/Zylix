@@ -1,5 +1,5 @@
 /**
- * manager.h - Memory manager.
+ * floppy.c - Floppy drive routines.
  *
  * This file is part of Zylix.
  *
@@ -17,22 +17,36 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MANAGER_H__
-#define __MANAGER_H__
-
 #include <stdint.h>
+#include <stdio.h>
 
-#include <multiboot.h>
+#include <arch/io.h>
+#include <arch/interrupts.h>
+#include <arch/registers.h>
 
-#include <structures/double_list.h>
+#include <devices/storage/floppy.h>
 
-double_list_t* memory_list;
+#include <common.h>
 
-void* ManagerPageAllocate(uint16_t num_pages);
-int ManagerPageFree(void* address, uint16_t num_pages);
+void FloppySetMotor() {
 
-void* ManagerPageMap(void* physical_address, void* virtual_address, uint32_t flags);
+}
 
-void SetupMemoryManager(multiboot_info_t* multiboot_info);
+void FloppyDetectDrives() {
+    outb(0x70, 0x10);
 
-#endif /* __MANAGER_H__ */
+    uint8_t num_drives = inb(0x71);
+
+    printf("[Floppy] Detected Floppy Drive 0: %i\n", (num_drives >> 4));
+    printf("[Floppy] Detected Floppy Drive 1: %i\n", (num_drives & 0xF));
+}
+
+void SetupFloppy() {
+
+    FloppyDetectDrives();
+
+    outb(FLOPPY_DIGITAL_OUTPUT_REGISTER, FLOPPY_DOR_BIT_DSEL0);
+
+
+
+}

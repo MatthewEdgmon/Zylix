@@ -24,8 +24,8 @@
 #include <arch/interrupts.h>
 #include <arch/registers.h>
 
-#include <devices/ata.h>
-#include <devices/ata_pio.h>
+#include <devices/storage/ata.h>
+#include <devices/storage/ata_pio.h>
 #include <devices/pci.h>
 
 #include <common.h>
@@ -168,55 +168,86 @@ uint8_t ATA_PIO_DetectDevice(uint8_t bus_number, uint8_t device_number) {
 			break;
 		default:
 			printf("Tried to detect an ATA device on an invalid bus number!\n");
+            return 0;
 			break;
 	}
 
-	/* Select the requested device. */
+	/* Select the requested device and set parameters to 0. */
 	outb(port_drive_head, device_number);
+    outb(port_sect_num, 0x0);
+	outb(port_lba_low, 0x0);
+	outb(port_lba_mid, 0x0);
+	outb(port_lba_high, 0x0);
 
 	/* Last selected bus/drive is set. */
 	ata_selected_bus = bus_number;
 	ata_selected_drive = device_number;
 
-	/* Read the status register. */
-	temp = inb(port_status);
-	temp = inb(port_status);
-	temp = inb(port_status);
-	temp = inb(port_status);
-	temp = inb(port_status);
-
-	/* Check RDY and BSY before setting parameters. */
-
-	outb(port_sect_num, 0x0);
-	outb(port_lba_low, 0x0);
-	outb(port_lba_mid, 0x0);
-	outb(port_lba_high, 0x0);
-
-	/* Send the identify command. */
+    /* Send the identify command. */
 	outb(port_command, ATA_COMMAND_IDENTIFY);
 
+	/* Read the status register. */
+    io_wait();
+    temp = inb(port_status);
+	temp = inb(port_status);
+	temp = inb(port_status);
+	temp = inb(port_status);
+	temp = inb(port_status);
 	temp = inb(port_status);
 
 	if(temp == 0) {
 		/* Zero means drive doesn't exist. Done. */
 		if(device_number == ATA_MASTER) {
 			printf("ATA BUS%d/MASTER does not exist.\n", bus_number);
-			return 0;
+			return ATA_DEVICE_NONE;
 		} else {
 			printf("ATA BUS%d/SLAVE does not exist.\n", bus_number);
-			return 0;
+			return ATA_DEVICE_NONE;
 		}
 	}
 
+    /* SATA and ATAPI devices immediately set the ERR bit in the status register. */
+    if(BIT_CHECK(temp, ATA_STATUS_BIT_ERR)) {
+
+        /* ATAPI Devices will read byte 0x14 on 0x1F4, and 0xEB on 0x1F5. */
+        if(inb(port_lba_mid) == 0x14) {
+            if(inb(port_lba_high) == 0xEB) {
+                if(device_number == ATA_MASTER) {
+                    printf("Found ATAPI device on BUS%d/MASTER.\n", bus_number);
+                    return ATA_DEVICE_PATAPI;
+                } else {
+                    printf("Found ATAPI device on BUS%d/SLAVE.\n", bus_number);
+                    return ATA_DEVICE_PATAPI;
+                }
+            }
+        }
+
+        /* SATA Devices will read byte 0x3C on 0x1F4, and 0x3C on 0x1F5. */
+        if(inb(port_lba_mid) == 0x3C) {
+            if(inb(port_lba_high) == 0x3C) {
+                if(device_number == ATA_MASTER) {
+                    printf("Found SATA device on BUS%d/MASTER.\n", bus_number);
+                    return ATA_DEVICE_SATA;
+                } else {
+                    printf("Found SATA device on BUS%d/SLAVE.\n", bus_number);
+                    return ATA_DEVICE_SATA;
+                }
+            }
+        }
+
+        return ATA_DEVICE_UNKNOWN;
+    }
+
 	/* Non-zero on the status port, wait until BSY clears. */
 	while(BIT_CHECK(temp, ATA_STATUS_BIT_BSY)) {
+        printf("Waiting for BSY bit to clear...\n");
 		temp = inb(port_status);
 	}
 
 	/* Poll LBA Mid and LBa High ports to check for ATA. */
 	if(inb(port_lba_mid != 0) || inb(port_lba_high != 0)) {
 		printf("ATA BUS%d/SLAVE is not an ATA device.\n", bus_number);
-		return 1;
+		return ATA_DEVICE_UNKNOWN;
 	}
 
 	/* Poll the status register until DRQ is clear. */
@@ -227,21 +258,23 @@ uint8_t ATA_PIO_DetectDevice(uint8_t bus_number, uint8_t device_number) {
 		if(BIT_CHECK(temp, ATA_STATUS_BIT_ERR)) {
 			if(device_number == ATA_MASTER) {
 				printf("ATA BUS%d/MASTER made an error.\n", bus_number);
-				return 1;
+				return ATA_DEVICE_PATA;
 			} else {
 				printf("ATA BUS%d/SLAVE made an error.\n", bus_number);
-				return 1;
+				return ATA_DEVICE_PATA;
 			}
 		}
 	}
 
 	/* Output all 256 16 bit values of the device. */
 	for(size_t i = 0; i < 256; i++) {
-		printf("%X", inb(port_data));
+		printf("%01X", inb(port_data));
 	}
 
+    printf("\n");
+
 	/* And say this device exists. */
-	return 1;
+	return ATA_DEVICE_PATA;
 }
 
 uint8_t ATA_PIO_PrimaryInterruptHandler(registers_t* regs) {
@@ -349,7 +382,7 @@ void ATA_PIO_TestRead() {
  * first to find the actual control registers and IRQs for each ATA bus. The PCI
  * specs state that all disk controllers ports should be set to standard.
  */
-void SetupATA_PIO() {
+int SetupATA_PIO() {
 
     /* Disable interrupts. */
     PICSetMask(IRQ_PRIMARY_IDE);
@@ -408,13 +441,15 @@ void SetupATA_PIO() {
 		}
 	}
 
-	uint16_t num_total_drives = ata_primary_num_drives + ata_secondary_num_drives +
-								ata_tertiary_num_drives + ata_quaternary_num_drives;
-
-	printf("ATA Total Drives = %d\n", num_total_drives);
+    printf("[ATA] Bus 1 Drives = %d\n", ata_primary_num_drives);
+    printf("[ATA] Bus 2 Drives = %d\n", ata_secondary_num_drives);
+    printf("[ATA] Bus 3 Drives = %d\n", ata_tertiary_num_drives);
+    printf("[ATA] Bus 4 Drives = %d\n", ata_quaternary_num_drives);
 
     /* Renable interrupts. */
     PICEnableInterrupts();
     PICClearMask(IRQ_PRIMARY_IDE);
     PICClearMask(IRQ_SECONDARY_IDE);
+
+    return 0;
 }

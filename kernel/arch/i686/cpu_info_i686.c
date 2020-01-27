@@ -56,7 +56,7 @@ void StoreCPUInformation() {
 
 	cpuid(CPUID_REQUEST_STANDARD_FEATURES, eax, ebx, ecx, edx);
 
-	if(ecx & CPUID_FEAT_ECX_SSE3)         { sprintf(cpu_info->features, "%s SSE3",               cpu_info->features); cpu_info->features_SSE3 = true; }
+	if(ecx & CPUID_FEAT_ECX_SSE3)         { sprintf(cpu_info->features, "SSE3");                                      cpu_info->features_SSE3 = true; }
 	if(ecx & CPUID_FEAT_ECX_PCLMULQDQ)    { sprintf(cpu_info->features, "%s PCLMULQDQ",          cpu_info->features); cpu_info->features_PCLMULQDQ = true; }
 	if(ecx & CPUID_FEAT_ECX_DTES64)       { sprintf(cpu_info->features, "%s DTES64",             cpu_info->features); cpu_info->features_DTES64 = true; }
 	if(ecx & CPUID_FEAT_ECX_MONITOR)      { sprintf(cpu_info->features, "%s Monitor",            cpu_info->features); cpu_info->features_MONITOR = true; }
@@ -87,7 +87,7 @@ void StoreCPUInformation() {
 	if(ecx & CPUID_FEAT_ECX_RDRAND)       { sprintf(cpu_info->features, "%s RDRAND",             cpu_info->features); cpu_info->features_RDRAND = true; }
 	if(ecx & CPUID_FEAT_ECX_HYPERVISOR)   { sprintf(cpu_info->features, "%s HyperVisor",         cpu_info->features); cpu_info->features_HYPERVISOR = true; }
 
-	if(edx & CPUID_FEAT_EDX_FPU)          { sprintf(cpu_info->features,    "FPU");                                    cpu_info->features_FPU = true; }
+	if(edx & CPUID_FEAT_EDX_FPU)          { sprintf(cpu_info->features, "%s FPU",                cpu_info->features); cpu_info->features_FPU = true; }
 	if(edx & CPUID_FEAT_EDX_VME)          { sprintf(cpu_info->features, "%s VME",                cpu_info->features); cpu_info->features_VME = true; }
 	if(edx & CPUID_FEAT_EDX_DE)           { sprintf(cpu_info->features, "%s DE",                 cpu_info->features); cpu_info->features_DE = true; }
 	if(edx & CPUID_FEAT_EDX_PSE)          { sprintf(cpu_info->features, "%s PSE",                cpu_info->features); cpu_info->features_PSE = true; }
@@ -117,6 +117,8 @@ void StoreCPUInformation() {
 	if(edx & CPUID_FEAT_EDX_TM)           { sprintf(cpu_info->features, "%s Thermal Interrupts", cpu_info->features); cpu_info->features_TM = true; }
 	if(edx & CPUID_FEAT_EDX_IA64)         { sprintf(cpu_info->features, "%s IA64",               cpu_info->features); cpu_info->features_IA64 = true; }
 	if(edx & CPUID_FEAT_EDX_PBE)          { sprintf(cpu_info->features, "%s PBE",                cpu_info->features); cpu_info->features_PBE = true; }
+
+    sprintf(cpu_info->features, "%s\0", cpu_info->features);
 
 	cpuid(CPUID_REQUEST_STANDARD_SERIAL_NUMBER, eax, ebx, ecx, edx);
 

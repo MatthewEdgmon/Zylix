@@ -21,7 +21,6 @@
 #include <stdint.h>
 
 #include <tasking/elf.h>
-#include <tasking/process.h>
 
 unsigned char elf_magic_numbers[] = {
     ELFMAG0,
@@ -42,27 +41,23 @@ int ELFValidateHeader(void* data) {
     return 0;
 }
 
-process_t* ELFLoad(void* elf) {
-
-    if(ELFValidateHeader(elf)) {
-        printf("Tried to load an invalid ELF file.\n");
-        return (process_t*) NULL;
-    }
-
-    /* Retrieve the header. */
-    elf32_ehdr* header = (elf32_ehdr*) elf;
-
-    if(header->e_type != ET_EXEC) {
-        printf("Tried to load a non-executable ELF file.\n");
-        return (process_t*) NULL;
-    }
-
-    process_t* process;
-    process->name = "ELF_PROGRAM";
-
-    return process;
-}
-
-void ELFDumpInfo(void* elf) {
-
-}
+// process_t* ELFLoad(void* elf) {
+//
+//     if(ELFValidateHeader(elf)) {
+//         printf("Tried to load an invalid ELF file.\n");
+//         return (process_t*) NULL;
+//     }
+//
+//     /* Retrieve the header. */
+//     elf32_ehdr* header = (elf32_ehdr*) elf;
+//
+//     if(header->e_type != ET_EXEC) {
+//         printf("Tried to load a non-executable ELF file.\n");
+//         return (process_t*) NULL;
+//     }
+//
+//     process_t* process;
+//     process->name = "ELF_PROGRAM";
+//
+//     return process;
+// }

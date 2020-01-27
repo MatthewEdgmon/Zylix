@@ -1,5 +1,5 @@
 /**
- * ata_dma.c - Generic ATA DMA mode driver.
+ * AM79C970A.c - AMD PCnet-PCI II Network Driver
  *
  * This file is part of Zylix.
  *
@@ -17,14 +17,26 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ATA_DMA_H__
-#define __ATA_DMA_H__
+#include <stdint.h>
+#include <stdio.h>
 
+#include <devices/net/Am79C970A.h>
 
+#include <devices/pci.h>
 
-void ATA_DMA_SoftwareReset();
-void ATA_DMA_TestRead();
+int SetupAm79C970A() {
 
-void SetupATA_DMA();
+    uint32_t device = PCIFind(AM79C970A_PCI_VENDOR_ID, AM79C970A_PCI_DEVICE_ID);
 
-#endif /* __ATA_DMA_H__ */
+    if(device == 0xFFFF) {
+        device = PCIFind(AM79C970A_PCI_VENDOR_ID, AM79C970A_PCI_DEVICE_ID_ALT);
+        if(device == 0xFFFF) {
+            printf("Did not find AMD PCnet-PCI II\n");
+            return 1;
+        }
+    } else {
+        printf("Found AMD PCnet-PCI II\n");
+    }
+
+    return 0;
+}

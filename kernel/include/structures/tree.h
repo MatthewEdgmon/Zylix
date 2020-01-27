@@ -20,11 +20,11 @@
 #ifndef __TREE_H__
 #define __TREE_H__
 
-#include <structures/list.h>
+#include <structures/double_list.h>
 
 typedef struct tree_node {
     void* value;
-    list_t* children;
+    double_list_t* children;
     struct tree_node* parent;
 } tree_node_t;
 

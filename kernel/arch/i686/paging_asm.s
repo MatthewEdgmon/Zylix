@@ -20,18 +20,33 @@
 .section .text
 .align 4
 
+.global PagingLoadCR3
+.type PagingLoadCR3, @function
+
+/* Arg 1 - 32-bit pointer to physical address of page directory. */
+PagingLoadCR3:
+    mov 8(%esp), %eax
+    mov %eax, %cr3
+    ret
+
 .global PagingEnable
 .type PagingEnable, @function
 
 PagingEnable:
-    /* Load cr3 with the address of the page directory. */
-    mov 4(%esp), %eax
-    mov %cr3, %eax
-
-    /* Set the paging (PG) and protection (PE) bits of cr0. */
-    mov %eax, %cr0
-    or %eax, 0x80000001
+    /* Set the paging (PG) bit of cr0. */
     mov %cr0, %eax
+    or 0x80000000, %eax
+    mov %eax, %cr0
+    ret
+
+.global PagingDisable
+.type PagingDisable, @function
+
+PagingDisable:
+    /* Clear the paging (PG) bit of cr0. */
+    mov %cr0, %eax
+    or 0x80000000, %eax
+    mov %eax, %cr0
     ret
 
 .global PagingActivatePSE
@@ -39,9 +54,9 @@ PagingEnable:
 
 PagingActivatePSE:
     /* Set the page size extension (PSE) bit of cr4. */
-    mov %eax, %cr4
-    or %eax, 0x00000010
     mov %cr4, %eax
+    or 0x00000010, %eax
+    mov %eax, %cr4
     ret
 
 .global PagingActivatePAE
@@ -49,7 +64,17 @@ PagingActivatePSE:
 
 PagingActivatePAE:
     /* Set the physical address extension (PAE) bit of cr4. */
-    mov %eax, %cr4
-    or %eax, 0x00000020
     mov %cr4, %eax
+    or 0x00000020, %eax
+    mov %eax, %cr4
+    ret
+
+.global PagingActivateLA57
+.type PagingActivateLA57, @function
+
+PagingActivateLA57:
+    /* Set the LA57 bit in CR4. */
+    mov %cr4, %eax
+    or 0x00001000, %eax
+    mov %eax, %cr4
     ret

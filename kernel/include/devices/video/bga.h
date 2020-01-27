@@ -70,6 +70,6 @@ uint16_t BGAOffsetToBank(uint32_t offset);
 void BGASetBank(uint16_t bank_number);
 void BGASetVideoMode(uint16_t width, uint16_t height, uint16_t bpp, uint8_t use_lfb, uint8_t clear_vram);
 
-void SetupBGA();
+int SetupBGA();
 
 #endif /* __BGA_H__ */

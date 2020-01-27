@@ -28,6 +28,6 @@ uint8_t ATA_PIO_SecondaryInterruptHandler(registers_t* regs);
 
 void ATA_PIO_TestRead();
 
-void SetupATA_PIO();
+int SetupATA_PIO();
 
 #endif /* __ATA_PIO_H__ */

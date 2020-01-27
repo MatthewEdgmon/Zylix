@@ -1,5 +1,5 @@
 /**
- * manager.h - Memory manager.
+ * AM79C970A.h - AMD PCnet-PCI II Network Driver
  *
  * This file is part of Zylix.
  *
@@ -17,22 +17,13 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MANAGER_H__
-#define __MANAGER_H__
+#ifndef __AM79C970A_H__
+#define __AM79C970A_H__
 
-#include <stdint.h>
+#define AM79C970A_PCI_VENDOR_ID     0x1022
+#define AM79C970A_PCI_DEVICE_ID     0x2000
+#define AM79C970A_PCI_DEVICE_ID_ALT 0x2000
 
-#include <multiboot.h>
+int SetupAm79C970A();
 
-#include <structures/double_list.h>
-
-double_list_t* memory_list;
-
-void* ManagerPageAllocate(uint16_t num_pages);
-int ManagerPageFree(void* address, uint16_t num_pages);
-
-void* ManagerPageMap(void* physical_address, void* virtual_address, uint32_t flags);
-
-void SetupMemoryManager(multiboot_info_t* multiboot_info);
-
-#endif /* __MANAGER_H__ */
+#endif /* __AM79C970A_H__ */

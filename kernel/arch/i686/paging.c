@@ -20,19 +20,24 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
+
+#include <memory/liballoc.h>
 
 #include "cpu_info_i686.h"
 #include "paging.h"
 
-page_directory_t* page_directory;
-page_table_t* page_table;
-
-extern void PagingEnable(page_directory_t*);
+extern void PagingLoadCR3(uint32_t*);
+extern void PagingEnable(void);
+extern void PagingDisable(void);
 extern void PagingActivatePSE(void);
 extern void PagingActivatePAE(void);
+extern void PagingActivateLA57(void);
 
 bool using_pae = false;
 bool using_pse = false;
+
+bool paging_active = false;
 
 /**
  * Returns a physical address for a mapped virtual address.
@@ -58,11 +63,11 @@ void PagingMapPage(uintptr_t physical, uintptr_t virtual, uint16_t flags) {
     /* Flush TLB. */
 }
 
-void PagingDebugPrintDirectory(page_directory_t* directory) {
+void PagingUpdateFeatures() {
 
-}
-
-void SetupPaging() {
+    if(paging_active) {
+        return;
+    }
 
     if(cpu_info->features_PAE) {
         PagingActivatePAE();
@@ -73,10 +78,38 @@ void SetupPaging() {
         PagingActivatePSE();
         using_pse = true;
     }
+}
+
+void SetupPaging() {
+
+    if(paging_active) {
+        return;
+    }
+
+    /* Simple paging for now. */
+    //PagingUpdateFeatures();
 
     /* Determine total memory size. */
 
-    //PagingEnable(page_directory);
-}
+    /* Setup identity mapping for now. */
 
-// CR3 GETS LOADED SUCCESSFULLY, ACTUALYL SETTING THE PROTECTION BITS CRASHES SYSTEM.
+    uint32_t page_directory[1024] __attribute__((aligned(4096)));
+
+    for(size_t i = 0; i < 1024; i++) {
+        page_directory[i] = 0x00000002;
+    }
+
+    uint32_t first_page_table[1024] __attribute__((aligned(4096)));
+
+    for(size_t i = 0; i < 1024; i++) {
+        first_page_table[i] = (i * 0x1000) | 0x3;
+    }
+
+    page_directory[0] = (uint32_t) first_page_table | 3;
+
+    PagingLoadCR3(page_directory);
+
+    PagingEnable();
+
+    paging_active = true;
+}

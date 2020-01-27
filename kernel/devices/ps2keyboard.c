@@ -27,6 +27,8 @@
 #include <devices/ps2.h>
 #include <devices/ps2keyboard.h>
 
+#include <shell/shell.h>
+
 // Uncomment this to see how a keypress corresponds to it's character.
 //#define DEBUG_SCANCODES
 
@@ -312,7 +314,7 @@ int PS2KeyboardHandler(registers_t* registers) {
 
             /* Empty out the buffer. */
             input_array_index = 0;
-            for(int i = 0; i <= INPUT_ARRAY_LENGTH; i++) {
+            for(int i = 0; i < INPUT_ARRAY_LENGTH; i++) {
                 input_array[i] = '\0';
             }
         }

@@ -1,5 +1,5 @@
 /**
- * floppy.c - Floppy drive routines.
+ * atapi.c - ATA Packet Interface devices.
  *
  * This file is part of Zylix.
  *
@@ -20,17 +20,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <arch/io.h>
-#include <arch/interrupts.h>
-#include <arch/registers.h>
+#include <devices/storage/ata.h>
+#include <devices/storage/atapi.h>
 
-#include <devices/floppy.h>
+void SetupATAPI() {
 
-#include <common.h>
+    printf("Test ATAPI driver.\n");
 
-void SetupFloppy() {
-    outb(FLOPPY_DIGITAL_OUTPUT_REGISTER, FLOPPY_DOR_BIT_DSEL0);
-
-
-
+    return;
 }

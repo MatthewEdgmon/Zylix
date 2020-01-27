@@ -24,14 +24,15 @@
 #include <arch/cpu_info.h>
 #include <arch/io.h>
 
-#include <devices/ata.h>
-#include <devices/ata_pio.h>
-#include <devices/ata_dma.h>
+#include <devices/storage/ata.h>
+#include <devices/storage/ata_pio.h>
+#include <devices/storage/ata_dma.h>
 #include <devices/video/bga.h>
 #include <devices/video/lfb_terminal.h>
 #include <devices/video/vesa.h>
 #include <devices/video/vga.h>
 #include <devices/cmos.h>
+#include <devices/smbios.h>
 
 #include <shell/shell_commands.h>
 #include <shell/shell.h>

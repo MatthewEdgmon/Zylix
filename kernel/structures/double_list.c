@@ -22,13 +22,13 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <structures/list.h>
+#include <structures/double_list.h>
 
 /**
  * Creates an empty list structure with NO nodes.
  */
-list_t* ListCreate() {
-    list_t* list = malloc(sizeof(list_t));
+double_list_t* DoubleListCreate() {
+    double_list_t* list = malloc(sizeof(double_list_t));
     list->length = 0;
     return list;
 }
@@ -36,8 +36,8 @@ list_t* ListCreate() {
 /**
  * Returns an exact copy of the original.
  */
-list_t* ListCopy(list_t* original) {
-    list_t* copy = malloc(sizeof(list_t));
+double_list_t* DoubleListCopy(double_list_t* original) {
+    double_list_t* copy = malloc(sizeof(double_list_t));
     copy->length = original->length;
     return copy;
 }
@@ -45,15 +45,15 @@ list_t* ListCopy(list_t* original) {
 /**
  * Frees every node of the list, and the list structure itself.
  */
-void ListDestroy(list_t* list) {
-    ListDestroyAllNodes(list);
+void DoubleListDestroy(double_list_t* list) {
+    DoubleListDestroyAllNodes(list);
     free(list);
 }
 
 /**
  * Frees a specified node from a list.
  */
-void ListDestroyNode(list_t* list, list_node_t* node_destroy) {
+void DoubleListDestroyNode(double_list_t* list, double_list_node_t* node_destroy) {
     foreach(node, list) {
         if(node == node_destroy) {
             // Tell each of the surronding nodes we're disappearing.
@@ -68,8 +68,8 @@ void ListDestroyNode(list_t* list, list_node_t* node_destroy) {
 /**
  * Frees a node at the index.
  */
-void ListDestroyIndex(list_t* list, size_t index) {
-    list_node_t* node_destroy = list->head;
+void DoubleListDestroyIndex(double_list_t* list, size_t index) {
+    double_list_node_t* node_destroy = list->head;
     for(size_t i = 0; i <= list->length; i++) {
         node_destroy = node_destroy->next;
         if(i == index) {
@@ -85,15 +85,15 @@ void ListDestroyIndex(list_t* list, size_t index) {
 /**
  * Frees all the nodes in a list, but not the structure.
  */
-void ListDestroyAllNodes(list_t* list) {
+void DoubleListDestroyAllNodes(double_list_t* list) {
     // Free the values.
     foreach(node, list) {
         free(node->value);
     }
     // Free the nodes themselves.
-    list_node_t* this_node = list->head;
+    double_list_node_t* this_node = list->head;
     while(this_node) {
-        list_node_t* next_node = this_node->next;
+        double_list_node_t* next_node = this_node->next;
         free(this_node);
         this_node = next_node;
     }
@@ -102,11 +102,11 @@ void ListDestroyAllNodes(list_t* list) {
 /**
  * Puts a node at index, descending from the head. Current node at index
  */
-void ListInsertNode(list_t* list, list_node_t* node, size_t index) {
+void DoubleListInsertNode(double_list_t* list, double_list_node_t* node, size_t index) {
 
     /* User just wants to set a new head node. */
     if(index == 0) {
-        ListAppendNode(list, node);
+        DoubleListAppendNode(list, node);
     }
 
     if(index >= list->length) {
@@ -115,7 +115,7 @@ void ListInsertNode(list_t* list, list_node_t* node, size_t index) {
     }
 
     /* Create a working node. */
-    list_node_t* current = list->head;
+    double_list_node_t* current = list->head;
 
     for(size_t i = 0; i < index; i++) {
         /* Check if there is a next node. */
@@ -133,18 +133,18 @@ void ListInsertNode(list_t* list, list_node_t* node, size_t index) {
 /**
  * Creates new node with value at index, descending from the head.
  */
-void ListInsertValue(list_t* list, void* value, size_t index) {
-    list_node_t* new_node;
+void DoubleListInsertValue(double_list_t* list, void* value, size_t index) {
+    double_list_node_t* new_node;
     new_node->value = value;
 
     /* Use an existing function to do the hard work. */
-    ListInsertNode(list, new_node, index);
+    DoubleListInsertNode(list, new_node, index);
 }
 
 /**
  * Adds a node to the end of the list.
  */
-void ListAppendNode(list_t* list, list_node_t* node) {
+void DoubleListAppendNode(double_list_t* list, double_list_node_t* node) {
     /* Check if this node already belongs to a list, if not, this list is it's owner. */
     if(node->owner != NULL) {
         printf("[LIST] Tried to append a node to a list but it already belongs to one.\n");
@@ -174,7 +174,7 @@ void ListAppendNode(list_t* list, list_node_t* node) {
 /**
  * Adds a node to the start of a list.
  */
-void ListPrependNode(list_t* list, list_node_t* node) {
+void DoubleListPrependNode(double_list_t* list, double_list_node_t* node) {
     /* Check if this node already belongs to a list, if not, this list is it's owner. */
     if(node->owner != NULL) {
         printf("[LIST] Tried to prepend a node to a list but it already belongs to one.\n");
@@ -202,25 +202,26 @@ void ListPrependNode(list_t* list, list_node_t* node) {
 /**
  * Adds a new node with the specified value to the end of the list.
  */
-void ListAppendValue(list_t* list, void* value) {
-    list_node_t* new_node = malloc(sizeof(list_node_t));
+void DoubleListAppendValue(double_list_t* list, void* value) {
+    double_list_node_t* new_node = malloc(sizeof(double_list_node_t));
     new_node->value = value;
-    ListAppendNode(list, new_node);
+    new_node->owner = list;
+    DoubleListAppendNode(list, new_node);
 }
 
 /**
  * Adds a new node with the specified value to the start of the list.
  */
-void ListPrependValue(list_t* list, void* value) {
-    list_node_t* new_node = malloc(sizeof(list_node_t));
+void DoubleListPrependValue(double_list_t* list, void* value) {
+    double_list_node_t* new_node = malloc(sizeof(double_list_node_t));
     new_node->value = value;
-    ListPrependNode(list, new_node);
+    DoubleListPrependNode(list, new_node);
 }
 
 /**
  * Returns the first node in the list which contains the specified value.
  */
-list_node_t* ListSearchNode(list_t* list, void* value) {
+double_list_node_t* DoubleListSearchNode(double_list_t* list, void* value) {
     foreach(node, list) {
         if(node->value == value) {
             return node;
@@ -232,7 +233,7 @@ list_node_t* ListSearchNode(list_t* list, void* value) {
 /**
  * Returns the first index of the specified value.
  */
-int ListSearchIndex(list_t* list, void* value) {
+int DoubleListSearchIndex(double_list_t* list, void* value) {
     int index = 0;
     foreach(node, list) {
         if(node->value == value) {
@@ -248,8 +249,8 @@ int ListSearchIndex(list_t* list, void* value) {
  * Creates a new list from two different lists, the "source" list is put on the
  * end of the "destination" list. Neither list's original structure is saved.
  */
-list_t* ListMerge(list_t* source, list_t* destination) {
-    list_t* merged_list = ListCreate();
+double_list_t* DoubleListMerge(double_list_t* source, double_list_t* destination) {
+    double_list_t* merged_list = DoubleListCreate();
 
     /* The length of the list is now both lengths added. */
     merged_list->length = destination->length + source->length;
@@ -279,14 +280,14 @@ list_t* ListMerge(list_t* source, list_t* destination) {
     }
 
     /* The source lists are not saved. */
-    ListDestroy(source);
-    ListDestroy(destination);
+    DoubleListDestroy(source);
+    DoubleListDestroy(destination);
 
     return merged_list;
 }
 
-void ListOutputStructure(list_t* list) {
-    printf("\nPrinting List Structure. %d Elements.\n", list->length);
+void DoubleListOutputStructure(double_list_t* list) {
+    printf("\nPrinting Double-List Structure. %d Elements.\n", list->length);
     foreach(node, list) {
         if(node == list->tail) {
             printf(" %d", node->value);

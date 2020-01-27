@@ -102,7 +102,8 @@ clean-userspace:
 
 clean-image:
 	@echo "Cleaning emulation hard disk image..."
-	@rm -f zylix.img
+	@rm -f zylix-el-torito.iso
+	@rm -f zylix-hard-drive.img
 	@rm -f $(HD_IMAGE_DIR)/boot/zykernel
 	@rm -r -f $(HD_IMAGE_DIR)/usr/lib/libc
 	@rm -r -f $(HD_IMAGE_DIR)/usr/include/libc
@@ -123,13 +124,13 @@ clean-trace:
 errors: errors-libc errors-kernel errors-userspace
 
 errors-libc:
-	@cd libc && cat .build-errors
+	@cd libc && cat .build-log
 
 errors-kernel:
-	@cd kernel && cat .build-errors
+	@cd kernel && cat .build-log
 
 errors-userspace:
-	@cd userspace && cat .build-errors
+	@cd userspace && cat .build-log
 
 ################################################################################
 #                                Emulation                                     #
