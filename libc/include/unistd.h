@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -39,6 +40,10 @@ int execve(const char*, char* const[], char* const[]);
 int execvp(const char*, char* const[]);
 
 int fork(void);
+
+int read(int, void*, size_t);
+void sync();
+int write(int, void*, size_t);
 
 #ifdef __cplusplus
 }

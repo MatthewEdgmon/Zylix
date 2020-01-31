@@ -20,7 +20,7 @@
 #ifndef __I686_H__
 #define __I686_H__
 
-#include <stdint.h>
+#define SYSCALL_VECTOR 0x63
 
 #define USER_STACK_BOTTOM 0xAFF00000
 #define USER_STACK_TOP    0xB0000000

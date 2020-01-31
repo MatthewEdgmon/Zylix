@@ -21,12 +21,13 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <arch/io.h>
-#include <arch/interrupts.h>
-#include <arch/cpu.h>
 #include <arch/cpu_info.h>
+#include <arch/cpu.h>
+#include <arch/interrupts.h>
+#include <arch/io.h>
+#include <arch/syscalls.h>
 
-#include <devices/acpi/acpica_zylix.h>
+#include <devices/acpi/acpi.h>
 #include <devices/net/Am79C970A.h>
 #include <devices/storage/ata.h>
 #include <devices/storage/ata_pio.h>
@@ -66,7 +67,6 @@
 #include <logging.h>
 #include <multiboot.h>
 #include <panic.h>
-#include <syscall_handler.h>
 #include <terminal.h>
 
 uintptr_t initial_esp;

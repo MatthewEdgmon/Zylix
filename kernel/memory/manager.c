@@ -25,6 +25,7 @@
 
 #include <arch/cpu_info.h>
 #include <arch/interrupts.h>
+#include <arch/registers.h>
 
 #include <memory/manager.h>
 
@@ -64,7 +65,7 @@ void* ManagerPageMap(void* physical_address, void* virtual_address, uint32_t fla
 
 }
 
-void ManagerHandlePageFault(registers_t* registers) {
+int ManagerHandlePageFault(cpu_registers_t* registers) {
     return;
 }
 

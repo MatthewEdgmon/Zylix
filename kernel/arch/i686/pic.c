@@ -23,9 +23,12 @@
 
 #include <arch/io.h>
 #include <arch/interrupts.h>
+#include <arch/registers.h>
+#include <common.h>
 
-#include "pic.h"
 #include "i686.h"
+#include "control_registers.h"
+#include "pic.h"
 #include "idt.h"
 
 #define PIC1                0x20    /* IO base address for master PIC */
@@ -51,9 +54,6 @@
 
 #define IRQ_CHAIN_SIZE		16
 #define IRQ_CHAIN_DEPTH		4
-
-#define SYNC_CLI()          __asm__ __volatile__("cli")
-#define SYNC_STI()          __asm__ __volatile__("sti")
 
 extern void  irq0();
 extern void  irq1();
@@ -89,20 +89,14 @@ func_pointer_t irq_functions[] = {
 };
 
 void PICDisableInterrupts() {
-	/* Check if interrupts are enabled */
-	uint32_t flags;
-	__asm__ __volatile__("pushf\n\t"
-	             		 "pop %%eax\n\t"
-	             	     "movl %%eax, %0\n\t"
-	             		 : "=r"(flags)
-	             		 :
-	                     : "%eax");
+    /* Check if interrupts are enabled */
+	uint32_t flags = GetFlagRegister();
 
 	/* Disable interrupts */
-	SYNC_CLI();
+	__asm__ __volatile__("cli");
 
 	/* If interrupts were enabled, then this is the first call depth */
-	if (flags & (1 << 9)) {
+	if(BIT_CHECK(flags, FLAG_BIT_IF)) {
 		sync_depth = 1;
 	} else {
 		/* Otherwise there is now an additional call depth */
@@ -112,39 +106,41 @@ void PICDisableInterrupts() {
 
 void PICEnableInterrupts() {
 	sync_depth = 0;
-	SYNC_STI();
+	__asm__ __volatile__("sti");
 }
 
 void PICResumeInterrupts() {
 	/* If there is one or no call depths, reenable interrupts */
 	if(sync_depth == 0 || sync_depth == 1) {
-		SYNC_STI();
+		__asm__ __volatile__("sti");
 	} else {
 		sync_depth--;
 	}
 }
 
 void PICInstallIRQHandler(size_t irq, irq_handler_chain_t handler) {
-	/* Disable interrupts when changing handlers */
-	SYNC_CLI();
-	for (size_t i = 0; i < IRQ_CHAIN_DEPTH; i++) {
-		if (irq_routines[i * IRQ_CHAIN_SIZE + irq])
+	__asm__ __volatile__("cli");
+
+	for(size_t i = 0; i < IRQ_CHAIN_DEPTH; i++) {
+		if(irq_routines[i * IRQ_CHAIN_SIZE + irq])
 			continue;
 		irq_routines[i * IRQ_CHAIN_SIZE + irq] = handler;
 		break;
 	}
-	SYNC_STI();
+
+	__asm__ __volatile__("sti");
 }
 
 void PICUninstallIRQHandler(size_t irq) {
-	/* Disable interrupts when changing handlers */
-	SYNC_CLI();
+	__asm__ __volatile__("cli");
+
 	for (size_t i = 0; i < IRQ_CHAIN_DEPTH; i++)
 		irq_routines[i * IRQ_CHAIN_SIZE + irq] = NULL;
-	SYNC_STI();
+
+	__asm__ __volatile__("sti");
 }
 
-void PICHandlerIRQ(registers_t* registers) {
+void PICHandlerIRQ(cpu_registers_t* registers) {
 	PICDisableInterrupts();
 	if(registers->interrupt_number <= 47 && registers->interrupt_number >= 32) {
 		for(size_t i = 0; i < IRQ_CHAIN_DEPTH; i++) {
@@ -258,10 +254,12 @@ int PICCascadeIRQHandler() {
 }
 
 void SetupPIC() {
+
 	/* Load the IRQ routines. */
-	for(int i = 0; i < IRQ_CHAIN_SIZE; i++) {
+	for(size_t i = 0; i < IRQ_CHAIN_SIZE; i++) {
 		irqs[i] = irq_functions[i];
 	}
+
 	PICRemap(0x20, 0x28);
     PICSetupGates();
     PICInstallIRQHandler(IRQ_CASCADE, PICCascadeIRQHandler);

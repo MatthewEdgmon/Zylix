@@ -1,5 +1,5 @@
 /**
- * cpu.c - i686 CPU Startup and Management.
+ * cpu.c - i686 CPU specific startup, management and utilities.
  *
  * This file is part of Zylix.
  *
@@ -18,7 +18,6 @@
  */
 
 #include <stdint.h>
-#include <stdio.h>
 
 #include "i686.h"
 #include "cpu_info_i686.h"

@@ -110,7 +110,15 @@ void CommandShutdown() {
     for(const char *s = "Shutdown"; *s; ++s) {
         outb(0x8900, *s);
     }
-    outb(0xF4, 0x00);
+
+    /* Bochs, old QEMU */
+    outw(0xB004, 0x2000);
+
+    /* New QEMU */
+    outw(0x0604, 0x2000);
+
+    /* Virtualbox */
+    outw(0x4004, 0x3400);
 }
 
 void CommandATASetupPIO() {

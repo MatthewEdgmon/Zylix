@@ -1,5 +1,5 @@
 /**
- * browser.c - Built-in file explorer.
+ * userspace.s - x86_64 Userspace Jump
  *
  * This file is part of Zylix.
  *
@@ -17,20 +17,47 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
+.code64
+.section .text
+.align 4
 
-#include <arch/io.h>
-#include <arch/interrupts.h>
+.global UserspaceReturn
+.type UserspaceReturn, @function
 
-#include <devices/ps2keyboard.h>
-#include <devices/video/vga.h>
+UserspaceReturn:
+    # Restore segment registers.
+    pop %rdx
+    pop %rcx
+    pop %rbx
+    pop %rax
+    mov %gs, %dx
+    mov %fs, %cx
+    mov %es, %bx
+    mov %ds, %ax
 
-#include <shell/monitor.h>
-#include <terminal.h>
+    # Restore all registers.
+    pop %rdi
+    pop %rsi
+    pop %rbp
+    pop %rsp
+    pop %rbx
+    pop %rdx
+    pop %rcx
+    pop %rax
 
-void BrowserMain() {
-    printf("Test.\n");
-}
+    # Pop CS, EIP, EFLAGS, SS and ESP
+    iret
+
+.global UserspaceJump
+.type UserspaceJump, @function
+
+UserspaceJump:
+
+    /* Request ring3 */
+    or $0x200, %rax
+    push %rax
+    push $0x1B
+
+    iret
+    push %rbp
+    ret

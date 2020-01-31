@@ -17,6 +17,7 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+.code32
 .section .text
 .align 4
 
@@ -52,13 +53,21 @@ IRQ 15, 47
 
 CommonIRQ:
 	# Save all registers.
-	pusha
+    push %eax
+    push %ecx
+    push %edx
+    push %ebx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
 
     # Save segment registers.
     push %ds
     push %es
     push %fs
     push %gs
+
     mov $0x10, %ax
     mov %ax, %ds
     mov %ax, %es
@@ -76,11 +85,15 @@ CommonIRQ:
     pop %es
     pop %ds
 
-	# Restore all registers.
-	popa
-
-    # Cleanup error code and IRQ.
-    add $8, %esp
+    # Restore all registers.
+    push %rdi
+    push %rsi
+    push %rbp
+    push %rsp
+    push %rbx
+    push %rdx
+    push %rcx
+    push %rax
 
 	# Pop CS, EIP, EFLAGS, SS and ESP
 	iret

@@ -31,15 +31,17 @@
 /**
  * Types of CPUID requests, with explanations. Put this value into EAX.
  */
-#define CPUID_REQUEST_STANDARD_VENDOR_MAX_LEVEL	    0x00000000  /* Returns max level in EAX, vendor string in EBX, EDX, ECX (in that order). */
+#define CPUID_REQUEST_STANDARD_VENDOR_MAX_LEVEL	    0x00000000  /* Returns max standard level in EAX, vendor string in EBX, EDX, ECX (in that order). */
 #define CPUID_REQUEST_STANDARD_FEATURES	            0x00000001  /* Returns CPU signature in EAX, features flags in ECX & EDX, additional features in EBX. */
 #define CPUID_REQUEST_STANDARD_CACHES               0x00000002  /* Processor configuration descriptors. */
 #define CPUID_REQUEST_STANDARD_SERIAL_NUMBER		0x00000003  /* Returns processor serial number in EAX, EBX, ECX and EDX. */
 #define CPUID_REQUEST_STANDARD_CACHES2              0x00000004
 #define CPUID_REQUEST_STANDARD_POWER                0x00000006
 #define CPUID_REQUEST_STANDARD_EXTENDED_FEATURES    0x00000007  /* Requests more feature information NOTE: ECX must equal 0x0 */
+#define CPUID_REQUEST_STANDARD_SGX                  0x00000012  /* Requests SGX resource enumeration. */
 #define CPUID_REQUEST_STANDARD_FREQUENCY1           0x00000015  /* Requests information about the CPU frequency. */
 #define CPUID_REQUEST_STANDARD_FREQUENCY2           0x00000016  /* Requests information about the CPU frequency. */
+#define CPUID_REQUEST_STANDARD_ATTRIBUTES           0x00000017  /* Requests information about processor vendor attributes. */
 #define CPUID_REQUEST_STANDARD_TLB                  0x00000018
 #define CPUID_REQUEST_XEON_PHI_MAX_LEVEL            0x20000000  /* Returns maximum supported level in EAX. */
 #define CPUID_REQUEST_XEON_PHI                      0x20000001  /* Returns processor information in EDX. */
@@ -162,141 +164,141 @@
 
 /*
 char* cpuid_intel_brand[] = {
-	"Brand ID Not Supported.",
-	"Intel(R) Celeron(R) Processor",
-	"Intel(R) Pentium(R) III Processor",
-	"Intel(R) Pentium(R) III Xeon(R) Processor",
-	"Intel(R) Pentium(R) III Processor",
-	"Reserved",
-	"Mobile Intel(R) Pentium(R) III Processor-M",
-	"Mobile Intel(R) Celeron(R) Processor",
-	"Intel(R) Pentium(R) 4 Processor",
-	"Intel(R) Pentium(R) 4 Processor",
-	"Intel(R) Celeron(R) Processor",
-	"Intel(R) Xeon(R) Processor",
-	"Intel(R) Xeon(R) Processor MP",
-	"Reserved",
-	"Mobile Intel(R) Pentium(R) 4 Processor-M",
-	"Mobile Intel(R) Pentium(R) Celeron(R) Processor",
-	"Reserved",
-	"Mobile Genuine Intel(R) Processor",
-	"Intel(R) Celeron(R) M Processor",
-	"Mobile Intel(R) Celeron(R) Processor",
-	"Intel(R) Celeron(R) Processor",
-	"Mobile Geniune Intel(R) Processor",
-	"Intel(R) Pentium(R) M Processor",
-	"Mobile Intel(R) Celeron(R) Processor"
+    "Brand ID Not Supported.",
+    "Intel(R) Celeron(R) Processor",
+    "Intel(R) Pentium(R) III Processor",
+    "Intel(R) Pentium(R) III Xeon(R) Processor",
+    "Intel(R) Pentium(R) III Processor",
+    "Reserved",
+    "Mobile Intel(R) Pentium(R) III Processor-M",
+    "Mobile Intel(R) Celeron(R) Processor",
+    "Intel(R) Pentium(R) 4 Processor",
+    "Intel(R) Pentium(R) 4 Processor",
+    "Intel(R) Celeron(R) Processor",
+    "Intel(R) Xeon(R) Processor",
+    "Intel(R) Xeon(R) Processor MP",
+    "Reserved",
+    "Mobile Intel(R) Pentium(R) 4 Processor-M",
+    "Mobile Intel(R) Pentium(R) Celeron(R) Processor",
+    "Reserved",
+    "Mobile Genuine Intel(R) Processor",
+    "Intel(R) Celeron(R) M Processor",
+    "Mobile Intel(R) Celeron(R) Processor",
+    "Intel(R) Celeron(R) Processor",
+    "Mobile Geniune Intel(R) Processor",
+    "Intel(R) Pentium(R) M Processor",
+    "Mobile Intel(R) Celeron(R) Processor"
 };
 
 char* cpuid_intel_brand_other[] = {
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Intel(R) Celeron(R) Processor",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Intel(R) Xeon(R) Processor MP",
-	"Reserved",
-	"Reserved",
-	"Intel(R) Xeon(R) Processor",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Reserved"
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Intel(R) Celeron(R) Processor",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Intel(R) Xeon(R) Processor MP",
+    "Reserved",
+    "Reserved",
+    "Intel(R) Xeon(R) Processor",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved"
 };
 */
 
 typedef struct {
 
-	/* What's the max value CPUID supports? */
-	uint32_t max_request;
+    /* What's the max value CPUID supports? */
+    uint32_t max_request;
 
-	/* Information, all strings are null terminated. */
-	char vendor[13];
-	char processor_name1[17];
-	char processor_name2[17];
-	char processor_name3[17];
-	char serial[64];
-	char features[8192];
+    /* Information, all strings are null terminated. */
+    char vendor[13];
+    char processor_name1[17];
+    char processor_name2[17];
+    char processor_name3[17];
+    char serial[64];
+    char features[8192];
 
-	/* Frequency */
-	uint32_t freq_denominator;
-	uint32_t freq_numerator;
-	uint32_t freq_hz;
+    /* Frequency */
+    uint32_t freq_denominator;
+    uint32_t freq_numerator;
+    uint32_t freq_hz;
 
-	/* EDX Features */
-	bool features_FPU;
-	bool features_VME;
-	bool features_DE;
-	bool features_PSE;
-	bool features_TSC;
-	bool features_MSR;
-	bool features_PAE;
-	bool features_MCE;
-	bool features_CX8;
-	bool features_APIC;
-	bool features_SEP;
-	bool features_MTRR;
-	bool features_PGE;
-	bool features_MCA;
-	bool features_CMOV;
-	bool features_PAT;
-	bool features_PSE36;
-	bool features_PSN;
-	bool features_CLFLUSH;
-	bool features_DS;
-	bool features_ACPI;
-	bool features_MMX;
-	bool features_FXSR;
-	bool features_SSE;
-	bool features_SSE2;
-	bool features_SS;
-	bool features_HYPERTHREADING;
-	bool features_TM;
-	bool features_IA64;
-	bool features_PBE;
+    /* EDX Features */
+    bool features_FPU;
+    bool features_VME;
+    bool features_DE;
+    bool features_PSE;
+    bool features_TSC;
+    bool features_MSR;
+    bool features_PAE;
+    bool features_MCE;
+    bool features_CX8;
+    bool features_APIC;
+    bool features_SEP;
+    bool features_MTRR;
+    bool features_PGE;
+    bool features_MCA;
+    bool features_CMOV;
+    bool features_PAT;
+    bool features_PSE36;
+    bool features_PSN;
+    bool features_CLFLUSH;
+    bool features_DS;
+    bool features_ACPI;
+    bool features_MMX;
+    bool features_FXSR;
+    bool features_SSE;
+    bool features_SSE2;
+    bool features_SS;
+    bool features_HYPERTHREADING;
+    bool features_TM;
+    bool features_IA64;
+    bool features_PBE;
 
-	/* ECX Features */
-	bool features_SSE3;
-	bool features_PCLMULQDQ;
-	bool features_DTES64;
-	bool features_MONITOR;
-	bool features_DS_CPL;
-	bool features_VMX;
-	bool features_SMX;
-	bool features_EST;
-	bool features_TM2;
-	bool features_SSSE3;
-	bool features_CNXTID;
-	bool features_FMA;
-	bool features_CMPXCHG16B;
-	bool features_ETPRD;
-	bool features_PDCM;
-	bool features_PCID;
-	bool features_DCA;
-	bool features_SSE4_1;
-	bool features_SSE4_2;
-	bool features_X2APIC;
-	bool features_MOVBE;
-	bool features_POPCNT;
-	bool features_TSC_DEADLINE;
-	bool features_AES;
-	bool features_XSAVE;
-	bool features_OSXSAVE;
-	bool features_AVX;
-	bool features_F16C;
-	bool features_RDRAND;
-	bool features_HYPERVISOR;
+    /* ECX Features */
+    bool features_SSE3;
+    bool features_PCLMULQDQ;
+    bool features_DTES64;
+    bool features_MONITOR;
+    bool features_DS_CPL;
+    bool features_VMX;
+    bool features_SMX;
+    bool features_EST;
+    bool features_TM2;
+    bool features_SSSE3;
+    bool features_CNXTID;
+    bool features_FMA;
+    bool features_CMPXCHG16B;
+    bool features_ETPRD;
+    bool features_PDCM;
+    bool features_PCID;
+    bool features_DCA;
+    bool features_SSE4_1;
+    bool features_SSE4_2;
+    bool features_X2APIC;
+    bool features_MOVBE;
+    bool features_POPCNT;
+    bool features_TSC_DEADLINE;
+    bool features_AES;
+    bool features_XSAVE;
+    bool features_OSXSAVE;
+    bool features_AVX;
+    bool features_F16C;
+    bool features_RDRAND;
+    bool features_HYPERVISOR;
 
 } cpu_info_t;
 

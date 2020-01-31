@@ -13,7 +13,8 @@ GCC=gcc-7.1.0
 BINUTILS=binutils-2.28
 # Toolchain and building options
 PREFIX=$DIR/local
-TARGET=i686-pc-zylix
+# TARGET=i686-pc-zylix
+TARGET=x86_64-pc-zylix
 # This is relative to the build directories, not the script directory.
 SYSROOT=$DIR/../../sysroot
 
@@ -27,10 +28,10 @@ function main() {
     fi
 
     command_check wget
-	command_check tar
-	command_check find
-	command_check patch
-	command_check make
+    command_check tar
+    command_check find
+    command_check patch
+    command_check make
     command_check gcc
     command_check genisoimage
     command_check genext2fs
@@ -38,24 +39,25 @@ function main() {
     echo "Building toolchain in $PREFIX targeting $TARGET at sysroot $SYSROOT"
 
     echo "Preparing system root."
-	mkdir -p $DIR/../../sysroot/bin
-	mkdir -p $DIR/../../sysroot/boot
-	mkdir -p $DIR/../../sysroot/dev
-	mkdir -p $DIR/../../sysroot/etc
-	mkdir -p $DIR/../../sysroot/home/Zylix
-	mkdir -p $DIR/../../sysroot/lib
-	mkdir -p $DIR/../../sysroot/media
-	mkdir -p $DIR/../../sysroot/mnt
-	mkdir -p $DIR/../../sysroot/opt
-	mkdir -p $DIR/../../sysroot/proc
-	mkdir -p $DIR/../../sysroot/root
-	mkdir -p $DIR/../../sysroot/tmp
-	mkdir -p $DIR/../../sysroot/usr
-	mkdir -p $DIR/../../sysroot/var
+    mkdir -p $DIR/../../sysroot/bin
+    mkdir -p $DIR/../../sysroot/boot
+    mkdir -p $DIR/../../sysroot/dev
+    mkdir -p $DIR/../../sysroot/etc
+    mkdir -p $DIR/../../sysroot/home/Zylix
+    mkdir -p $DIR/../../sysroot/lib
+    mkdir -p $DIR/../../sysroot/media
+    mkdir -p $DIR/../../sysroot/mnt
+    mkdir -p $DIR/../../sysroot/opt
+    mkdir -p $DIR/../../sysroot/proc
+    mkdir -p $DIR/../../sysroot/root
+    mkdir -p $DIR/../../sysroot/tmp
+    mkdir -p $DIR/../../sysroot/usr/include
+    mkdir -p $DIR/../../sysroot/usr/lib
+    mkdir -p $DIR/../../sysroot/var
 
-	echo "Copying C library headers to sysroot."
-	directory_check $DIR/../../sysroot/usr/include
-	(cd $DIR/../../libc/include && find . -name '*.h' -print | tar --create --files-from -) | (cd $DIR/../../sysroot/usr/include/ && tar xvfp -)
+    echo "Copying C library headers to sysroot."
+    directory_check $DIR/../../sysroot/usr/include
+    (cd $DIR/../../libc/include && find . -name '*.h' -print | tar --create --files-from -) | (cd $DIR/../../sysroot/usr/include/ && tar xvfp -)
 
     directory_check $DIR/download
     pushd $DIR/download > /dev/null
@@ -114,9 +116,9 @@ function download_and_extract() {
 
 function apply_patch() {
     echo Patching $1
-	pushd $1 > /dev/null
+    pushd $1 > /dev/null
     patch -p2 < $DIR/patches/$1.patch > /dev/null
-	popd > /dev/null
+    popd > /dev/null
 }
 
 function clean() {

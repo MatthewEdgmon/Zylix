@@ -371,7 +371,7 @@ void VGASetTextMode(uint8_t width, uint8_t height) {
     }
 }
 
-void VGASetGraphicsMode(uint8_t width, uint8_t height, uint8_t depth) {
+void VGASetGraphicsMode(uint16_t width, uint16_t height, uint16_t depth) {
     //VGAWriteRegisters(vga_graphics_320x200x256_mode_x);
     //vga_graphics_width = 320;
     //vga_graphics_height = 200;

@@ -1,5 +1,5 @@
 /**
- * syscall_handler.c
+ * syscall.c - x86_64 syscall handler.
  *
  * This file is part of Zylix.
  *
@@ -17,49 +17,52 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+
+#include "isr.h"
+#include "syscall.h"
 
 #include <arch/interrupts.h>
 #include <arch/registers.h>
-
-#include <devices/ps2keyboard.h>
+#include <arch/syscalls.h>
 
 #include <devices/video/lfb_terminal.h>
 #include <devices/video/vga.h>
+#include <devices/ps2keyboard.h>
 
 #include <memory/liballoc.h>
 
 #include <panic.h>
-#include <syscall_handler.h>
 #include <terminal.h>
 
-void SyscallHandler(registers_t* registers) {
-    switch(registers->EAX) {
+void SyscallHandler(cpu_registers_t* registers) {
+    switch(registers->rax) {
         case SYSCALL_EXIT:
-            registers->EAX = syscall_exit(registers);
+            registers->rax = syscall_exit(registers);
             return;
         case SYSCALL_FORK:
-            registers->EAX = syscall_fork(registers);
+            registers->rax = syscall_fork(registers);
             return;
         case SYSCALL_OPEN:
-            registers->EAX = open((char*) registers->EBX, registers->ECX);
+            registers->rax = open((char*) registers->rbx, registers->rcx);
             return;
         case SYSCALL_CLOSE:
             return;
         case SYSCALL_READ:
-            registers->EAX = read(registers->EBX, (char*) registers->ECX, (size_t) registers->EDX);
+            registers->rax = read(registers->rbx, (char*) registers->rcx, (size_t) registers->rdx);
             return;
         case SYSCALL_WRITE:
-            registers->EAX = write(registers->EBX, (char*) registers->ECX, (size_t) registers->EDX);
+            registers->rax = write(registers->rbx, (char*) registers->rcx, (size_t) registers->rdx);
             return;
         case SYSCALL_MALLOC:
-            registers->EAX = malloc((size_t) registers->EBX);
-            //registers->EAX = ManagerAllocate((size_t) registers->EBX);
+            registers->rax = malloc((size_t) registers->rbx);
+            //registers->rax = ManagerAllocate((size_t) registers->rbx);
             return;
         case SYSCALL_FREE:
-            free((uintptr_t) registers->EBX);
-            //registers->EAX = ManagerFree((uintptr_t) registers->EBX);
+            free((uintptr_t) registers->rbx);
+            //registers->rax = ManagerFree((uintptr_t) registers->rbx);
             return;
         case SYSCALL_GETSTDIN:
             return;
@@ -86,12 +89,12 @@ void SyscallHandler(registers_t* registers) {
     return;
 }
 
-uint32_t syscall_exit(registers_t* registers) {
+uint32_t syscall_exit(cpu_registers_t* registers) {
     // TODO: Actually end the process.
-    return registers->EAX;
+    return registers->rax;
 }
 
-uint32_t syscall_fork(registers_t* registers) {
+uint32_t syscall_fork(cpu_registers_t* registers) {
     // TODO: Actually fork the process.
     printf("Attempted to fork a process.\n");
     return 0;
@@ -123,6 +126,9 @@ uint32_t write(FILE fid, char* buffer, size_t length) {
             TerminalPrintCharacter(buffer[i]);
         }
     }
+
+    /* TODO: Even uglier hack! We're putting all writes to RS232 here. */
+    // WriteRS232(stuff)
 
     return 0;
 }

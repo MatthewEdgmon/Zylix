@@ -30,7 +30,11 @@ extern "C" {
 #define NULL ((void*)0)
 #endif
 
+/* Define size_t if it's undefined. */
+#ifndef LIBC_SIZE_T_DEFINED
+#define LIBC_SIZE_T_DEFINED
 typedef unsigned long size_t;
+#endif /* LIBC_SIZE_T_DEFINED */
 
 #ifdef __cplusplus
 }

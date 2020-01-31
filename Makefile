@@ -1,10 +1,29 @@
+##
+# Zylix high level Makefile
+#
+# This file is part of Zylix.
+#
+# Zylix is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Zylix is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
+
 # Emulation image generators
 GENEXT2FS = genext2fs
 GENISOIMAGE = genisoimage
-HD_IMAGE_NAME = zylix-hard-drive.img
+GRUB_MKRESUCE = grub-mkrescue
+HD_IMAGE_NAME = zylix-HDD.img
 HD_IMAGE_DIR = sysroot
 HD_IMAGE_SIZE = 131072
-ISO_IMAGE_NAME = zylix-el-torito.iso
+ISO_IMAGE_NAME = zylix.iso
 ISO_IMAGE_DIR = sysroot
 ISO_IMAGE_LABEL = ZylixAlpha
 
@@ -32,7 +51,8 @@ QEMU_ARGS += -rtc base=localtime
 # QEMU quick shutdown
 QEMU_ARGS += -device isa-debug-exit,iobase=0xf4,iosize=0x04
 
-VBOX = vboxmanage startvm "Zylix"
+# VBOX = vboxmanage startvm "Zylix"
+VBOX = vboxmanage.exe startvm "Zylix"
 VBOX_ARGS =
 
 BOCHS = bochs
@@ -102,8 +122,8 @@ clean-userspace:
 
 clean-image:
 	@echo "Cleaning emulation hard disk image..."
-	@rm -f zylix-el-torito.iso
-	@rm -f zylix-hard-drive.img
+	@rm -f $(ISO_IMAGE_NAME)
+	@rm -f $(HD_IMAGE_NAME)
 	@rm -f $(HD_IMAGE_DIR)/boot/zykernel
 	@rm -r -f $(HD_IMAGE_DIR)/usr/lib/libc
 	@rm -r -f $(HD_IMAGE_DIR)/usr/include/libc
@@ -136,13 +156,14 @@ errors-userspace:
 #                                Emulation                                     #
 ################################################################################
 
-zylix-hard-drive.img: install
+zylix-HDD.img: install
 	@echo "Building emulation hard disk image."
 	@$(GENEXT2FS) -d $(HD_IMAGE_DIR) -D tools/devtable -b $(HD_IMAGE_SIZE) -N 4096 $(HD_IMAGE_NAME)
 
-zylix-el-torito.iso: install
-	@echo "Building an El Torito CD image."
-	@$(GENISOIMAGE) -input-charset utf8 -quiet -V $(ISO_IMAGE_NAME) -R -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $(ISO_IMAGE_NAME) $(ISO_IMAGE_DIR)
+zylix.iso: install
+	@echo "Building ISO image."
+#	@$(GENISOIMAGE) -input-charset utf8 -quiet -V $(ISO_IMAGE_NAME) -R -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $(ISO_IMAGE_NAME) $(ISO_IMAGE_DIR)
+	@$(GRUB_MKRESUCE) -o $(ISO_IMAGE_NAME) $(ISO_IMAGE_DIR)
 
 run: $(HD_IMAGE_NAME) $(ISO_IMAGE_NAME)
 	@echo "Running ${EMU}"

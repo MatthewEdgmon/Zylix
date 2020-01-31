@@ -26,7 +26,7 @@
 
 void PITSpeakerPlaySound();
 void PITSetupTimer(uint32_t frequency);
-int PITHandlerIRQ(registers_t* registers);
+int PITHandlerIRQ(cpu_registers_t* registers);
 
 void SetupPIT();
 

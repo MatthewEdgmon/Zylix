@@ -20,11 +20,13 @@
 #ifndef __ATA_PIO_H__
 #define __ATA_PIO_H__
 
+#include <arch/registers.h>
+
 uint8_t ATA_PIO_SoftwareReset(uint8_t bus);
 uint8_t ATA_PIO_DetectDevice(uint8_t bus_number, uint8_t device_number);
 
-uint8_t ATA_PIO_PrimaryInterruptHandler(registers_t* regs);
-uint8_t ATA_PIO_SecondaryInterruptHandler(registers_t* regs);
+uint8_t ATA_PIO_PrimaryInterruptHandler(cpu_registers_t* regs);
+uint8_t ATA_PIO_SecondaryInterruptHandler(cpu_registers_t* regs);
 
 void ATA_PIO_TestRead();
 

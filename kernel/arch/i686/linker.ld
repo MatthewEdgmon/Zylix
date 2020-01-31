@@ -1,6 +1,8 @@
 /* The bootloader will look at this image and start execution at the symbol
    designated at the entry point. */
-OUTPUT_FORMAT(elf32-i386)
+
+/* OUTPUT_FORMAT(elf32-i386) */
+OUTPUT_FORMAT(i686-pc-zylix)
 ENTRY(_start)
 
 /* Tell where the various sections of the object files will be put in the final

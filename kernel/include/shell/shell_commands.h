@@ -23,7 +23,7 @@
 #include <arch/interrupts.h>
 #include <arch/registers.h>
 
-int ComamndInputHandler(registers_t* registers);
+int ComamndInputHandler(cpu_registers_t* registers);
 
 void CommandEcho();
 void CommandClear();

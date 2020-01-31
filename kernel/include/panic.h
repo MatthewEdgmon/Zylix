@@ -22,7 +22,7 @@
 
 #include <arch/registers.h>
 
-void _KernelPanic(char* message, const char* file, int line, registers_t* registers);
+void _KernelPanic(char* message, const char* file, int line, cpu_registers_t* registers);
 void _AssertFailure(const char* statement, const char* file, int line);
 
 #define KernelPanic(message, registers) _KernelPanic(message, __FILE__, __LINE__, registers)

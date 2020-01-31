@@ -17,18 +17,40 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO: Find clean way to put this struct in arch/i686
-
 #ifndef __REGISTERS_H__
 #define __REGISTERS_H__
 
-struct registers {
+#include <stdint.h>
+
+#ifdef ARCH_i686
+
+typedef struct cpu_registers {
 	unsigned int GS, FS, ES, DS;
 	unsigned int EDI, ESI, EBP, ESP, EBX, EDX, ECX, EAX;
 	unsigned int interrupt_number, error_code;
 	unsigned int EIP, CS, eflags, useresp, SS;
-};
+} cpu_registers_t;
 
-typedef struct registers registers_t;
+#endif
+
+#ifdef ARCH_x86_64
+
+typedef struct cpu_registers {
+    /* General Purpose Registers */
+    uint64_t rax, rbx, rcx, rdx, rsi, rdi, rsp, rbp;
+    /* Pointer Registers. */
+    uint64_t rip;
+    /* Processor Flags. */
+    uint64_t rflags;
+    /* x86_64 Specific General Purpose Registers */
+    uint64_t r8, r9, r10, r11, r12, r13, r14, r15;
+    /* Segment Registers (these are saved for running 32 bit code on 64 bit platforms). */
+	uint16_t cs, ds, ss, es, fs, gs;
+
+    /* Variables saved with the registers for IRQ handler. */
+	unsigned int interrupt_number, error_code, useresp;
+} cpu_registers_t;
+
+#endif
 
 #endif /* __REGISTERS_H__ */

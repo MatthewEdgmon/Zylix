@@ -20,25 +20,28 @@ CROSS_DIR = ../tools/toolchain/local/bin
 CROSS_VER = 7.1.0
 
 # Change TARGET_ARCH to match the platform you're targeting.
-TARGET_ARCH  = i686
+# TARGET_ARCH  = i686
+TARGET_ARCH  = x86_64
 ARCH_DIR     = arch/$(TARGET_ARCH)
 include        $(ARCH_DIR)/make.config
 
 # Build using our cross compiler.
+AR  = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-ar
+AS  = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-as
 CC  = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-gcc
 LD  = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-ld
 NM  = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-nm
 CXX = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-g++
-AS  = $(CROSS_DIR)/$(KERNEL_ARCH_GCC_NAME)-as
 
 # Flags used to build the kernel.
 KERNEL_CFLAGS  = -O2 -std=c99
 KERNEL_CFLAGS += -finline-functions -ffreestanding
+KERNEL_CFLAGS += -DARCH_$(TARGET_ARCH)
 # TODO: Build support for libssp in gcc
 #KERNEL_CFLAGS += -fstack-protector-strong
 KERNEL_CFLAGS += -Wall -Wextra -Wno-unused-function -Wno-unused-parameter
 KERNEL_CFLAGS += -pedantic -fno-omit-frame-pointer
-KERNEL_LDFLAGS = -z defs
+KERNEL_LDFLAGS = -z defs -z max-page-size=0x1000
 KERNEL_LIBS    = -lc -lgcc
 
 # Kernel headers.
@@ -65,7 +68,7 @@ KERNEL_OBJ_LINK_LIST = ${KERNEL_ARCH_OBJS} \
                        ${KERNEL_OBJS} \
 
 # Capture build events to a log.
-ERRORS = &>>./.build-log
+ERRORS = 2>>./.build-log
 
 # Where to put the finished kernel and headers.
 SYSROOT = ../sysroot
@@ -94,7 +97,7 @@ zykernel: ${KERNEL_ARCH_OBJS} ${KERNEL_OBJS}
 
 %.o: %.s
 	@printf "Compiling ${COLOR_LIGHT_BLUE}$< ${COLOR_OFF}..."
-	@${AS} -c $< -o $@ ${ERRORS}
+	@${AS} -c $< -o $@ # ${ERRORS}
 	@printf "${STATUS_OK}"
 
 ################################################################################

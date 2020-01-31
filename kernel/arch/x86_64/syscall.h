@@ -1,5 +1,5 @@
 /**
- * syscall_handler.h
+ * syscall.h - x86_64-specific syscall handling.
  *
  * This file is part of Zylix.
  *
@@ -17,29 +17,16 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SYSCALL_HANDLER_H__
-#define __SYSCALL_HANDLER_H__
+#ifndef __SYSCALL_H__
+#define __SYSCALL_H__
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stddef.h>
 
-#define SYSCALL_EXIT      0
-#define SYSCALL_FORK      1
-#define SYSCALL_OPEN      2
-#define SYSCALL_CLOSE     3
-#define SYSCALL_READ      4
-#define SYSCALL_WRITE     5
-#define SYSCALL_MALLOC    6
-#define SYSCALL_FREE      7
-#define SYSCALL_GETSTDIN  10
-#define SYSCALL_GETSTDOUT 11
-#define SYSCALL_GETSTDERR 12
-#define SYSCALL_LSEEK     19
-#define SYSCALL_GETPID    20
-#define SYSCALL_MOUNT     21
-#define SYSCALL_UMOUNT    22
-#define SYSCALL_REBOOT    23
-#define SYSCALL_SYNC      24
+#include <arch/registers.h>
+
+void SyscallHandler(cpu_registers_t* registers);
 
 uint32_t syscall_exit();
 uint32_t syscall_fork();
@@ -52,8 +39,6 @@ uint32_t close(FILE fid);
 FILE open(char* path, uint32_t offset);
 int sys_wait(int pid, int* status, int options);
 
-uint32_t _exit(registers_t* regs);
+uint32_t _exit(cpu_registers_t* regs);
 
-void SetupSyscalls();
-
-#endif /* __SYSCALL_HANDLER_H__ */
+#endif /* __SYSCALL_H__ */

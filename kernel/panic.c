@@ -29,7 +29,7 @@
 #include <panic.h>
 #include <terminal.h>
 
-void _KernelPanic(char* message, const char* file, int line, registers_t* registers) {
+void _KernelPanic(char* message, const char* file, int line, cpu_registers_t* registers) {
     InterruptsDisable();
     TerminalClear();
     TerminalSetColor(TerminalMakeColor(COLOR_LIGHT_RED, COLOR_BLACK));
@@ -37,6 +37,22 @@ void _KernelPanic(char* message, const char* file, int line, registers_t* regist
     printf("  Message: %s\n", message);
     printf("     File: %s\n", file);
     printf("     Line: %d\n", line);
+
+#ifdef ARCH_x86_64
+    if(registers) {
+        printf("\nRegisters:\n");
+        printf("RAX=0x%X RBX=0x%X RCX=0x%X RDX=0x%X\n", registers->rax, registers->rbx, registers->rcx, registers->rdx);
+        printf("RSI=0x%X RDI=0x%X RSP=0x%X RBP=0x%X\n", registers->rsi, registers->rdi, registers->rsp, registers->rbp);
+        printf("R8 =0x%X R9 =0x%X R10=0x%X R11=0x%X\n", registers->r8,  registers->r9,  registers->r10, registers->r11);
+        printf("R12=0x%X R13=0x%X R14=0x%X R15=0x%X\n", registers->r12, registers->r13, registers->r14, registers->r15);
+        printf("         RIP=0x%X\n", registers->rip);
+        printf("Error code:  0x%X\n", registers->error_code);
+        printf("RFLAGS:      0x%X\n", registers->rflags);
+        printf("User ESP:    0x%X\n", registers->useresp);
+    }
+#endif
+
+#ifdef ARCH_i686
     if(registers) {
         printf("\nRegisters:\n");
         printf("EAX=0x%X EBX=0x%X\n", registers->EAX, registers->EBX);
@@ -47,6 +63,8 @@ void _KernelPanic(char* message, const char* file, int line, registers_t* regist
         printf("EFLAGS:      0x%X\n", registers->eflags);
         printf("User ESP:    0x%X\n", registers->useresp);
     }
+#endif
+
     printf("\nStopping execution.\n");
     while(1) {
         stop_execution();

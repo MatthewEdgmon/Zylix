@@ -97,4 +97,5 @@ int SetupATA_DMA() {
     0xC-0xF		PRDT Address (uint32_t)
     */
 
+    return 0;
 }

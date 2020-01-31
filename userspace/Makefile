@@ -20,7 +20,8 @@ CROSS_DIR = ../tools/toolchain/local/bin
 CROSS_VER = 7.1.0
 
 # Change TARGET_ARCH to match the platform you're targeting.
-TARGET_ARCH  = i686
+# TARGET_ARCH  = i686
+TARGET_ARCH  = x86_64
 ARCH_DIR     = arch/$(TARGET_ARCH)
 include        $(ARCH_DIR)/make.config
 
@@ -34,6 +35,7 @@ AS  = $(CROSS_DIR)/$(USERSPACE_ARCH_GCC_NAME)-as
 # Flags used to build the library.
 USER_CFLAGS  = -O2 -std=c99
 USER_CFLAGS += -finline-functions
+USER_CFLAGS += -DARCH_$(TARGET_ARCH)
 USER_CFLAGS += -Wall -Wextra -Wno-unused-function -Wno-unused-parameter
 USER_CFLAGS += -pedantic -fno-omit-frame-pointer
 USER_CFLAGS += -DZYLIX_LIBC_USERSPACE

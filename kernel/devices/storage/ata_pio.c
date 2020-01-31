@@ -277,7 +277,7 @@ uint8_t ATA_PIO_DetectDevice(uint8_t bus_number, uint8_t device_number) {
 	return ATA_DEVICE_PATA;
 }
 
-uint8_t ATA_PIO_PrimaryInterruptHandler(registers_t* regs) {
+uint8_t ATA_PIO_PrimaryInterruptHandler(cpu_registers_t* regs) {
 	uint8_t status = inb(ATA_PRIMARY_PORT_STATUS);
 
 	while(BIT_CHECK(status, ATA_STATUS_BIT_BSY)) {
@@ -311,7 +311,7 @@ uint8_t ATA_PIO_PrimaryInterruptHandler(registers_t* regs) {
 	return 1;
 }
 
-uint8_t ATA_PIO_SecondaryInterruptHandler(registers_t* regs) {
+uint8_t ATA_PIO_SecondaryInterruptHandler(cpu_registers_t* regs) {
 	uint8_t status = inb(ATA_SECONDARY_PORT_STATUS);
 
 	while(BIT_CHECK(status, ATA_STATUS_BIT_BSY)) {

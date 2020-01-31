@@ -17,6 +17,7 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+.code32
 .section .text
 .align 4
 

@@ -23,6 +23,7 @@
 #include <stdint.h>
 
 #include <arch/interrupts.h>
+#include <arch/registers.h>
 
 #define VBOX_GUEST_LOG_PORT      0x504
 
@@ -48,7 +49,7 @@ typedef struct {
     uint32_t os_type;
 } vbox_guest_info_t;
 
-int VBoxGuestHandler(registers_t* registers);
+int VBoxGuestHandler(cpu_registers_t* registers);
 
 void SetupVBoxGuest();
 

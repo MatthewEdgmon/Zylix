@@ -1,5 +1,5 @@
 /**
- * acpica_zylix.c - Glue layer for ACPICA services.
+ * acpi.h - Advanced Configuration and Power Interface
  *
  * This file is part of Zylix.
  *
@@ -17,12 +17,28 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
+#ifndef __ACPI_ZYLIX_H__
+#define __ACPI_ZYLIX_H__
 
-#include <devices/acpi/acpica_zylix.h>
+#include <stdint.h>
 
-void SetupACPI() {
+typedef struct rsdp_descriptor {
+    char signature[8];
+    uint8_t checksum;
+    char oem_id[6];
+    uint8_t revision;
+    uint32_t rsdt_address;
+} rsdp_descriptor_t __attribute__((packed));
 
-    printf("Starting ACPI sub-system...\n");
+typedef struct rsdp_descriptor2 {
+    rsdp_descriptor_t original_descriptor;
 
-}
+    uint32_t length;
+    uint64_t xsdt_address;
+    uint8_t extended_checksum;
+    uint8_t reserved[3];
+} rsdp_descriptor2_t __attribute__((packed));
+
+void SetupACPI();
+
+#endif /* __ACPI_ZYLIX_H__ */

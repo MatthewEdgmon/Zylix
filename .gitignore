@@ -15,8 +15,8 @@ zykernel
 
 # Emulation images
 grub.img
-zylix-el-torito.iso
-zylix-hard-drive.img
+zylix.iso
+zylix-HDD.img
 
 # Logs
 bochs-log.txt

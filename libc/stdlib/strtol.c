@@ -6,7 +6,7 @@
 long strtol(char* string, char* pointer, int base) {
 
     unsigned long result = 0;
-    uint16_t character;
+    uint16_t character = 0;
 
     /* If non-zero, number is negative. */
     int negative = 0;

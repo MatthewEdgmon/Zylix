@@ -58,6 +58,8 @@ stack_bottom:
 .skip 16384 # 16 KiB
 stack_top:
 
+# The kernel entry point.
+.code32
 .section .text
 
 .global _start
@@ -89,6 +91,7 @@ _start:
 	cli
 
 hang:
+    # Keep jumping back in case NMI interrupts HLT.
 	hlt
 	jmp hang
 

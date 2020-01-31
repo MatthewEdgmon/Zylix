@@ -83,7 +83,7 @@ uint16_t VGAGetGraphicsModeHeight();
 /* Mode setting functions. */
 void VGASetPlane(uint8_t plane);
 void VGASetTextMode(uint8_t width, uint8_t height);
-void VGASetGraphicsMode(uint8_t width, uint8_t height, uint8_t depth);
+void VGASetGraphicsMode(uint16_t width, uint16_t height, uint16_t depth);
 
 /* Pixel plotting functions. */
 void VGAGraphicsDrawPixel1(uint8_t x, uint8_t y, uint8_t c);

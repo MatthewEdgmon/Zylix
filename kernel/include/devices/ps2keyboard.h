@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 #include <arch/interrupts.h>
+#include <arch/registers.h>
 
 #include <devices/ps2.h>
 
@@ -68,6 +69,6 @@ uint8_t PS2KeyboardGetKey();
 uint8_t PS2KeyboardGetExtendedKey();
 void SetupPS2Keyboard();
 
-int PS2KeyboardHandler(registers_t* registers);
+int PS2KeyboardHandler(cpu_registers_t* registers);
 
 #endif /* __PS2KEYBOARD_H__ */

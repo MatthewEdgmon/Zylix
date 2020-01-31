@@ -22,6 +22,12 @@
 
 #include <stdbool.h>
 
+#ifdef ARCH_i686
 #include "../../arch/i686/cpu_info_i686.h"
+#endif
+
+#ifdef ARCH_x86_64
+#include "../../arch/x86_64/cpu_info_x86_64.h"
+#endif
 
 #endif /* __CPU_INFO_H__ */

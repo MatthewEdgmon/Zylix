@@ -1,49 +1,28 @@
+/**
+ * x86_64.h - x86_64 Definitions
+ *
+ * This file is part of Zylix.
+ *
+ * Zylix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zylix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef __X86_64_H__
 #define __X86_64_H__
 
-/**
- * Collection of variables, defines, and functions not visible globally, only for this arch.
- */
-
-#include <libc/stdint.h>
-
-#define SYSCALL_VECTOR 0x90
+#define SYSCALL_VECTOR 0x63
 
 #define USER_STACK_BOTTOM 0xAFF00000
 #define USER_STACK_TOP    0xB0000000
-
-struct registers {
-	unsigned int GS, FS, ES, DS;
-	unsigned int EDI, ESI, EBP, ESP, EBX, EDX, ECX, EAX;
-	unsigned int interrupt_number, error_code;
-	unsigned int EIP, CS, eflags, useresp, SS;
-};
-
-/* ISR.c */
-typedef struct registers registers_t;
-
-typedef void (*irq_handler_t) (struct registers *);
-typedef int (*irq_handler_chain_t) (struct registers *);
-
-void SetupISR();
-
-/* CPU.c */
-uint64_t rdtsc();
-
-/* CPUInfo.c */
-void StoreCPUInformation(void);
-
-/* GDT.c */
-void SetupGDT();
-
-/* IDT.c */
-typedef void (*idt_gate_t)(void);
-
-void SetupIDT();
-void CreateIDTEntry(uint8_t entry_number, idt_gate_t base, uint16_t sel, uint8_t flags);
-
-/* IRQ.c */
-void RemapIRQ();
-void SetupIRQ();
 
 #endif /* __X86_64_H__ */

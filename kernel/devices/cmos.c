@@ -30,6 +30,7 @@
 
 #include <arch/io.h>
 #include <arch/interrupts.h>
+#include <arch/registers.h>
 
 #include <devices/cmos.h>
 
@@ -187,7 +188,7 @@ uint16_t CMOSGetSeconds() {
     return seconds;
 }
 
-int RTCHandlerIRQ(registers_t* registers) {
+int RTCHandlerIRQ(cpu_registers_t* registers) {
 
     CMOSReadRTC();
 

@@ -23,6 +23,7 @@
 
 #include <arch/io.h>
 #include <arch/interrupts.h>
+#include <arch/registers.h>
 
 #include <devices/ps2.h>
 #include <devices/ps2keyboard.h>
@@ -52,7 +53,7 @@ uint8_t current_extended_key = 0;
 
 uint8_t current_key_held = 0;
 
-char US_QWERTY_1[128] = {
+uint16_t US_QWERTY_1[128] = {
 0,                 /* Escape */
 '1','2','3','4','5','6','7','8','9','0',
   '-','=',
@@ -97,7 +98,7 @@ char US_QWERTY_1[128] = {
 0
 };
 
-char US_QWERTY_sh[128]= {
+uint16_t US_QWERTY_sh[128]= {
 
   // Key Presses
 
@@ -147,7 +148,7 @@ char US_QWERTY_sh[128]= {
 
   };
 
-char US_QWERTY_extended[]= {
+uint16_t US_QWERTY_extended[]= {
 '\n',         /* Keypad Enter */
 0,            //Right Control */
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -222,7 +223,7 @@ uint8_t PS2KeyboardGetExtendedKey() {
     return current_extended_key;
 }
 
-int PS2KeyboardHandler(registers_t* registers) {
+int PS2KeyboardHandler(cpu_registers_t* registers) {
     uint8_t keyboard_scan_code;
 
     /* We do not need to probe the status bit on an IRQ. */

@@ -22,9 +22,9 @@
 
 #include <stdint.h>
 
-#include <multiboot.h>
-
+#include <arch/registers.h>
 #include <structures/double_list.h>
+#include <multiboot.h>
 
 double_list_t* memory_list;
 
@@ -32,6 +32,8 @@ void* ManagerPageAllocate(uint16_t num_pages);
 int ManagerPageFree(void* address, uint16_t num_pages);
 
 void* ManagerPageMap(void* physical_address, void* virtual_address, uint32_t flags);
+
+int ManagerHandlePageFault(cpu_registers_t* registers);
 
 void SetupMemoryManager(multiboot_info_t* multiboot_info);
 

@@ -1,5 +1,5 @@
 /**
- * acpica_zylix.h - Glue layer for ACPICA services.
+ * acpi.c - Advanced Configuration and Power Interface
  *
  * This file is part of Zylix.
  *
@@ -17,9 +17,23 @@
  * along with Zylix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ACPICA_ZYLIX_H__
-#define __ACPICA_ZYLIX_H__
+#include <stdint.h>
+#include <stdio.h>
 
-void SetupACPI();
+#include <devices/acpi/acpi.h>
 
-#endif /* __ACPICA_ZYLIX_H__ */
+/* RSDP Can be anywhere from 0x000E0000 to 0x000FFFFF in memory, on 16 byte boundary. */
+uint32_t* FindRSDP() {
+
+    for(uint32_t i = 0xE0000; i < 0xFFFFF; i += 0x10) {
+
+    }
+
+    printf("RSDP not found. ACPI not enabled.");
+    return 0xE0000;
+}
+
+void SetupACPI() {
+    printf("Starting ACPI sub-system...\n");
+    FindRSDP();
+}

@@ -20,17 +20,18 @@
 #ifndef __ISR_H__
 #define __ISR_H__
 
+#include <arch/interrupts.h>
+#include <arch/registers.h>
+
 /* ISR numbers. */
 #define ISR_DIVIDE_BY_ZERO 0
 
 #define ISR_PAGE_FAULT 19
 #define ISR_SYSCALL 99
 
-#define SYSCALL_VECTOR 0x63
-
 void ISRInstallHandler(size_t isrs, irq_handler_t handler);
 void ISRUninstallHandler(size_t isrs);
-void ISRFaultHandler(struct registers *regs);
+void ISRFaultHandler(cpu_registers_t* regs);
 
 void SetupISR();
 

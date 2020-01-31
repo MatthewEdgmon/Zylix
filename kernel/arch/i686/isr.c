@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include <arch/interrupts.h>
+#include <arch/registers.h>
 
 #include "i686.h"
 #include "isr.h"
@@ -104,28 +105,28 @@ static const char *exception_messages[32] = {
 };
 
 static struct {
-	size_t index;
-	void (*stub)(void);
+    size_t index;
+    void (*stub)(void);
 } isrs[32 + 1] __attribute__((used));
 
 static irq_handler_t isr_routines[256] = { 0 };
 
 void ISRInstallHandler(size_t isrs, irq_handler_t handler) {
-	isr_routines[isrs] = handler;
+    isr_routines[isrs] = handler;
 }
 
 void ISRUninstallHandler(size_t isrs) {
-	isr_routines[isrs] = 0;
+    isr_routines[isrs] = 0;
 }
 
-void ISRFaultHandler(struct registers *regs) {
-	irq_handler_t handler = isr_routines[regs->interrupt_number];
-	if(handler) {
+void ISRFaultHandler(cpu_registers_t* regs) {
+    irq_handler_t handler = isr_routines[regs->interrupt_number];
+    if(handler) {
         printf("Handling ISR [%d] %s \n", regs->interrupt_number, exception_messages[regs->interrupt_number]);
-		handler(regs);
-	} else {
-		printf("Unhandled exception: [%d] %s \n", regs->interrupt_number, exception_messages[regs->interrupt_number]);
-	}
+        handler(regs);
+    } else {
+        printf("Unhandled exception: [%d] %s \n", regs->interrupt_number, exception_messages[regs->interrupt_number]);
+    }
 }
 
 typedef void (*func_pointer_t)();
@@ -149,12 +150,12 @@ void SetupISR(void) {
         isrs[i].stub = isr_functions[i];
     }
 
-	isrs[ISR_COUNT].index = SYSCALL_VECTOR;
-	isrs[ISR_COUNT].stub = isr_functions[ISR_COUNT];
+    isrs[ISR_COUNT].index = SYSCALL_VECTOR;
+    isrs[ISR_COUNT].stub = isr_functions[ISR_COUNT];
 
-	for(int i = 0; i < ISR_COUNT + 1; i++) {
-		IDTCreateEntry(isrs[i].index, isrs[i].stub, 0x08, 0x8E);
-	}
+    for(int i = 0; i < ISR_COUNT + 1; i++) {
+        IDTCreateEntry(isrs[i].index, isrs[i].stub, 0x08, 0x8E);
+    }
 
     return;
 }

@@ -20,8 +20,10 @@
 #ifndef __CMOS_H__
 #define __CMOS_H__
 
+#include <arch/registers.h>
+
 /* Changed every year, in order to support CMOS without century registers. */
-#define CMOS_CURRENT_YEAR         2017
+#define CMOS_CURRENT_YEAR         2020
 
 #define CMOS_ADDRESS_PORT         0x70
 #define CMOS_DATA_PORT            0x71
@@ -62,7 +64,7 @@ uint16_t CMOSGetHours();
 uint16_t CMOSGetMinutes();
 uint16_t CMOSGetSeconds();
 
-int RTCHandlerIRQ();
+int RTCHandlerIRQ(cpu_registers_t* registers);
 
 void SetupRTC();
 

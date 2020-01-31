@@ -27,6 +27,12 @@ uint64_t rdtsc();
 void SetupCPU();
 void SetupFPU();
 
+#ifdef ARCH_i686
 #include "../../arch/i686/i686.h"
+#endif
+
+#ifdef ARCH_x86_64
+#include "../../arch/x86_64/x86_64.h"
+#endif
 
 #endif /* __CPU_H__ */

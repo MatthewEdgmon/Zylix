@@ -20,20 +20,23 @@ CROSS_DIR = ../tools/toolchain/local/bin
 CROSS_VER = 7.1.0
 
 # Change TARGET_ARCH to match the platform you're targeting.
-TARGET_ARCH  = i686
+# TARGET_ARCH  = i686
+TARGET_ARCH  = x86_64
 ARCH_DIR     = arch/$(TARGET_ARCH)
 include        $(ARCH_DIR)/make.config
 
 # Build using our cross compiler.
+AR  = $(CROSS_DIR)/$(LIBRARY_ARCH_GCC_NAME)-ar
+AS  = $(CROSS_DIR)/$(LIBRARY_ARCH_GCC_NAME)-as
 CC  = $(CROSS_DIR)/$(LIBRARY_ARCH_GCC_NAME)-gcc
 LD  = $(CROSS_DIR)/$(LIBRARY_ARCH_GCC_NAME)-ld
 NM  = $(CROSS_DIR)/$(LIBRARY_ARCH_GCC_NAME)-nm
 CXX = $(CROSS_DIR)/$(LIBRARY_ARCH_GCC_NAME)-g++
-AS  = $(CROSS_DIR)/$(LIBRARY_ARCH_GCC_NAME)-as
 
 # Flags used to build the library.
 LIBRARY_CFLAGS  = -O2 -std=c99
 LIBRARY_CFLAGS += -finline-functions
+LIBRARY_CFLAGS += -DARCH_$(TARGET_ARCH)
 #LIBRARY_CFLAGS += -fstack-protector-strong
 LIBRARY_CFLAGS += -fno-builtin
 LIBRARY_CFLAGS += -Wall -Wextra -Wno-unused-function -Wno-unused-parameter
@@ -78,7 +81,7 @@ LIBRARY_OBJ_LINK_LIST = ${LIBRARY_ARCH_OBJS} \
                         ${LIBRARY_OBJS}
 
 # Capture build events to a log.
-ERRORS = &>>./.build-log
+ERRORS = 2>>./.build-log
 
 # Where to put the library headers.
 SYSROOT = ../sysroot

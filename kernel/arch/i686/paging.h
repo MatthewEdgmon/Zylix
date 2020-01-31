@@ -65,6 +65,17 @@
 uintptr_t PagingGetPhysical(uintptr_t virtual);
 void PagingMapPage(uintptr_t physical, uintptr_t virtual, uint16_t flags);
 
+/* Located in paging_asm.s */
+void PagingLoadCR3(uint32_t*);
+void PagingEnable();
+void PagingDisable();
+void PagingEnablePSE();
+void PagingDisablePSE();
+void PagingEnablePAE();
+void PagingDisablePAE();
+void PagingEnableLA57();
+void PagingDisableLA57();
+
 void SetupPaging();
 
 #endif /* __PAGING_H__ */

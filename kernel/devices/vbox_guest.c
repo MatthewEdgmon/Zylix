@@ -22,6 +22,7 @@
 
 #include <arch/io.h>
 #include <arch/interrupts.h>
+#include <arch/registers.h>
 
 #include <devices/pci.h>
 #include <devices/vbox_guest.h>
@@ -35,7 +36,7 @@ void VBoxGuestLog(char input) {
     outb(VBOX_GUEST_LOG_PORT, input);
 }
 
-int VBoxGuestHandler(registers_t* registers) {
+int VBoxGuestHandler(cpu_registers_t* registers) {
 
     //PICSendEOI();
 

@@ -24,15 +24,9 @@
 
 #include <memory/liballoc.h>
 
+#include "control_registers.h"
 #include "cpu_info_i686.h"
 #include "paging.h"
-
-extern void PagingLoadCR3(uint32_t*);
-extern void PagingEnable(void);
-extern void PagingDisable(void);
-extern void PagingActivatePSE(void);
-extern void PagingActivatePAE(void);
-extern void PagingActivateLA57(void);
 
 bool using_pae = false;
 bool using_pse = false;
@@ -70,12 +64,10 @@ void PagingUpdateFeatures() {
     }
 
     if(cpu_info->features_PAE) {
-        PagingActivatePAE();
         using_pae = true;
     }
 
     if(cpu_info->features_PSE) {
-        PagingActivatePSE();
         using_pse = true;
     }
 }
@@ -107,9 +99,10 @@ void SetupPaging() {
 
     page_directory[0] = (uint32_t) first_page_table | 3;
 
-    PagingLoadCR3(page_directory);
+    LoadCR3(page_directory);
 
-    PagingEnable();
+    /* Change this to LoadCR0 with paging bit enabled. */
+    //PagingEnable();
 
     paging_active = true;
 }
