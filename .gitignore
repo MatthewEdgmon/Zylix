@@ -17,6 +17,7 @@ zykernel
 grub.img
 zylix.iso
 zylix-HDD.img
+zylix-HDD.img.lock
 
 # Logs
 bochs-log.txt
