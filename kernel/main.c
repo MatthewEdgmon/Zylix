@@ -140,7 +140,7 @@ int main(multiboot_info_t* multiboot_info, uint32_t multiboot_magic, uintptr_t e
     SetupVBoxGuest();
 
     /* Begin multi-tasking. */
-    SetupMultitask();
+    //SetupMultitask();
 
     SetupShell();
 

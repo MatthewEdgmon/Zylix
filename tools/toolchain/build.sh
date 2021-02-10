@@ -3,14 +3,14 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Multi-threaded build
-MAKEFLAGS="-j8 --output-sync"
+MAKEFLAGS="-j$(nproc) --output-sync"
 # Single-threaded build
 #MAKEFLAGS=
 
 # BUILD CONFIGURATION OPTIONS
 # Toolchain versions, this should match the filname of the tarball minus extension
-GCC=gcc-7.1.0
-BINUTILS=binutils-2.28
+GCC=gcc-10.2.0
+BINUTILS=binutils-2.34
 # Toolchain and building options
 PREFIX=$DIR/local
 # TARGET=i686-pc-zylix
@@ -61,7 +61,7 @@ function main() {
 
     directory_check $DIR/download
     pushd $DIR/download > /dev/null
-        download_and_extract "ftp://ftp.gnu.org/gnu/gcc/$GCC/" $GCC ".tar.bz2"
+        download_and_extract "ftp://ftp.gnu.org/gnu/gcc/$GCC/" $GCC ".tar.gz"
         download_and_extract "ftp://ftp.gnu.org/gnu/binutils/" $BINUTILS ".tar.bz2"
 
         apply_patch $GCC
