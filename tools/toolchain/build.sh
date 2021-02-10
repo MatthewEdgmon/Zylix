@@ -3,7 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Multi-threaded build
-MAKEFLAGS="-j8 --output-sync"
+MAKEFLAGS="-j$(nproc) --output-sync"
 # Single-threaded build
 #MAKEFLAGS=
 

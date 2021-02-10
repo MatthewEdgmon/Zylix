@@ -4,7 +4,7 @@ An open-source, hobby/research kernel and operating system.
 Before contributing, make sure to check the [coding style](https://github.com/MatthewEdgmon/Zylix/blob/master/STYLE.md) and the source code [license](https://github.com/MatthewEdgmon/Zylix/blob/master/LICENSE.md).
 
 ## Build Instructions
-Zylix provides a script known to work under WSL and Ubuntu to download and compile a toolchain. Run ```tools/toolchain/build.sh```. Required programs, and steps to follow if the script breaks on your system are there. The compiler is set in the Makefile for an 8 core machine, make sure to set it accordingly to your system.
+Zylix provides a script known to work under WSL and Ubuntu to download and compile a toolchain. Run ```tools/toolchain/build.sh```. Required programs, and steps to follow if the script breaks on your system are there.
 
 By default, the build scripts and Makefiles generate x86_64 binaries. To change the target architecture just change references of ```x86_64-pc-zylix``` to ```i686-pc-zylix``` for 32-bit builds. Automatic toolchain support for more architectures is coming but I'm sure it's possible to whip up an unpatched cross compiler for any architecture.
 
@@ -17,6 +17,9 @@ gcc (7.1.0 confirmed working)
 genext2fs (1.4.1 confirmed working) for hard disk image creation.
 grub 2.0 for grub-mkrescue.
 patch, wget, tar and GNU make for auto toolchain script.
+cdrkit
+xorriso
+mkisofs
 ```
 
 ## Emulation
